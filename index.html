@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>VIN Photo Capture - QR Scanner</title>
+    <title>VIN Photo Capture - Native Camera</title>
     <style>
         * {
             margin: 0;
@@ -54,6 +54,10 @@
             font-size: 1.2rem;
         }
 
+        .settings-btn:hover {
+            background: #4b5563;
+        }
+
         /* Cards */
         .card {
             background: #1f2937;
@@ -74,6 +78,10 @@
         .card-header h2 {
             font-size: 1.25rem;
             font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
 
         /* Form Elements */
@@ -106,109 +114,8 @@
             background: #4b5563;
         }
 
-        /* VIN Input Section */
-        .vin-input-section {
-            display: flex;
-            gap: 0.75rem;
-            align-items: end;
-        }
-
-        .vin-input-wrapper {
-            flex: 1;
-        }
-
-        .qr-scan-btn {
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-            border: none;
-            color: white;
-            padding: 1rem;
-            border-radius: 0.75rem;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: bold;
-            min-width: 120px;
-            transition: all 0.3s;
-        }
-
-        .qr-scan-btn:hover:not(:disabled) {
-            background: linear-gradient(135deg, #7c3aed, #6d28d9);
-        }
-
-        /* QR Scanner */
-        .qr-scanner-container {
-            position: relative;
-            background: #000;
-            border-radius: 0.75rem;
-            overflow: hidden;
-            margin-bottom: 1rem;
-            border: 2px solid #8b5cf6;
-        }
-
-        .qr-scanner-container.hidden {
-            display: none;
-        }
-
-        #qr-video {
-            width: 100%;
-            height: 300px;
-            object-fit: cover;
-        }
-
-        .qr-scanner-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(0, 0, 0, 0.3);
-            pointer-events: none;
-        }
-
-        .qr-scanner-frame {
-            width: 200px;
-            height: 200px;
-            border: 3px solid #8b5cf6;
-            border-radius: 0.5rem;
-            position: relative;
-        }
-
-        .qr-scanner-controls {
-            position: absolute;
-            bottom: 1rem;
-            left: 1rem;
-            right: 1rem;
-            display: flex;
-            gap: 0.75rem;
-            justify-content: center;
-        }
-
-        .qr-control-btn {
-            background: rgba(139, 92, 246, 0.9);
-            border: none;
-            color: white;
-            padding: 0.75rem 1rem;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            font-size: 0.875rem;
-            font-weight: bold;
-            backdrop-filter: blur(10px);
-        }
-
-        .qr-status {
-            position: absolute;
-            top: 1rem;
-            left: 1rem;
-            right: 1rem;
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 0.75rem;
-            border-radius: 0.5rem;
-            text-align: center;
-            font-size: 0.875rem;
-            backdrop-filter: blur(10px);
+        .form-input::placeholder {
+            color: #9ca3af;
         }
 
         /* Buttons */
@@ -234,9 +141,35 @@
             color: white;
         }
 
+        .btn-primary:hover:not(:disabled) {
+            background: linear-gradient(135deg, #059669, #047857);
+        }
+
         .btn-secondary {
             background: linear-gradient(135deg, #8b5cf6, #7c3aed);
             color: white;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: linear-gradient(135deg, #7c3aed, #6d28d9);
+        }
+
+        .btn-orange {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+
+        .btn-orange:hover:not(:disabled) {
+            background: linear-gradient(135deg, #d97706, #b45309);
+        }
+
+        .btn-red {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+        }
+
+        .btn-red:hover:not(:disabled) {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
         }
 
         .btn-ghost {
@@ -245,10 +178,24 @@
             color: #9ca3af;
         }
 
+        .btn-ghost:hover:not(:disabled) {
+            background: #374151;
+            color: white;
+        }
+
         .btn:disabled {
             background: #6b7280;
             color: #9ca3af;
             cursor: not-allowed;
+        }
+        
+        .btn-qr {
+            background: linear-gradient(135deg, #f06292, #d81b60);
+            color: white;
+        }
+        
+        .btn-qr:hover:not(:disabled) {
+            background: linear-gradient(135deg, #d81b60, #ad1457);
         }
 
         /* Settings Row */
@@ -308,6 +255,16 @@
             padding: 0.75rem;
             cursor: pointer;
             transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .photo-item:hover {
+            background: #4b5563;
+        }
+
+        .photo-item.selected {
+            border-color: #8b5cf6;
+            background: #581c87;
         }
 
         .photo-item img {
@@ -335,6 +292,25 @@
             padding: 0.5rem;
             font-size: 0.75rem;
             margin-bottom: 0;
+        }
+
+        .photo-preview {
+            width: 100%;
+            max-height: 400px;
+            object-fit: contain;
+            border-radius: 0.5rem;
+            border: 2px solid #8b5cf6;
+            margin-bottom: 1rem;
+        }
+
+        .photo-info {
+            background: #000;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            color: #10b981;
+            border: 1px solid #374151;
         }
 
         /* Activity Log */
@@ -373,21 +349,123 @@
             border: 0;
         }
 
+        /* Success message */
+        .success-msg {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1rem;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #1f2937;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 400px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #9ca3af;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        .close-btn:hover {
+            color: white;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn-group .btn {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        
+        #qr-scanner-container {
+            margin-top: 1.5rem;
+            display: none;
+        }
+        
+        #reader {
+            width: 100%;
+            height: auto;
+            border-radius: 0.75rem;
+            overflow: hidden;
+        }
+
         /* Mobile optimizations */
         @media (max-width: 640px) {
-            .vin-input-section {
-                flex-direction: column;
-                gap: 1rem;
+            .container {
+                padding: 0.75rem;
             }
-
-            .qr-scan-btn {
-                width: 100%;
-                min-width: auto;
+            
+            .card {
+                padding: 1rem;
+                margin-bottom: 1rem;
+            }
+            
+            .btn {
+                padding: 0.875rem;
+                font-size: 1rem;
+            }
+            
+            .form-input {
+                padding: 0.875rem;
+                font-size: 1rem;
             }
 
             .settings-row {
                 grid-template-columns: 1fr;
                 gap: 0.5rem;
+            }
+
+            .photo-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 0.75rem;
             }
         }
     </style>
@@ -402,35 +480,22 @@
 
         <!-- Capture Section -->
         <div class="card-header">
-            <h2>📸 Vehicle Photo System with QR Scanner</h2>
+            <h2>📸 Vehicle Photo System</h2>
         </div>
 
         <div class="card">
-            <!-- QR Scanner -->
-            <div id="qr-scanner-container" class="qr-scanner-container hidden">
-                <video id="qr-video" autoplay muted playsinline></video>
-                <div class="qr-scanner-overlay">
-                    <div class="qr-scanner-frame"></div>
-                </div>
-                <div id="qr-status" class="qr-status">Point camera at QR code</div>
-                <div class="qr-scanner-controls">
-                    <button class="qr-control-btn" onclick="stopQRScanner()">❌ Stop Scanner</button>
-                    <button class="qr-control-btn" onclick="switchCamera()" id="switch-camera-btn">🔄 Switch Camera</button>
-                </div>
-            </div>
-
-            <!-- VIN Input Section -->
             <div class="form-group">
                 <label class="form-label">VIN Number:</label>
-                <div class="vin-input-section">
-                    <div class="vin-input-wrapper">
-                        <input type="text" id="vin-input" class="form-input" placeholder="Enter VIN number or scan QR..." 
-                               onkeyup="handleVinInput(event)" maxlength="17">
-                    </div>
-                    <button id="qr-scan-btn" class="qr-scan-btn" onclick="startQRScanner()">
-                        📷 Scan QR
-                    </button>
-                </div>
+                <input type="text" id="vin-input" class="form-input" placeholder="Enter VIN number..." 
+                       onkeyup="handleVinInput(event)" maxlength="17">
+            </div>
+
+            <!-- QR Scanner Section -->
+            <button class="btn btn-qr" id="qr-scan-btn">
+                🔍 Scan VIN (QR)
+            </button>
+            <div id="qr-scanner-container" class="form-group">
+                <div id="reader"></div>
             </div>
 
             <div class="settings-row">
@@ -462,7 +527,7 @@
 
             <div id="status-display" class="status-display">
                 <div class="status-text">Ready to capture photos</div>
-                <div class="status-subtext">Enter VIN manually or scan QR code, then take photos</div>
+                <div class="status-subtext">Enter VIN and take photos using your device camera</div>
             </div>
         </div>
 
@@ -470,6 +535,12 @@
         <div class="card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                 <div class="form-label" id="photo-gallery-title">📁 Photos for Current VIN</div>
+                <div>
+                    <button class="btn btn-orange" onclick="downloadAllPhotos()" 
+                            style="width: auto; padding: 0.5rem 1rem; font-size: 0.875rem; margin-bottom: 0;">
+                        📦 Download All
+                    </button>
+                </div>
             </div>
 
             <div id="photo-grid" class="photo-grid"></div>
@@ -486,18 +557,209 @@
             <div id="activity-log" class="log-container"></div>
         </div>
 
-        <!-- Hidden camera inputs -->
+        <!-- Data Management -->
+        <div class="card">
+            <div class="form-label">💾 Data Management</div>
+            
+            <button class="btn btn-secondary" onclick="openModal('import-modal')">
+                📤 Import VIN Data
+            </button>
+            
+            <button class="btn btn-orange" onclick="openModal('admin-export-modal')">
+                🔒 Admin Bulk Export
+            </button>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title">⚙️ App Settings</div>
+                    <button class="close-btn" onclick="closeModal('settings-modal')">&times;</button>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Photo Quality:</label>
+                    <select id="photo-quality" class="form-input">
+                        <option value="0.9">High Quality (90%)</option>
+                        <option value="0.8" selected>Good Quality (80%)</option>
+                        <option value="0.7">Medium Quality (70%)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Auto-export when complete:</label>
+                    <select id="auto-export" class="form-input">
+                        <option value="true" selected>Yes - Auto-download JSON file</option>
+                        <option value="false">No - Manual export only</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Auto-clear VIN after completion:</label>
+                    <select id="auto-clear" class="form-input">
+                        <option value="true">Yes</option>
+                        <option value="false">No</option>
+                    </select>
+                </div>
+
+                <hr style="border: 1px solid #374151; margin: 1.5rem 0;">
+
+                <div class="form-group">
+                    <label class="form-label">🔒 Admin Functions (Password Required):</label>
+                    <input type="password" id="admin-password" class="form-input" placeholder="Enter admin password...">
+                </div>
+
+                <div id="admin-functions" class="hidden" style="background: #374151; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem;">
+                    <div style="color: #10b981; font-weight: bold; margin-bottom: 1rem;">✅ Admin Access Granted</div>
+                    
+                    <button class="btn btn-orange" onclick="bulkExportAllPhotos()" style="margin-bottom: 1rem;">
+                        📁 Bulk Export All Photos (JPG Files)
+                    </button>
+                    <div style="font-size: 0.75rem; color: #9ca3af; margin-bottom: 1rem;">
+                        Downloads all photos as individual JPG files, organized in folders by VIN
+                    </div>
+
+                    <button class="btn btn-secondary" onclick="bulkExportAllVinsAsJSON()" style="margin-bottom: 1rem;">
+                        📦 Bulk Export All VINs (JSON Database)
+                    </button>
+                    <div style="font-size: 0.75rem; color: #9ca3af; margin-bottom: 1rem;">
+                        Downloads complete database as single JSON file for seamless device transfer
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="saveSettings()">✅ Save</button>
+                    <button class="btn btn-ghost" onclick="closeModal('settings-modal')">❌ Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Import Modal -->
+        <div id="import-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title">📤 Import VIN Data</div>
+                    <button class="close-btn" onclick="closeModal('import-modal')">&times;</button>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Select JSON file to import:</label>
+                    <input type="file" id="import-file" class="form-input" accept=".json">
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="importVinData()">📤 Import</button>
+                    <button class="btn btn-ghost" onclick="closeModal('import-modal')">❌ Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Export Modal -->
+        <div id="admin-export-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title">🔒 Admin Bulk Export</div>
+                    <button class="close-btn" onclick="closeModal('admin-export-modal')">&times;</button>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">🔑 Admin Password:</label>
+                    <input type="password" id="admin-export-password" class="form-input" placeholder="Enter admin password...">
+                </div>
+
+                <div id="admin-export-functions" class="hidden" style="background: #374151; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem;">
+                    <div style="color: #10b981; font-weight: bold; margin-bottom: 1rem;">✅ Admin Access Granted</div>
+                    
+                    <button class="btn btn-orange" onclick="executeBulkExportPhotos()" style="margin-bottom: 1rem;">
+                        📁 Download All Photos as ZIP File
+                    </button>
+                    <div style="font-size: 0.75rem; color: #9ca3af; margin-bottom: 1rem;">
+                        Downloads all photos in a ZIP file, organized in folders by VIN
+                    </div>
+
+                    <button class="btn" onclick="testZipFunctionality()" style="margin-bottom: 1rem; background: #6b7280;">
+                        🧪 Test ZIP Functionality
+                    </button>
+                    <div style="font-size: 0.75rem; color: #9ca3af; margin-bottom: 1rem;">
+                        Test if ZIP creation works (creates small test ZIP file)
+                    </div>
+
+                    <button class="btn btn-secondary" onclick="executeBulkExportJSON()" style="margin-bottom: 1rem;">
+                        📦 Download Complete Database as JSON
+                    </button>
+                    <div style="font-size: 0.75rem; color: #9ca3af; margin-bottom: 1rem;">
+                        Downloads complete database as single JSON file for device transfer
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn btn-ghost" onclick="closeModal('admin-export-modal')">❌ Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hidden camera inputs for sequence capture -->
         <input type="file" id="camera-input" class="camera-input" accept="image/*" capture="environment" multiple>
         <input type="file" id="single-camera-input" class="camera-input" accept="image/*" capture="environment">
     </div>
 
-    <!-- QR Code Scanner Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+    <!-- The original service worker script -->
+    <script id="service-worker-script">
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                const swCode = `
+                    var cacheName = 'vin-photo-v12';
+                    var filesToCache = [
+                        '/',
+                        '/index.html',
+                        // Add other assets to cache
+                    ];
+                    
+                    self.addEventListener('install', function(event) {
+                        event.waitUntil(
+                            caches.open(cacheName).then(function(cache) {
+                                return cache.addAll(filesToCache);
+                            })
+                        );
+                    });
+
+                    self.addEventListener('fetch', function(event) {
+                        event.respondWith(
+                            caches.match(event.request)
+                                .then(function(response) {
+                                    if (response) {
+                                        return response;
+                                    }
+                                    return fetch(event.request);
+                                }
+                            )
+                        );
+                    });
+                `;
+                
+                const blob = new Blob([swCode], { type: 'application/javascript' });
+                const swUrl = URL.createObjectURL(blob);
+                
+                navigator.serviceWorker.register(swUrl)
+                    .then(function(registration) {
+                        console.log('ServiceWorker registration successful');
+                    })
+                    .catch(function(err) {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
+    </script>
+    
+    <!-- html5-qrcode library from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
     <script>
-        // QR Scanner Variables
-        let qrScanner = null;
-        let currentCameraId = null;
-        let availableCameras = [];
+        // =========================================================
+        // Core Application Logic
+        // =========================================================
 
         // IndexedDB Database Setup
         const DB_NAME = 'VINPhotoDatabase';
@@ -505,955 +767,692 @@
         const STORE_NAME = 'photos';
         let db = null;
 
-        // Global variables
-        let currentVin = '';
-        let photos = {};
-        let settings = {
-            photoQuality: 0.8,
-            autoClear: false,
-            autoExport: true
-        };
+        // UI Element References
+        const vinInput = document.getElementById('vin-input');
+        const photoCountInput = document.getElementById('photo-count');
+        const photosTakenInput = document.getElementById('photos-taken');
+        const photosRemainingInput = document.getElementById('photos-remaining');
+        const takePhotoBtn = document.getElementById('take-photo-btn');
+        const singlePhotoBtn = document.getElementById('single-photo-btn');
+        const loadVinBtn = document.getElementById('load-vin-btn');
+        const photoGrid = document.getElementById('photo-grid');
+        const statusDisplay = document.getElementById('status-display');
+        const statusText = statusDisplay.querySelector('.status-text');
+        const statusSubtext = statusDisplay.querySelector('.status-subtext');
+        const emptyGallery = document.getElementById('empty-gallery');
+        const cameraInput = document.getElementById('camera-input');
+        const singleCameraInput = document.getElementById('single-camera-input');
 
-        // Initialize IndexedDB
+        // Global state
+        let currentVin = '';
+        let photosToTake = 3;
+        let photosCaptured = 0;
+        let photoData = [];
+        let isCapturingSequence = false;
+        let currentPhotoIndex = 0;
+        let selectedPhoto = null;
+
+        // Settings
+        let photoQuality = 0.8;
+        let autoExport = true;
+        let autoClear = true;
+
+        // QR Scanning Logic
+        const qrScanBtn = document.getElementById('qr-scan-btn');
+        const qrScannerContainer = document.getElementById('qr-scanner-container');
+        let html5QrcodeScanner = null;
+        let isQrScannerRunning = false;
+
+        /**
+         * Initializes the IndexedDB database.
+         */
         async function initDatabase() {
             return new Promise((resolve, reject) => {
                 const request = indexedDB.open(DB_NAME, DB_VERSION);
-                
-                request.onerror = () => reject(request.error);
-                
-                request.onsuccess = () => {
-                    db = request.result;
-                    addLog('Database initialized successfully');
-                    resolve(db);
+
+                request.onerror = (event) => {
+                    log(`Database error: ${event.target.errorCode}`);
+                    reject(event.target.error);
                 };
-                
-                request.onupgradeneeded = (event) => {
+
+                request.onsuccess = (event) => {
                     db = event.target.result;
-                    
+                    resolve();
+                };
+
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
                     if (!db.objectStoreNames.contains(STORE_NAME)) {
-                        const store = db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-                        store.createIndex('vin', 'vin', { unique: false });
-                        store.createIndex('timestamp', 'timestamp', { unique: false });
-                        addLog('Database schema created');
+                        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+                        log('Database upgraded: "photos" object store created.');
                     }
                 };
             });
         }
-
-        // Check camera permissions first
-        async function checkCameraPermissions() {
-            try {
-                // Check if we're on HTTPS or localhost
-                const isSecure = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-                
-                if (!isSecure) {
-                    throw new Error('Camera requires HTTPS connection. Please access via HTTPS or localhost.');
-                }
-
-                // Check if browser supports getUserMedia
-                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                    throw new Error('Camera not supported in this browser');
-                }
-
-                // Request camera permission
-                addLog('🔐 Requesting camera permission...');
-                const stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { 
-                        facingMode: 'environment' // Try to use back camera
-                    } 
-                });
-                
-                // Stop the stream immediately - we just wanted to check permission
-                stream.getTracks().forEach(track => track.stop());
-                addLog('✅ Camera permission granted');
-                return true;
-                
-            } catch (error) {
-                addLog(`❌ Camera permission error: ${error.message}`);
-                return false;
-            }
-        }
-
-        // QR Scanner Functions
-        async function startQRScanner() {
-            try {
-                addLog('🔍 Starting QR scanner...');
-                document.getElementById('qr-scan-btn').disabled = true;
-                document.getElementById('qr-scan-btn').innerHTML = '📷 Starting...';
-                
-                // Check protocol and permissions first
-                const hasPermission = await checkCameraPermissions();
-                if (!hasPermission) {
-                    throw new Error('Camera permission denied or not available');
-                }
-                
-                document.getElementById('qr-scanner-container').classList.remove('hidden');
-                document.getElementById('qr-status').textContent = 'Checking cameras...';
-                
-                // Get available cameras with better error handling
-                let cameras;
-                try {
-                    cameras = await Html5Qrcode.getCameras();
-                } catch (cameraError) {
-                    addLog(`❌ Failed to get cameras: ${cameraError.message}`);
-                    throw new Error(`Cannot access cameras: ${cameraError.message}`);
-                }
-                
-                availableCameras = cameras || [];
-                addLog(`📱 Found ${availableCameras.length} camera(s)`);
-                
-                if (availableCameras.length === 0) {
-                    throw new Error('No cameras found on this device');
-                }
-
-                // Prefer back camera for QR scanning
-                currentCameraId = availableCameras.find(camera => 
-                    camera.label && (
-                        camera.label.toLowerCase().includes('back') ||
-                        camera.label.toLowerCase().includes('rear') ||
-                        camera.label.toLowerCase().includes('environment')
-                    )
-                )?.id || availableCameras[availableCameras.length - 1].id;
-                
-                const selectedCamera = availableCameras.find(cam => cam.id === currentCameraId);
-                addLog(`📷 Using camera: ${selectedCamera?.label || 'Unknown Camera'}`);
-                
-                // Initialize QR scanner
-                qrScanner = new Html5Qrcode("qr-video");
-                
-                // Mobile-optimized config
-                const config = {
-                    fps: 10,
-                    qrbox: function(viewfinderWidth, viewfinderHeight) {
-                        // Square QR box that's 70% of the smaller dimension
-                        const minEdgePercentage = 0.7;
-                        const minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
-                        const qrboxSize = Math.floor(minEdgeSize * minEdgePercentage);
-                        return {
-                            width: qrboxSize,
-                            height: qrboxSize
-                        };
-                    },
-                    aspectRatio: 1.0,
-                    disableFlip: false,
-                    videoConstraints: {
-                        facingMode: 'environment' // Prefer back camera
-                    }
-                };
-                
-                document.getElementById('qr-status').textContent = 'Starting camera...';
-                
-                await qrScanner.start(
-                    currentCameraId,
-                    config,
-                    onQRScanSuccess,
-                    onQRScanFailure
-                );
-                
-                document.getElementById('qr-status').textContent = 'Point camera at QR code';
-                addLog('✅ QR scanner started successfully');
-                
-                // Show switch camera button if multiple cameras available
-                const switchBtn = document.getElementById('switch-camera-btn');
-                if (availableCameras.length > 1) {
-                    switchBtn.style.display = 'block';
-                } else {
-                    switchBtn.style.display = 'none';
-                }
-                
-            } catch (error) {
-                console.error('QR Scanner error:', error);
-                addLog(`❌ QR scanner failed: ${error.message}`);
-                
-                // More specific error messages
-                let errorMessage = error.message;
-                if (error.message.includes('Permission denied')) {
-                    errorMessage = 'Camera permission denied. Please allow camera access and try again.';
-                } else if (error.message.includes('HTTPS')) {
-                    errorMessage = 'Camera requires secure connection. Please use HTTPS.';
-                } else if (error.message.includes('NotFoundError')) {
-                    errorMessage = 'No camera found on this device.';
-                } else if (error.message.includes('NotAllowedError')) {
-                    errorMessage = 'Camera access blocked. Check browser permissions.';
-                } else if (error.message.includes('NotReadableError')) {
-                    errorMessage = 'Camera is being used by another app.';
-                }
-                
-                document.getElementById('qr-status').textContent = `Error: ${errorMessage}`;
-                
-                // Show troubleshooting info
-                showCameraTroubleshooting(errorMessage);
-                
-                stopQRScanner();
-            }
-        }
-
-        function showCameraTroubleshooting(errorMessage) {
-            const modal = document.createElement('div');
-            modal.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.8);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                z-index: 1000;
-                padding: 1rem;
-            `;
-            modal.innerHTML = `
-                <div style="
-                    background: #1f2937;
-                    border-radius: 0.75rem;
-                    padding: 1.5rem;
-                    max-width: 400px;
-                    color: white;
-                ">
-                    <div style="font-weight: bold; margin-bottom: 1rem; color: #ef4444;">📷 Camera Error</div>
-                    <div style="margin-bottom: 1rem; font-size: 0.875rem;">${errorMessage}</div>
-                    
-                    <div style="background: #374151; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
-                        <div style="font-weight: bold; margin-bottom: 0.5rem;">💡 Troubleshooting Tips:</div>
-                        <div style="font-size: 0.75rem; line-height: 1.4;">
-                            1. <strong>Allow camera permission</strong> when prompted<br>
-                            2. <strong>Check browser settings</strong> - ensure camera is not blocked<br>
-                            3. <strong>Close other camera apps</strong> that might be using the camera<br>
-                            4. <strong>Try refreshing</strong> the page and try again<br>
-                            5. <strong>Use HTTPS</strong> - camera requires secure connection<br>
-                            6. <strong>Try another browser</strong> if the issue persists
-                        </div>
-                    </div>
-                    
-                    <div style="background: #059669; padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 1rem; font-size: 0.75rem;">
-                        <strong>Alternative:</strong> You can still enter VIN manually using the text input field above.
-                    </div>
-                    
-                    <div style="display: flex; gap: 0.75rem;">
-                        <button onclick="this.closest('div').remove(); startQRScanner();" style="
-                            flex: 1;
-                            background: #3b82f6;
-                            border: none;
-                            color: white;
-                            padding: 0.75rem;
-                            border-radius: 0.5rem;
-                            cursor: pointer;
-                            font-size: 0.875rem;
-                        ">🔄 Try Again</button>
-                        <button onclick="this.closest('div').remove();" style="
-                            flex: 1;
-                            background: #6b7280;
-                            border: none;
-                            color: white;
-                            padding: 0.75rem;
-                            border-radius: 0.5rem;
-                            cursor: pointer;
-                            font-size: 0.875rem;
-                        ">❌ Close</button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-            
-            // Close on click outside
-            modal.addEventListener('click', function(e) {
-                if (e.target === modal) {
-                    modal.remove();
-                }
-            });
-        }
-
-        function onQRScanSuccess(decodedText, decodedResult) {
-            addLog(`📷 QR code detected: ${decodedText.substring(0, 50)}...`);
-            
-            const vin = extractVinFromQR(decodedText);
-            
-            if (vin) {
-                document.getElementById('vin-input').value = vin;
-                currentVin = vin;
-                
-                addLog(`✅ VIN extracted: ${vin}`);
-                document.getElementById('qr-status').textContent = `✅ VIN Found: ${vin}`;
-                
-                showQRSuccessNotification(vin);
-                
-                setTimeout(() => {
-                    stopQRScanner();
-                    loadVin();
-                }, 1500);
-                
-            } else {
-                addLog(`⚠️ No VIN found in QR code: ${decodedText}`);
-                document.getElementById('qr-status').textContent = '⚠️ No VIN found in QR code - keep scanning';
-            }
-        }
-
-        function onQRScanFailure(error) {
-            // Called frequently when no QR code is detected - don't log
-        }
-
-        function extractVinFromQR(qrText) {
-            try {
-                addLog(`🔍 Analyzing QR text: ${qrText}`);
-                
-                const hashIndex = qrText.indexOf('#');
-                
-                if (hashIndex !== -1 && hashIndex < qrText.length - 16) {
-                    const afterHash = qrText.substring(hashIndex + 1);
-                    addLog(`📋 Text after #: ${afterHash}`);
-                    
-                    const vinMatch = afterHash.match(/^([A-Z0-9]{16})/);
-                    
-                    if (vinMatch) {
-                        const extractedVin = vinMatch[1];
-                        addLog(`🎯 Extracted VIN: ${extractedVin}`);
-                        return extractedVin;
-                    } else {
-                        addLog(`❌ No 16-character VIN pattern found after #`);
-                    }
-                } else {
-                    addLog(`❌ No # symbol found in QR code`);
-                }
-                
-                return null;
-                
-            } catch (error) {
-                console.error('Error extracting VIN:', error);
-                addLog(`❌ Error extracting VIN: ${error.message}`);
-                return null;
-            }
-        }
-
-        async function stopQRScanner() {
-            try {
-                if (qrScanner) {
-                    await qrScanner.stop();
-                    qrScanner = null;
-                    addLog('🛑 QR scanner stopped');
-                }
-            } catch (error) {
-                console.error('Error stopping QR scanner:', error);
-            } finally {
-                document.getElementById('qr-scanner-container').classList.add('hidden');
-                document.getElementById('qr-scan-btn').disabled = false;
-                document.getElementById('qr-scan-btn').innerHTML = '📷 Scan QR';
-            }
-        }
-
-        async function switchCamera() {
-            if (!qrScanner || availableCameras.length <= 1) return;
-            
-            try {
-                addLog('🔄 Switching camera...');
-                document.getElementById('qr-status').textContent = 'Switching camera...';
-                
-                await qrScanner.stop();
-                
-                const currentIndex = availableCameras.findIndex(camera => camera.id === currentCameraId);
-                const nextIndex = (currentIndex + 1) % availableCameras.length;
-                currentCameraId = availableCameras[nextIndex].id;
-                
-                addLog(`📱 Switched to camera: ${availableCameras[nextIndex].label || 'Unknown'}`);
-                
-                const config = {
-                    fps: 10,
-                    qrbox: { width: 250, height: 250 },
-                    aspectRatio: 1.0
-                };
-                
-                await qrScanner.start(
-                    currentCameraId,
-                    config,
-                    onQRScanSuccess,
-                    onQRScanFailure
-                );
-                
-                document.getElementById('qr-status').textContent = 'Point camera at QR code';
-                
-            } catch (error) {
-                console.error('Error switching camera:', error);
-                addLog(`❌ Failed to switch camera: ${error.message}`);
-                document.getElementById('qr-status').textContent = `Error switching camera: ${error.message}`;
-            }
-        }
-
-        function showQRSuccessNotification(vin) {
-            const notification = document.createElement('div');
-            notification.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: linear-gradient(135deg, #10b981, #059669);
-                color: white;
-                padding: 1rem;
-                border-radius: 0.75rem;
-                box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-                z-index: 1000;
-                max-width: 300px;
-                border: 2px solid #047857;
-            `;
-            notification.innerHTML = `
-                <div style="font-weight: bold; margin-bottom: 0.5rem;">📷 QR Scan Success!</div>
-                <div style="font-size: 0.875rem;">VIN: ${vin}</div>
-            `;
-            
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.remove();
-                }
-            }, 3000);
-        }
-
-        // Save photo to IndexedDB
-        async function savePhotoToDB(photo) {
-            return new Promise((resolve, reject) => {
-                const transaction = db.transaction([STORE_NAME], 'readwrite');
-                const store = transaction.objectStore(STORE_NAME);
-                
-                const request = store.add(photo);
-                request.onsuccess = () => resolve(request.result);
-                request.onerror = () => reject(request.error);
-            });
-        }
-
-        // Load photos for a VIN from IndexedDB
-        async function loadPhotosFromDB(vin) {
-            return new Promise((resolve, reject) => {
-                const transaction = db.transaction([STORE_NAME], 'readonly');
-                const store = transaction.objectStore(STORE_NAME);
-                const index = store.index('vin');
-                
-                const request = index.getAll(vin);
-                request.onsuccess = () => resolve(request.result || []);
-                request.onerror = () => reject(request.error);
-            });
-        }
-
-        // Photo capture functions
-        function startPhotoSequence() {
-            const vinInput = document.getElementById('vin-input');
-            const vin = vinInput.value.trim().toUpperCase();
-            
-            if (!vin) {
-                alert('Please enter a VIN number first or scan a QR code!');
-                return;
-            }
-
-            const photosNeeded = parseInt(document.getElementById('photo-count').value) || 3;
-            currentVin = vin;
-            
-            document.getElementById('take-photo-btn').disabled = true;
-            document.getElementById('take-photo-btn').innerHTML = 'Opening Camera...';
-            
-            updateStatus('📸 Taking photo sequence...', `Take ${photosNeeded} photos continuously`);
-            addLog(`Starting photo sequence for VIN: ${vin} (${photosNeeded} photos)`);
-            
-            setTimeout(() => {
-                document.getElementById('camera-input').click();
-            }, 1000);
-        }
-
-        function takeSinglePhoto() {
-            const vinInput = document.getElementById('vin-input');
-            const vin = vinInput.value.trim().toUpperCase();
-            
-            if (!vin) {
-                alert('Please enter a VIN number first or scan a QR code!');
-                return;
-            }
-
-            currentVin = vin;
-            updateStatus('Opening camera...', 'Take a single photo');
-            
-            document.getElementById('single-camera-input').click();
-        }
-
-        // Camera input handlers
-        document.getElementById('camera-input').addEventListener('change', function(event) {
-            const files = event.target.files;
-            if (files && files.length > 0) {
-                handleCapturedPhotos(files);
-            }
-            event.target.value = '';
-        });
-
-        document.getElementById('single-camera-input').addEventListener('change', function(event) {
-            const file = event.target.files[0];
-            if (file) {
-                handleSinglePhoto(file);
-            }
-            event.target.value = '';
-        });
-
-        function handleCapturedPhotos(files) {
-            if (!currentVin) {
-                alert('No VIN specified!');
-                return;
-            }
-
-            document.getElementById('take-photo-btn').disabled = false;
-            document.getElementById('take-photo-btn').innerHTML = '📸 Start Photo Sequence';
-
-            if (!files || files.length === 0) {
-                updateStatus('No photos captured', 'Try again');
-                addLog('Photo sequence cancelled - no photos taken');
-                return;
-            }
-
-            const photosNeeded = parseInt(document.getElementById('photo-count').value) || 3;
-            const photosCaptured = Math.min(files.length, photosNeeded);
-            
-            if (!photos[currentVin]) {
-                photos[currentVin] = [];
-            }
-
-            const savePromises = [];
-            for (let i = 0; i < photosCaptured; i++) {
-                const file = files[i];
-                const photo = {
-                    id: generateId(),
-                    vin: currentVin,
-                    timestamp: Date.now() + i,
-                    photoNumber: photos[currentVin].length + 1,
-                    file: file,
-                    blob: file
-                };
-
-                photos[currentVin].push(photo);
-                savePromises.push(savePhotoToDB(photo));
-            }
-
-            Promise.all(savePromises).then(() => {
-                addLog(`✅ ${photosCaptured} photos saved to persistent storage`);
-                
-                updatePhotoGallery();
-                updatePhotoCounters();
-                
-                const totalPhotos = photos[currentVin].length;
-                addLog(`Captured ${photosCaptured} photos for VIN: ${currentVin}`);
-                
-                if (totalPhotos >= photosNeeded) {
-                    updateStatus('✅ Photo sequence complete!', `All ${photosNeeded} photos captured successfully`);
-                } else {
-                    const remaining = photosNeeded - totalPhotos;
-                    updateStatus(`📸 ${photosCaptured} photos added!`, `${remaining} more photo${remaining > 1 ? 's' : ''} needed`);
-                }
-            }).catch(error => {
-                console.error('Failed to save photos to database:', error);
-                addLog('⚠️ Failed to save photos to persistent storage');
-                alert('Warning: Photos may not be saved permanently. Try again.');
-            });
-        }
-
-        function handleSinglePhoto(file) {
-            if (!currentVin) {
-                alert('No VIN specified!');
-                return;
-            }
-
-            const photo = {
-                id: generateId(),
-                vin: currentVin,
-                timestamp: Date.now(),
-                photoNumber: getCurrentPhotoNumber(),
-                file: file,
-                blob: file
-            };
-
-            if (!photos[currentVin]) {
-                photos[currentVin] = [];
-            }
-            photos[currentVin].push(photo);
-
-            savePhotoToDB(photo).then(() => {
-                addLog(`✅ Photo saved to persistent storage`);
-                
-                updatePhotoGallery();
-                updatePhotoCounters();
-                
-                const photosTaken = photos[currentVin].length;
-                const photosNeeded = parseInt(document.getElementById('photo-count').value);
-                
-                addLog(`Single photo captured for VIN: ${currentVin}`);
-                
-                if (photosTaken >= photosNeeded) {
-                    updateStatus('✅ All photos complete!', `${photosNeeded} photos captured`);
-                } else {
-                    const remaining = photosNeeded - photosTaken;
-                    updateStatus(`📸 Photo ${photosTaken} captured!`, `${remaining} more photo${remaining > 1 ? 's' : ''} needed`);
-                }
-            }).catch(error => {
-                console.error('Failed to save photo to database:', error);
-                addLog('⚠️ Failed to save photo to persistent storage');
-                alert('Warning: Photo may not be saved permanently. Try again.');
-            });
-        }
-
-        function getCurrentPhotoNumber() {
-            if (!photos[currentVin]) return 1;
-            return photos[currentVin].length + 1;
-        }
-
-        function updatePhotoCounters() {
-            const photosNeeded = parseInt(document.getElementById('photo-count').value) || 3;
-            const photosTaken = currentVin && photos[currentVin] ? photos[currentVin].length : 0;
-            const photosRemaining = Math.max(0, photosNeeded - photosTaken);
-
-            document.getElementById('photos-taken').value = photosTaken;
-            document.getElementById('photos-remaining').value = photosRemaining;
-            document.getElementById('photo-count').addEventListener('input', updatePhotoCounters);
-        }
-
-        async function loadVin() {
-            const vinInput = document.getElementById('vin-input');
-            const vin = vinInput.value.trim().toUpperCase();
-            
-            if (!vin) {
-                alert('Please enter a VIN number or scan a QR code!');
-                return;
-            }
-
-            try {
-                currentVin = vin;
-                
-                const vinPhotos = await loadPhotosFromDB(vin);
-                photos[vin] = vinPhotos;
-                
-                updatePhotoGallery();
-                updatePhotoCounters();
-                
-                const photoCount = vinPhotos.length;
-                addLog(`Loaded VIN: ${vin} with ${photoCount} existing photos from database`);
-                updateStatus(`VIN loaded: ${vin}`, `${photoCount} existing photos found`);
-            } catch (error) {
-                console.error('Failed to load VIN photos:', error);
-                addLog(`⚠️ Failed to load photos for VIN: ${vin}`);
-            }
-        }
-
-        function updatePhotoGallery() {
-            const gallery = document.getElementById('photo-grid');
-            const emptyGallery = document.getElementById('empty-gallery');
-            const title = document.getElementById('photo-gallery-title');
-            
-            gallery.innerHTML = '';
-            
-            if (!currentVin || !photos[currentVin] || photos[currentVin].length === 0) {
-                emptyGallery.classList.remove('hidden');
-                title.textContent = '📁 Photos for Current VIN';
-                return;
-            }
-
-            emptyGallery.classList.add('hidden');
-            title.textContent = `📁 Photos for VIN: ${currentVin} (${photos[currentVin].length})`;
-
-            photos[currentVin].forEach((photo, index) => {
-                const photoItem = document.createElement('div');
-                photoItem.className = 'photo-item';
-                
-                const img = document.createElement('img');
-                img.src = URL.createObjectURL(photo.blob);
-                img.alt = `Photo ${photo.photoNumber}`;
-                
-                const info = document.createElement('div');
-                info.className = 'photo-item-info';
-                info.textContent = `Photo ${photo.photoNumber} - ${new Date(photo.timestamp).toLocaleString()}`;
-                
-                const actions = document.createElement('div');
-                actions.className = 'photo-item-actions';
-                
-                const downloadBtn = document.createElement('button');
-                downloadBtn.className = 'btn btn-primary';
-                downloadBtn.textContent = '💾';
-                downloadBtn.onclick = () => downloadPhoto(photo);
-                
-                const viewBtn = document.createElement('button');
-                viewBtn.className = 'btn btn-secondary';
-                viewBtn.textContent = '👁️';
-                viewBtn.onclick = () => viewPhoto(photo);
-                
-                actions.appendChild(downloadBtn);
-                actions.appendChild(viewBtn);
-                
-                photoItem.appendChild(img);
-                photoItem.appendChild(info);
-                photoItem.appendChild(actions);
-                
-                gallery.appendChild(photoItem);
-            });
-        }
-
-        function downloadPhoto(photo) {
-            const timestamp = new Date(photo.timestamp).toISOString().slice(0, 19).replace(/:/g, '-');
-            const filename = `${photo.vin}_photo_${photo.photoNumber.toString().padStart(2, '0')}_${timestamp}.jpg`;
-            
-            const link = document.createElement('a');
-            link.download = filename;
-            link.href = URL.createObjectURL(photo.blob);
-            
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            addLog(`📸 Downloaded: ${filename}`);
-        }
-
-        function viewPhoto(photo) {
-            const modal = document.createElement('div');
-            modal.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.8);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                z-index: 1000;
-                padding: 1rem;
-            `;
-            modal.innerHTML = `
-                <div style="
-                    background: #1f2937;
-                    border-radius: 0.75rem;
-                    padding: 1.5rem;
-                    max-width: 90vw;
-                    max-height: 90vh;
-                    overflow: auto;
-                ">
-                    <div style="
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        margin-bottom: 1rem;
-                    ">
-                        <div style="font-size: 1.25rem; font-weight: bold;">Photo ${photo.photoNumber} - ${photo.vin}</div>
-                        <button onclick="this.closest('div').remove()" style="
-                            background: none;
-                            border: none;
-                            color: #9ca3af;
-                            font-size: 1.5rem;
-                            cursor: pointer;
-                            padding: 0.25rem;
-                        ">&times;</button>
-                    </div>
-                    <img src="${URL.createObjectURL(photo.blob)}" style="width: 100%; border-radius: 0.5rem;">
-                    <div style="margin-top: 1rem; font-size: 0.875rem; color: #9ca3af;">
-                        <div>VIN: ${photo.vin}</div>
-                        <div>Photo: ${photo.photoNumber}</div>
-                        <div>Date: ${new Date(photo.timestamp).toLocaleString()}</div>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-            
-            // Close on click outside
-            modal.addEventListener('click', function(e) {
-                if (e.target === modal) {
-                    modal.remove();
-                }
-            });
-        }
-
-        // Modal functions (simplified)
-        function openModal(modalId) {
-            // Simplified modal - just show settings
-            if (modalId === 'settings-modal') {
-                alert('Settings: Photo Quality: 80%, Auto-export: Yes, Auto-clear: No');
-            }
-        }
-
-        // Utility functions
-        function generateId() {
-            return Date.now().toString(36) + Math.random().toString(36).substr(2);
-        }
-
-        function addLog(message) {
-            const log = document.getElementById('activity-log');
-            const timestamp = new Date().toLocaleTimeString();
+        
+        /**
+         * Adds a message to the activity log.
+         * @param {string} message - The message to log.
+         */
+        function log(message) {
+            const logContainer = document.getElementById('activity-log');
             const entry = document.createElement('div');
             entry.className = 'log-entry';
-            entry.textContent = `[${timestamp}] ${message}`;
-            log.appendChild(entry);
-            log.scrollTop = log.scrollHeight;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logContainer.prepend(entry);
+            if (logContainer.children.length > 50) {
+                logContainer.removeChild(logContainer.lastChild);
+            }
+        }
+        
+        /**
+         * Updates the UI to show the current photo status.
+         */
+        function updatePhotoStatus() {
+            photosTakenInput.value = photosCaptured;
+            photosRemainingInput.value = photosToTake - photosCaptured;
+            if (photosToTake - photosCaptured <= 0) {
+                takePhotoBtn.disabled = true;
+                setStatus('✅ Photo sequence complete!', 'All photos for this VIN have been captured.');
+            } else {
+                takePhotoBtn.disabled = false;
+                setStatus(`Waiting for photo #${photosCaptured + 1}`, `${photosToTake - photosCaptured} photos remaining.`);
+            }
         }
 
-        function updateStatus(main, sub = '') {
-            const statusDisplay = document.getElementById('status-display');
-            statusDisplay.innerHTML = `
-                <div class="status-text">${main}</div>
-                ${sub ? `<div class="status-subtext">${sub}</div>` : ''}
-            `;
+        /**
+         * Sets the main status display text.
+         * @param {string} text - The main status message.
+         * @param {string} subtext - The sub-status message.
+         * @param {string} type - 'info', 'success', or 'error'.
+         */
+        function setStatus(text, subtext = '', type = 'info') {
+            statusText.textContent = text;
+            statusSubtext.textContent = subtext;
+            statusDisplay.style.borderColor = (type === 'success') ? '#10b981' : (type === 'error') ? '#dc2626' : '#3b82f6';
         }
 
-        // Event handlers
+        /**
+         * Handles VIN input changes.
+         * @param {Event} event
+         */
         function handleVinInput(event) {
-            const input = event.target;
-            input.value = input.value.toUpperCase();
-            
-            if (event.key === 'Enter') {
-                loadVin();
+            const vin = event.target.value.toUpperCase().replace(/[^A-HJ-NPR-Z0-9]/g, '');
+            event.target.value = vin;
+            currentVin = vin;
+            if (currentVin.length === 17) {
+                log(`VIN entered: ${currentVin}`);
+                loadVinPhotos(currentVin);
+            } else {
+                clearPhotoGallery();
+                setStatus('Ready to capture photos', 'Enter a 17-digit VIN to begin.');
             }
         }
 
-        // Initialize app with permission check
-        document.addEventListener('DOMContentLoaded', async function() {
-            try {
-                await initDatabase();
-                updatePhotoCounters();
-                addLog('VIN Photo Capture System with QR Scanner ready');
-                
-                // Check if camera is available
-                const isSecure = location.protocol === 'https:' || location.hostname === 'localhost';
-                if (!isSecure) {
-                    addLog('⚠️ Camera requires HTTPS connection for mobile devices');
-                    addLog('💡 For local testing, use: python -m http.server --bind 127.0.0.1 8000');
-                    document.getElementById('qr-scan-btn').innerHTML = '🔒 HTTPS Required';
-                    document.getElementById('qr-scan-btn').disabled = true;
-                } else if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                    addLog('⚠️ Camera not supported in this browser');
-                    document.getElementById('qr-scan-btn').innerHTML = '❌ Not Supported';
-                    document.getElementById('qr-scan-btn').disabled = true;
-                } else {
-                    addLog('📷 QR scanner available for automatic VIN detection');
-                    addLog('💡 QR format: Look for 16 digits after # symbol');
-                }
-                
-                addLog('🔒 All photos stored permanently in browser database');
-                addLog('✍️ You can always enter VIN manually if camera is not available');
-                
-                // Focus VIN input
-                setTimeout(() => {
-                    document.getElementById('vin-input').focus();
-                }, 100);
-                
-            } catch (error) {
-                console.error('Failed to initialize app:', error);
-                addLog('⚠️ Failed to initialize database - photos may not persist');
-            }
-        });
+        /**
+         * Loads photos for a given VIN from IndexedDB.
+         * @param {string} vin - The VIN to load photos for.
+         */
+        async function loadVinPhotos(vin) {
+            if (!vin) return;
+            log(`Loading photos for VIN: ${vin}`);
+            const transaction = db.transaction(STORE_NAME, 'readonly');
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.getAll();
 
-        // Add manual VIN entry help
-        function showVinHelp() {
-            const modal = document.createElement('div');
-            modal.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.8);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                z-index: 1000;
-                padding: 1rem;
-            `;
-            modal.innerHTML = `
-                <div style="
-                    background: #1f2937;
-                    border-radius: 0.75rem;
-                    padding: 1.5rem;
-                    max-width: 350px;
-                    color: white;
-                ">
-                    <div style="font-weight: bold; margin-bottom: 1rem; color: #3b82f6;">📝 Manual VIN Entry</div>
-                    
-                    <div style="background: #374151; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
-                        <div style="font-weight: bold; margin-bottom: 0.5rem;">If QR scanner doesn't work:</div>
-                        <div style="font-size: 0.875rem; line-height: 1.4;">
-                            1. Find the VIN on your vehicle<br>
-                            2. Look for a QR code nearby<br>
-                            3. In the QR text, find the <strong>#</strong> symbol<br>
-                            4. Copy the <strong>16 characters after #</strong><br>
-                            5. Type them in the VIN field above
-                        </div>
-                    </div>
-                    
-                    <div style="background: #059669; padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 1rem; font-size: 0.75rem;">
-                        <strong>Example:</strong> If QR contains "...#MEERBC007S723254..." then VIN is "MEERBC007S723254"
-                    </div>
-                    
-                    <button onclick="this.closest('div').remove();" style="
-                        width: 100%;
-                        background: #3b82f6;
-                        border: none;
-                        color: white;
-                        padding: 0.75rem;
-                        border-radius: 0.5rem;
-                        cursor: pointer;
-                        font-size: 0.875rem;
-                    ">✅ Got it!</button>
-                </div>
-            `;
-            document.body.appendChild(modal);
-            
-            modal.addEventListener('click', function(e) {
-                if (e.target === modal) {
-                    modal.remove();
-                }
+            request.onsuccess = (event) => {
+                const allPhotos = event.target.result;
+                photoData = allPhotos.filter(p => p.vin === vin);
+                photosCaptured = photoData.length;
+                photosToTake = parseInt(photoCountInput.value);
+
+                renderPhotoGallery(photoData);
+                updatePhotoStatus();
+                log(`Loaded ${photoData.length} photos for VIN: ${vin}`);
+            };
+
+            request.onerror = (event) => {
+                log(`Failed to load photos: ${event.target.error}`);
+            };
+        }
+
+        /**
+         * Renders the photo gallery based on the current photo data.
+         * @param {Array} photos - Array of photo objects.
+         */
+        function renderPhotoGallery(photos) {
+            photoGrid.innerHTML = '';
+            if (photos.length === 0) {
+                emptyGallery.classList.remove('hidden');
+                return;
+            } else {
+                emptyGallery.classList.add('hidden');
+            }
+
+            photos.forEach(photo => {
+                const photoItem = document.createElement('div');
+                photoItem.className = 'photo-item';
+                photoItem.dataset.id = photo.id;
+                photoItem.onclick = () => selectPhoto(photo.id);
+
+                const img = new Image();
+                img.src = photo.data;
+                img.alt = `Photo for VIN ${photo.vin}`;
+                photoItem.appendChild(img);
+
+                const info = document.createElement('div');
+                info.className = 'photo-item-info';
+                info.textContent = `ID: ${photo.id.substring(0, 8)}`;
+                photoItem.appendChild(info);
+
+                const actions = document.createElement('div');
+                actions.className = 'photo-item-actions';
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'btn btn-red';
+                deleteBtn.textContent = 'Delete';
+                deleteBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    deletePhoto(photo.id);
+                };
+                actions.appendChild(deleteBtn);
+
+                photoItem.appendChild(actions);
+                photoGrid.appendChild(photoItem);
             });
         }
+        
+        /**
+         * Deletes a photo from IndexedDB and the gallery.
+         * @param {string} id - The ID of the photo to delete.
+         */
+        async function deletePhoto(id) {
+            if (!confirm('Are you sure you want to delete this photo?')) return;
+            const transaction = db.transaction(STORE_NAME, 'readwrite');
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.delete(id);
 
-        // Add help button next to VIN input
-        function addVinHelpButton() {
-            const vinSection = document.querySelector('.vin-input-section');
-            const helpBtn = document.createElement('button');
-            helpBtn.innerHTML = '❓';
-            helpBtn.className = 'qr-scan-btn';
-            helpBtn.style.minWidth = '60px';
-            helpBtn.onclick = showVinHelp;
-            helpBtn.title = 'Help with manual VIN entry';
-            vinSection.appendChild(helpBtn);
+            request.onsuccess = () => {
+                log(`Photo with ID ${id.substring(0, 8)} deleted.`);
+                photoData = photoData.filter(p => p.id !== id);
+                photosCaptured = photoData.length;
+                renderPhotoGallery(photoData);
+                updatePhotoStatus();
+            };
+
+            request.onerror = () => {
+                log('Failed to delete photo.');
+            };
         }
 
-        // Call this after DOM is loaded
-        setTimeout(addVinHelpButton, 1000);
+        /**
+         * Clears the photo gallery and related state.
+         */
+        function clearPhotoGallery() {
+            photoData = [];
+            photosCaptured = 0;
+            photoGrid.innerHTML = '';
+            emptyGallery.classList.remove('hidden');
+            updatePhotoStatus();
+        }
 
-        // Keyboard shortcuts
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Enter' && document.activeElement === document.getElementById('vin-input')) {
-                event.preventDefault();
-                startPhotoSequence();
-            }
-            
-            if (event.key === 'Escape') {
-                if (qrScanner) {
-                    stopQRScanner();
-                }
-                // Close any open modals
-                document.querySelectorAll('[style*="position: fixed"]').forEach(modal => {
-                    if (modal.style.zIndex === '1000') {
-                        modal.remove();
+        /**
+         * Saves a photo to IndexedDB.
+         * @param {string} vin - The VIN associated with the photo.
+         * @param {string} imageData - The base64 data URL of the image.
+         */
+        async function savePhoto(vin, imageData) {
+            const photoId = `${vin}-${Date.now()}`;
+            const photoObject = {
+                id: photoId,
+                vin: vin,
+                timestamp: new Date().toISOString(),
+                data: imageData
+            };
+
+            const transaction = db.transaction(STORE_NAME, 'readwrite');
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.add(photoObject);
+
+            request.onsuccess = () => {
+                log(`Photo saved for VIN: ${vin}`);
+                photoData.push(photoObject);
+                photosCaptured = photoData.length;
+                renderPhotoGallery(photoData);
+                updatePhotoStatus();
+
+                if (photosCaptured >= photosToTake && autoExport) {
+                    exportVinData(vin, photoData);
+                    if (autoClear) {
+                        clearVin();
                     }
+                }
+            };
+            request.onerror = (event) => {
+                log(`Error saving photo: ${event.target.error}`);
+            };
+        }
+
+        /**
+         * Exports all photo data for a VIN to a JSON file.
+         * @param {string} vin - The VIN to export.
+         * @param {Array} photos - The array of photo objects.
+         */
+        function exportVinData(vin, photos) {
+            const data = {
+                vin: vin,
+                photos: photos.map(p => ({
+                    id: p.id,
+                    timestamp: p.timestamp,
+                    data: p.data
+                }))
+            };
+            const json = JSON.stringify(data, null, 2);
+            downloadFile(`${vin}_photos.json`, json, 'application/json');
+            log(`Exported JSON for VIN: ${vin}`);
+        }
+
+        /**
+         * Clears the VIN input and photo gallery.
+         */
+        function clearVin() {
+            vinInput.value = '';
+            photosCaptured = 0;
+            photoData = [];
+            clearPhotoGallery();
+            setStatus('Ready to capture photos', 'Enter VIN and take photos using your device camera');
+            updatePhotoStatus();
+        }
+
+        /**
+         * Downloads a file to the user's device.
+         * @param {string} filename - The name of the file.
+         * @param {string} data - The file content.
+         * @param {string} mimeType - The MIME type of the file.
+         */
+        function downloadFile(filename, data, mimeType) {
+            const blob = new Blob([data], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        /**
+         * Starts the multi-photo capture sequence.
+         */
+        function startPhotoSequence() {
+            const vin = vinInput.value.toUpperCase();
+            photosToTake = parseInt(photoCountInput.value);
+            if (!vin || vin.length !== 17) {
+                setStatus('❌ Invalid VIN', 'Please enter a 17-digit VIN.', 'error');
+                return;
+            }
+            if (photosToTake <= 0) {
+                setStatus('❌ Invalid Photo Count', 'Please set a photo count greater than 0.', 'error');
+                return;
+            }
+
+            currentVin = vin;
+            isCapturingSequence = true;
+            currentPhotoIndex = photosCaptured;
+            log(`Starting photo sequence for VIN: ${currentVin}, capturing ${photosToTake - photosCaptured} photos.`);
+            takeNextPhotoInSequence();
+        }
+
+        /**
+         * Takes the next photo in a sequence.
+         */
+        function takeNextPhotoInSequence() {
+            if (isCapturingSequence && currentPhotoIndex < photosToTake) {
+                cameraInput.click();
+            } else {
+                isCapturingSequence = false;
+                log('Photo sequence complete.');
+                setStatus('✅ Sequence complete!', 'All photos for this VIN have been captured.', 'success');
+            }
+        }
+
+        /**
+         * Handles the file change event for the multi-photo input.
+         */
+        cameraInput.addEventListener('change', async (event) => {
+            if (event.target.files.length > 0) {
+                const file = event.target.files[0];
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    await savePhoto(currentVin, e.target.result);
+                    currentPhotoIndex++;
+                    takeNextPhotoInSequence();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        /**
+         * Takes a single photo.
+         */
+        function takeSinglePhoto() {
+            const vin = vinInput.value.toUpperCase();
+            if (!vin || vin.length !== 17) {
+                setStatus('❌ Invalid VIN', 'Please enter a 17-digit VIN.', 'error');
+                return;
+            }
+            currentVin = vin;
+            log(`Taking a single photo for VIN: ${currentVin}`);
+            singleCameraInput.click();
+        }
+
+        /**
+         * Handles the file change event for the single photo input.
+         */
+        singleCameraInput.addEventListener('change', (event) => {
+            if (event.target.files.length > 0) {
+                const file = event.target.files[0];
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    await savePhoto(currentVin, e.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        /**
+         * Opens a modal.
+         * @param {string} id - The ID of the modal to open.
+         */
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+        }
+
+        /**
+         * Closes a modal.
+         * @param {string} id - The ID of the modal to close.
+         */
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        // =========================================================
+        // QR Scanning Logic
+        // =========================================================
+
+        /**
+         * Starts the QR code scanner.
+         */
+        async function startQrScanner() {
+            if (!isQrScannerRunning) {
+                qrScannerContainer.style.display = 'block';
+                qrScanBtn.textContent = '❌ Stop QR Scan';
+                qrScanBtn.classList.add('btn-red');
+                qrScanBtn.classList.remove('btn-qr');
+                
+                // Find and use the back-facing camera
+                Html5Qrcode.getCameras().then(devices => {
+                    if (devices && devices.length) {
+                        let cameraId = null;
+                        const backCamera = devices.find(device => device.label.toLowerCase().includes('back') || device.label.toLowerCase().includes('rear'));
+                        if (backCamera) {
+                            cameraId = backCamera.id;
+                        } else {
+                            cameraId = devices[0].id;
+                        }
+
+                        html5QrcodeScanner = new Html5Qrcode('reader');
+                        html5QrcodeScanner.start(
+                            cameraId, 
+                            { fps: 10, qrbox: { width: 250, height: 250 } }, 
+                            onScanSuccess, 
+                            onScanFailure
+                        ).catch(err => {
+                            log(`Error starting QR scanner: ${err}`);
+                        });
+
+                        isQrScannerRunning = true;
+                        log('QR scanner started, looking for a back camera...');
+                    } else {
+                        log('No cameras found on this device.');
+                    }
+                }).catch(err => {
+                    log(`Error getting camera devices: ${err}`);
                 });
             }
-        });
+        }
 
-        // Clean up QR scanner on page unload
-        window.addEventListener('beforeunload', function() {
-            if (qrScanner) {
-                qrScanner.stop().catch(console.error);
+        /**
+         * Stops the QR code scanner.
+         */
+        async function stopQrScanner() {
+            if (isQrScannerRunning) {
+                try {
+                    await html5QrcodeScanner.stop();
+                    qrScannerContainer.style.display = 'none';
+                    qrScanBtn.textContent = '🔍 Scan VIN (QR)';
+                    qrScanBtn.classList.add('btn-qr');
+                    qrScanBtn.classList.remove('btn-red');
+                    isQrScannerRunning = false;
+                    log('QR scanner stopped.');
+                } catch (err) {
+                    log(`Error stopping QR scanner: ${err}`);
+                }
+            }
+        }
+
+        /**
+         * Callback function for successful QR code scan.
+         * @param {string} decodedText - The decoded text from the QR code.
+         */
+        function onScanSuccess(decodedText) {
+            log(`QR Code Scanned: ${decodedText}`);
+            
+            // Logic to extract VIN (16 chars after '#')
+            const hashIndex = decodedText.indexOf('#');
+            if (hashIndex !== -1 && decodedText.length >= hashIndex + 1 + 16) {
+                const vin = decodedText.substring(hashIndex + 1, hashIndex + 1 + 16);
+                vinInput.value = vin;
+                handleVinInput({ target: vinInput });
+                log(`Extracted VIN: ${vin}`);
+            } else {
+                log('Scanned QR code does not contain a valid VIN format. Scanning continues.');
+            }
+        }
+        
+        /**
+         * Callback function for QR code scan failures.
+         * @param {Error} error - The error object.
+         */
+        function onScanFailure(error) {
+            // This function is called continuously if no QR code is found.
+            // We can ignore the continuous errors and only log critical ones.
+        }
+
+        qrScanBtn.addEventListener('click', () => {
+            if (isQrScannerRunning) {
+                stopQrScanner();
+            } else {
+                startQrScanner();
             }
         });
+        
+        // =========================================================
+        // Modal and Admin Functions
+        // =========================================================
 
-        // Prevent zoom on mobile
-        let lastTouchEnd = 0;
-        document.addEventListener('touchend', function (event) {
-            const now = (new Date()).getTime();
-            if (now - lastTouchEnd <= 300) {
-                event.preventDefault();
+        /**
+         * Toggles the visibility of admin functions based on a password.
+         */
+        function checkAdminPassword() {
+            const passwordInput = document.getElementById('admin-password');
+            const adminFunctions = document.getElementById('admin-functions');
+            if (passwordInput.value === 'admin123') { // Hardcoded password for example
+                adminFunctions.classList.remove('hidden');
+                log('Admin access granted.');
+            } else {
+                adminFunctions.classList.add('hidden');
+                log('Incorrect admin password.');
             }
-            lastTouchEnd = now;
-        }, false);
+        }
 
-        // Prevent context menu
-        document.addEventListener('contextmenu', function(event) {
-            event.preventDefault();
+        /**
+         * Saves settings from the settings modal.
+         */
+        function saveSettings() {
+            photoQuality = parseFloat(document.getElementById('photo-quality').value);
+            autoExport = document.getElementById('auto-export').value === 'true';
+            autoClear = document.getElementById('auto-clear').value === 'true';
+            log('Settings saved.');
+            closeModal('settings-modal');
+        }
+
+        /**
+         * Bulk exports all photos from the database as a single JSON file.
+         */
+        async function bulkExportAllVinsAsJSON() {
+            log('Starting bulk export of all VINs as JSON...');
+            const transaction = db.transaction(STORE_NAME, 'readonly');
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.getAll();
+
+            request.onsuccess = (event) => {
+                const allPhotos = event.target.result;
+                const json = JSON.stringify(allPhotos, null, 2);
+                downloadFile('vin_database_backup.json', json, 'application/json');
+                log('Bulk export complete. JSON file downloaded.');
+            };
+
+            request.onerror = (event) => {
+                log(`Bulk export failed: ${event.target.error}`);
+            };
+        }
+
+        /**
+         * Bulk exports all photos as a ZIP file.
+         */
+        async function bulkExportAllPhotos() {
+            log('Starting bulk export of all photos as ZIP file...');
+            const zip = new JSZip();
+            const transaction = db.transaction(STORE_NAME, 'readonly');
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.getAll();
+
+            request.onsuccess = async (event) => {
+                const allPhotos = event.target.result;
+                const vinFolders = {};
+
+                for (const photo of allPhotos) {
+                    if (!vinFolders[photo.vin]) {
+                        vinFolders[photo.vin] = zip.folder(photo.vin);
+                    }
+                    const base64Data = photo.data.split(',')[1];
+                    const filename = `photo-${photo.id.split('-')[1]}.jpg`;
+                    vinFolders[photo.vin].file(filename, base64Data, { base64: true });
+                }
+
+                zip.generateAsync({ type: 'blob' }).then(function(content) {
+                    downloadFile('vin_photos_all.zip', content, 'application/zip');
+                    log('Bulk export complete. ZIP file downloaded.');
+                });
+            };
+
+            request.onerror = (event) => {
+                log(`Bulk export failed: ${event.target.error}`);
+            };
+        }
+
+        /**
+         * Imports VIN data from a selected JSON file.
+         */
+        async function importVinData() {
+            const fileInput = document.getElementById('import-file');
+            if (fileInput.files.length === 0) {
+                log('Please select a JSON file to import.');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                try {
+                    const importedData = JSON.parse(event.target.result);
+                    const transaction = db.transaction(STORE_NAME, 'readwrite');
+                    const store = transaction.objectStore(STORE_NAME);
+
+                    importedData.forEach(photo => {
+                        store.put(photo);
+                    });
+
+                    transaction.oncomplete = () => {
+                        log('Database import successful!');
+                        closeModal('import-modal');
+                    };
+
+                    transaction.onerror = () => {
+                        log(`Database import failed: ${transaction.error}`);
+                    };
+
+                } catch (e) {
+                    log('Failed to parse JSON file.');
+                }
+            };
+            reader.readAsText(file);
+        }
+        
+        /**
+         * Function to load all photos for a given VIN from the database and populate the gallery
+         */
+        function loadVin() {
+            const vin = vinInput.value.toUpperCase();
+            if (!vin || vin.length !== 17) {
+                setStatus('❌ Invalid VIN', 'Please enter a 17-digit VIN.', 'error');
+                return;
+            }
+            loadVinPhotos(vin);
+        }
+
+        // Event Listeners for modals
+        document.getElementById('admin-password').addEventListener('keyup', checkAdminPassword);
+        document.getElementById('admin-export-password').addEventListener('keyup', checkAdminPasswordForExport);
+
+        function checkAdminPasswordForExport() {
+            const passwordInput = document.getElementById('admin-export-password');
+            const adminFunctions = document.getElementById('admin-export-functions');
+            if (passwordInput.value === 'admin123') { // Hardcoded password
+                adminFunctions.classList.remove('hidden');
+            } else {
+                adminFunctions.classList.add('hidden');
+            }
+        }
+
+        function executeBulkExportPhotos() {
+             bulkExportAllPhotos();
+             closeModal('admin-export-modal');
+        }
+
+        function executeBulkExportJSON() {
+            bulkExportAllVinsAsJSON();
+            closeModal('admin-export-modal');
+        }
+
+        // =========================================================
+        // Initialization and Event Handlers
+        // =========================================================
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            await initDatabase();
+            log('VIN Photo Capture System ready');
+            log('Using native camera for reliable photo capture');
+            log('🔒 All photos stored permanently in browser database');
+            
+            // Set initial state from settings
+            document.getElementById('photo-quality').value = photoQuality;
+            document.getElementById('auto-export').value = autoExport;
+            document.getElementById('auto-clear').value = autoClear;
+
+            updatePhotoStatus();
         });
     </script>
 </body>
