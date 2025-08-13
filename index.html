@@ -810,15 +810,37 @@
                 qrScanBtn.classList.add('btn-red');
                 qrScanBtn.classList.remove('btn-qr');
                 
-                html5QrcodeScanner = new Html5QrcodeScanner(
-                    "reader",
-                    { fps: 10, qrbox: { width: 250, height: 250 } },
-                    /* verbose= */ false
-                );
+                // Find and use the back-facing camera
+                Html5Qrcode.getCameras().then(devices => {
+                    if (devices && devices.length) {
+                        let cameraId = null;
+                        // Prioritize the back camera (facing mode 'environment')
+                        const backCamera = devices.find(device => device.label.toLowerCase().includes('back') || device.label.toLowerCase().includes('rear'));
+                        if (backCamera) {
+                            cameraId = backCamera.id;
+                        } else {
+                            // Fallback to the first available camera
+                            cameraId = devices[0].id;
+                        }
 
-                html5QrcodeScanner.render(onScanSuccess, onScanFailure);
-                isQrScannerRunning = true;
-                log('QR scanner started.');
+                        html5QrcodeScanner = new Html5Qrcode('reader');
+                        html5QrcodeScanner.start(
+                            cameraId, 
+                            { fps: 10, qrbox: { width: 250, height: 250 } }, 
+                            onScanSuccess, 
+                            onScanFailure
+                        ).catch(err => {
+                            log(`Error starting QR scanner: ${err}`);
+                        });
+
+                        isQrScannerRunning = true;
+                        log('QR scanner started, looking for a back camera...');
+                    } else {
+                        log('No cameras found on this device.');
+                    }
+                }).catch(err => {
+                    log(`Error getting camera devices: ${err}`);
+                });
             }
         }
 
@@ -847,9 +869,9 @@
                 const vin = decodedText.substring(hashIndex + 1, hashIndex + 1 + 16);
                 vinInput.value = vin;
                 log(`Extracted VIN: ${vin}`);
-                stopQrScanner();
+                // The scanner remains active as per your request
             } else {
-                log('Scanned QR code does not contain a valid VIN format.');
+                log('Scanned QR code does not contain a valid VIN format. Scanning continues.');
             }
         }
         
