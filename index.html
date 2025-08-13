@@ -1251,8 +1251,8 @@
             
             // Logic to extract VIN (16 chars after '#')
             const hashIndex = decodedText.indexOf('#');
-            if (hashIndex !== -1 && decodedText.length >= hashIndex + 1 + 16) {
-                const vin = decodedText.substring(hashIndex + 1, hashIndex + 1 + 16);
+            if (hashIndex !== -1 && decodedText.length >= hashIndex + 1 + 17) {
+                const vin = decodedText.substring(hashIndex + 1, hashIndex + 1 + 17);
                 vinInput.value = vin;
                 handleVinInput({ target: vinInput });
                 log(`Extracted VIN: ${vin}`);
@@ -1457,3 +1457,4 @@
     </script>
 </body>
 </html>
+
