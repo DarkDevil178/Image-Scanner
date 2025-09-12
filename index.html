@@ -1527,6 +1527,7 @@
         function saveSettings() {
             settings.photoQuality = parseFloat(document.getElementById('photo-quality').value);
             settings.autoExport = document.getElementById('auto-export').value === 'true';
+            settings.autoClear = document.getElementById('auto-clear').value === 'true';
             
             localStorage.setItem('vinPhotoSettings', JSON.stringify(settings));
             closeModal('settings-modal');
@@ -1540,6 +1541,9 @@
                 settings = { ...settings, ...JSON.parse(saved) };
                 document.getElementById('photo-quality').value = settings.photoQuality;
                 document.getElementById('auto-export').value = settings.autoExport.toString();
+                if (document.getElementById('auto-clear')) {
+                    document.getElementById('auto-clear').value = (settings.autoClear || false).toString();
+                }
             }
         }
 
