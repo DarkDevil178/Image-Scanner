@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>VIN Photo Capture</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -139,7 +138,6 @@
             <div id="status-indicator" class="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
         </div>
 
-        <!-- Main Content Panel -->
         <div class="control-panel">
             <h2 class="text-lg font-semibold mb-2 text-white">Input VIN</h2>
             <div class="flex flex-col md:flex-row gap-2">
@@ -150,16 +148,13 @@
             <div id="status-message" class="mt-2 text-sm text-center text-gray-400 hidden"></div>
         </div>
         
-        <!-- Photo Capture Section -->
         <div id="photo-section" class="control-panel hidden">
             <h2 class="text-lg font-semibold mb-2 text-white">Required Photos</h2>
             <div class="flex flex-col gap-2" id="parts-list">
-                <!-- Buttons for each part will be generated here -->
-            </div>
+                </div>
             <div id="capture-status" class="mt-4 text-center text-sm font-medium"></div>
         </div>
 
-        <!-- QR Scanner/Camera View -->
         <div id="camera-section" class="control-panel hidden">
             <div id="camera-view">
                 <video id="camera-feed" class="w-full h-full"></video>
@@ -172,12 +167,10 @@
             </div>
         </div>
 
-        <!-- Log Panel -->
         <div class="log-panel">
             <div id="log-content"></div>
         </div>
 
-        <!-- Message Modal -->
         <div id="message-modal" class="modal hidden">
             <div class="modal-content">
                 <h3 id="modal-title" class="text-xl font-bold mb-2 text-white"></h3>
