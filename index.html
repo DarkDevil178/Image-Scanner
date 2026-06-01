@@ -545,8 +545,15 @@
         <div class="card">
             <div class="form-group">
                 <label class="form-label">VIN String:</label>
-                <input type="text" id="vin-input" class="form-input" placeholder="Enter full VIN string or scan QR..." 
-                       onkeyup="handleVinInput(event)">
+                <input type="text"
+                    id="vin-input"
+                    class="form-input"
+                    placeholder="Enter full VIN string or scan QR..."
+                    onkeyup="handleVinInput(event)"
+                    inputmode="none"
+                    autocomplete="off"
+                    autocorrect="off"
+                    spellcheck="false">
             </div>
 
             <!-- QR Scanner Section -->
@@ -642,10 +649,7 @@
             <button class="btn btn-secondary" onclick="openModal('import-modal')">
                 📤 Import VIN Data
             </button>
-            
-            <button class="btn btn-orange" onclick="openModal('admin-export-modal')">
-                🔒 Admin Bulk Export
-            </button>
+
         </div>
 
         <!-- Settings Modal -->
@@ -825,6 +829,47 @@
             autoClear: false
         };
         let partsData = {}; // Will store the Excel data
+
+        // Load saved Excel configuration
+        function loadSavedPartsData() {
+            const savedPartsData = localStorage.getItem('partsData');
+
+            if (savedPartsData) {
+                try {
+                    partsData = JSON.parse(savedPartsData);
+
+                    addLog(`📂 Loaded saved Excel configuration (${Object.keys(partsData).length} End Items)`);
+
+                    // Update upload UI
+                    document.getElementById('upload-status').innerHTML = `
+                        <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">✅</div>
+                        <div style="font-weight: bold; margin-bottom: 0.5rem; color: #10b981;">
+                            Excel Configuration Auto Loaded
+                        </div>
+                        <div style="font-size: 0.75rem; color: #9ca3af;">
+                            ${Object.keys(partsData).length} End Items restored
+                        </div>
+                    `;
+
+                    const excelStatus = document.getElementById('excel-status');
+                    const excelDetails = document.getElementById('excel-details');
+
+                    excelStatus.classList.remove('hidden');
+                    excelDetails.textContent =
+                        `${Object.keys(partsData).length} End Items loaded from local storage`;
+
+                    updateStatus(
+                        '✅ Saved Excel configuration loaded',
+                        'Ready to process VIN strings'
+                    );
+
+                } catch (error) {
+                    console.error('Failed to load saved configuration:', error);
+                    addLog('❌ Failed to load saved Excel configuration');
+                }
+            }
+        }
+
         let requiredParts = []; // Parts needed for current end item
         let takenPhotos = []; // Photos taken for current VIN
 
@@ -978,14 +1023,33 @@
             }
 
             addLog(`✅ Processed ${Object.keys(partsData).length} End Items from Excel`);
+
+            // Save processed Excel data permanently
+            localStorage.setItem('partsData', JSON.stringify(partsData));
+
+            addLog('💾 Excel configuration saved locally');
         }
 
         // Extract VIN from full string
+        // Supports two formats:
+        //   Old format: ...62#MEEHBC001T4140117  KH3C...  (VIN follows '#' delimiter)
+        //   New format: ...45TE MEERJF032T3002773  YZZD... (VIN is the 2nd space-separated token, no '#')
         function extractVinFromString(fullString) {
+            // Old format: VIN is the 17 alphanumeric characters immediately after '#'
             const vinMatch = fullString.match(/#([A-Za-z0-9]{17})/);
             if (vinMatch) {
                 return vinMatch[1];
             }
+
+            // New format: no '#' — VIN is the second whitespace-separated token
+            const tokens = fullString.trim().split(/\s+/);
+            if (tokens.length >= 2) {
+                const candidate = tokens[1];
+                if (/^[A-Za-z0-9]{17}$/.test(candidate)) {
+                    return candidate;
+                }
+            }
+
             return null;
         }
 
@@ -1011,13 +1075,14 @@
                 return;
             }
 
-            addLog(`🔍 Processing VIN string: ${fullString.substring(0, 50)}...`);
+            const detectedFormat = fullString.includes('#') ? 'Old format (# delimiter)' : 'New format (space delimiter)';
+            addLog(`🔍 Processing VIN string [${detectedFormat}]: ${fullString.substring(0, 50)}...`);
 
-            // Extract VIN (17 chars after #)
+            // Extract VIN - supports old format (17 chars after '#') and new format (2nd space-separated token)
             const extractedVin = extractVinFromString(fullString);
             if (!extractedVin) {
-                alert('Could not find a valid 17-character VIN after "#" in the string!');
-                addLog('❌ VIN extraction failed - no valid VIN found after #');
+                alert('Could not find a valid 17-character VIN in the string!\nExpected either:\n• Old format: ...#<17-char VIN>...\n• New format: <token1> <17-char VIN> ...');
+                addLog('❌ VIN extraction failed - no valid 17-char VIN found (checked both old # and new space-delimited formats)');
                 return;
             }
 
@@ -2009,8 +2074,13 @@
         function focusVinInput() {
             setTimeout(() => {
                 const vinInput = document.getElementById('vin-input');
+
                 vinInput.focus();
-                vinInput.select();
+
+                // Move cursor to end
+                const length = vinInput.value.length;
+                vinInput.setSelectionRange(length, length);
+
             }, 100);
         }
 
@@ -2238,6 +2308,13 @@
                 updatePhotoGallery();
             }, 500);
         });
+
+    window.onload = async function () {
+        await initDatabase();
+        loadSavedPartsData();
+        focusVinInput();
+    };
+    
     </script>
 </body>
 </html>
