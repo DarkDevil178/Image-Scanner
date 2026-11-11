@@ -1,3 +1,5 @@
 
 # /brag intermediates (frames, browser profile, captures)
 brag-output/work/
+# cinetic film project (node_modules, renders, licensed media stay local)
+brag-output/film/
