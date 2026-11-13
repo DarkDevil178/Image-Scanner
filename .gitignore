@@ -3,3 +3,18 @@
 brag-output/work/
 # cinetic film project (node_modules, renders, licensed media stay local)
 brag-output/film/
+# explainer intermediates (renders, captures, browser profile, licensed audio, voice takes)
+brag-output/explainer/frames-*/
+brag-output/explainer/stills-*/
+brag-output/explainer/shots/
+brag-output/explainer/profile/
+brag-output/explainer/items/
+brag-output/explainer/vo/
+brag-output/explainer/music/
+brag-output/explainer/*.mp4
+brag-output/explainer/*.wav
+brag-output/explainer/*.png
+brag-output/explainer/*.log
+brag-output/explainer/seed-backup.json
+brag-output/explainer/rects-extra.json
+brag-output/explainer/explainer.gen.html
