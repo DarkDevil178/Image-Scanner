@@ -18,3 +18,9 @@ brag-output/explainer/*.log
 brag-output/explainer/seed-backup.json
 brag-output/explainer/rects-extra.json
 brag-output/explainer/explainer.gen.html
+# launch kit: rendered output and the zip (142 MB, sent directly) stay local
+brag-output/launch-kit/out/
+brag-output/launch-kit/build/
+brag-output/launch-kit/package/
+brag-output/launch-kit/*.zip
+brag-output/launch-kit/*.png
