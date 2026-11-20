@@ -370,22 +370,71 @@ D[30] = dict(phase='4 · your closet, your december', kind='reel', theme='page',
     {'t': 's_countdown', 'big': '#002', 'title': 'coming soon', 'kicker': 'next', 'size': 260, 'sticker': 'countdown sticker goes here',
      'do': 'Add a COUNTDOWN "#002" with no end date (or your real date). Save to the "next" highlight.'}])
 
-HIGHLIGHT_OF = {1: 'hello', 3: '#001', 6: '#001', 7: '#001', 8: 'how to', 11: 'how to', 12: 'how to', 13: 'faq', 14: 'how to', 23: 'build log', 25: 'you', 28: 'you', 30: 'next'}
+# ================= the 7-day launch: tease (1-2), launch (3), features (4-6), black friday close (7) =================
+import copy
+C = copy.deepcopy
+TAGS['launch3'] = TAGS_CORE + ' #shopyourcloset #sustainablefashion #slowfashion #outfitideas #newapp'
+W = {}
+W[1] = C(D[1]); W[1]['phase'] = '1 · tease'
+W[1]['feed'][3]['title'] = 'lands monday,<br>23 november.'
+W[1]['caption'] = W[1]['caption'].replace('the first one lands friday, 27 november.', 'the first one lands monday, 23 november.')
+W[1]['stories'] = C(D[1]['stories']) + [dict(C(D[3]['stories'][1]), big='2', title='days to #001',
+    do='Add a COUNTDOWN sticker named "product #001" ending Mon 23 Nov, 7:00 pm. Keep this frame for the Highlights later.')]
+W[2] = dict(phase='1 · tease', kind='reel', theme='teaser', title='teaser: nothing to wear? photo in, background out', reel='teaser',
+  cover={'t': 'cover', 'title': 'nothing to wear?', 'kicker': '#001 · 23.11', 'cutouts': ['tee', 'denim', 'boots'], 'size': 130},
+  caption="you know the feeling. full closet, nothing to wear.\n\nso i built something: take a photo of any piece and the background disappears, right on your phone. that's one tiny part of it.\n\nproduct #001. tomorrow, monday 23.11, 7 pm.",
+  alt='Clothes drop around the words "Nothing to wear?", a photo of a t-shirt becomes a clean cut-out, then a card: product #001, Monday 23 November.',
+  first_comment='guess what #001 is. closest guess gets a shout-out tomorrow.',
+  stories=[dict(C(D[5]['stories'][0]), sub='tomorrow.'), C(D[6]['stories'][0]), C(D[6]['stories'][1])])
+W[2]['stories'][1]['do'] = 'Re-add the "product #001" COUNTDOWN sticker so people can tap "remind me".'
+W[3] = C(D[7]); W[3]['phase'] = '2 · launch'; W[3]['theme'] = 'launch3'
+W[3]['caption'] = W[3]['caption'].replace("\n\nit's black friday. before you buy more clothes, see what you already own. link in bio.", "\n\nbefore you buy more clothes, see what you already own. link in bio.")
+W[3]['stories'][1] = {'t': 's_phone', 'title': 'your closet, on your phone.', 'sub': 'what will you add first?', 'screen': 'w-home', 'tag': 'poll',
+                      'do': 'Add a POLL: "my favourite jacket" / "the thing i never wear".'}
+W[4] = C(D[9]); W[4]['phase'] = '3 · every feature'
+W[4]['stories'] = C(D[9]['stories']) + C(D[8]['stories'])
+W[5] = C(D[8]); W[5]['phase'] = '3 · every feature'
+W[5]['stories'] = C(D[17]['stories']) + C(D[11]['stories'])
+W[6] = C(D[13]); W[6]['phase'] = '3 · every feature'
+W[6]['caption'] = W[6]['caption'].replace('your launch-week questions, answered:', 'your launch questions, answered:')
+W[6]['feed'][0]['sub'] = 'the questions from launch.'
+W[6]['stories'] = C(D[13]['stories']) + [dict(C(D[10]['stories'][0]), title='tomorrow: Style me', do='Add a QUIZ sticker: "white tee + pleated skirt" (correct) / "hoodie + trousers" / "denim on denim". Hints at tomorrow\'s reel.')]
+W[7] = C(D[10]); W[7]['phase'] = '4 · black friday close'; W[7]['theme'] = 'launch'
+W[7]['title'] = 'black friday: shop your own closet first'
+W[7]['cover'] = {'t': 'cover', 'title': 'shop your closet first.', 'kicker': 'black friday · try on', 'screen': 't-style', 'size': 110}
+W[7]['caption'] = ("it's black friday. before you buy another outfit, let your closet try first.\n\nin Try on, tops, bottoms and shoes sit in rows at their real size. swipe to mix and match, "
+  "lock a piece you love, or tap Style me: it picks a combination whose colours work together, suited to the season and the weather.\n\nshop your own closet first. Wardrobe is in the bio.")
+W[7]['first_comment'] = 'found an outfit you forgot you had? post it and tag me 🖤'
+W[7]['stories'] = [dict(C(D[7]['stories'][1]), do='Add a POLL: "buying anything today?" "yes 🛍️" / "checking my closet first".'),
+                   dict(C(D[30]['stories'][0]), title='thank you for week one.', sub='Wardrobe stays in my bio.', do='Add a LINK sticker to the app.'),
+                   C(D[28]['stories'][0])]
+HIGHLIGHT_OF = {1: 'hello', 2: '#001', 3: '#001', 4: 'how to', 5: 'how to', 6: 'faq', 7: 'next'}
 
-for n in range(1, 31):
-    d, label = day(n); x = D[n]; folder = f'Day{n:02d}_{d.strftime("%a-%d-%b")}'
+def emit(n, x, folder, d=None, label=''):
     feed_files, story_files = [], []
     if x['kind'] in ('carousel', 'post'):
         for i, s in enumerate(x['feed']):
             p = f'{folder}/feed/{"slide" if x["kind"] == "carousel" else "post"}-{i + 1:02d}.png'; A(p, s, 1080, 1350); feed_files.append(p)
     else:
         A(f'{folder}/feed/cover.png', x['cover'], 1080, 1920); feed_files += [f'{folder}/feed/cover.png', f'{folder}/feed/{x["reel"]}.mp4']
-    for i, s in enumerate(x['stories']):
+    for i, s in enumerate(x.get('stories', [])):
         p = f'{folder}/story/story-{i + 1:02d}.png'; spec = {k: v for k, v in s.items() if k != 'do'}; A(p, spec, 1080, 1920); story_files.append(p)
-    plan.append({'day': n, 'date': d.isoformat(), 'label': label, 'folder': folder, 'phase': x['phase'], 'kind': x['kind'], 'title': x['title'],
-                 'time': TIMES[x['kind']], 'story_time': STORY_TIME, 'reel': x.get('reel'), 'feed': feed_files, 'stories': story_files,
-                 'story_do': [s['do'] for s in x['stories']], 'caption': x['caption'], 'hashtags': TAGS[x['theme']], 'alt': x['alt'],
-                 'first_comment': x['first_comment'], 'highlight': HIGHLIGHT_OF.get(n, '')})
+    return {'day': n, 'date': d.isoformat() if d else '', 'label': label, 'folder': folder, 'phase': x['phase'], 'kind': x['kind'], 'title': x['title'],
+            'time': TIMES[x['kind']], 'story_time': STORY_TIME, 'reel': x.get('reel'), 'feed': feed_files, 'stories': story_files,
+            'story_do': [s['do'] for s in x.get('stories', [])], 'caption': x['caption'], 'hashtags': TAGS[x['theme']], 'alt': x['alt'],
+            'first_comment': x['first_comment'], 'highlight': HIGHLIGHT_OF.get(n, '') if d else ''}
+
+for n in range(1, 8):
+    d, label = day(n); plan.append(emit(n, W[n], f'Day{n:02d}_{d.strftime("%a-%d-%b")}', d, label))
+
+# the after-launch library: finished posts that didn't fit the week, ready to use from day 8 on
+BONUS = [(14, 'reel_your-wardrobe'), (11, 'carousel_perfect-cutout'), (16, 'reel_outfits'), (15, 'carousel_capsule-101'), (12, 'reel_plan-the-week'),
+         (18, 'carousel_cost-per-wear'), (19, 'reel_trips-and-lists'), (20, 'carousel_packing'), (21, 'reel_insights'), (23, 'carousel_build-log'),
+         (24, 'reel_make-it-yours'), (26, 'carousel_holiday-outfits'), (17, 'post_before-after'), (22, 'post_dark-mode'), (25, 'post_10-piece-challenge'), (27, 'video_full-tour')]
+bonus = []
+for i, (k, name) in enumerate(BONUS):
+    x = C(D[k]); x['stories'] = []; bonus.append(emit(i + 1, x, f'after-launch-library/{i + 1:02d}_{name}'))
+json.dump(bonus, open(f'{OUT}/bonus.json', 'w'), indent=1, ensure_ascii=False)
 
 # ---------- profile, highlights, reel end cards ----------
 A('profile/profile-picture.png', {'t': 'avatar'}, 1080, 1080)
@@ -401,11 +450,9 @@ ICONS = {
 for k, ic in ICONS.items():
     A(f'profile/highlight-covers/{k.replace("#", "").replace(" ", "-")}.png', {'t': 'highlight', 'icon': ic.replace('font:', 'font:').replace('Bricolage Grotesque', "'Bricolage Grotesque'").replace('DM Mono', "'DM Mono'")}, 1080, 1920)
 A('_build/endcard.png', {'t': 'endcard'}, 1080, 1920)
-A('_build/tease1.png', {'t': 'teasecard', 'title': 'friday, 27.11'}, 1080, 1920)
-A('_build/tease2.png', {'t': 'teasecard', 'title': 'photo in.<br>background out.<br>27.11', 'size': 110}, 1080, 1920)
-A('_build/tease30.png', {'t': 'teasecard', 'title': '#002<br>coming soon'}, 1080, 1920)
+A('_build/tease.png', {'t': 'teasecard', 'title': 'monday, 23.11', 'size': 120}, 1080, 1920)
 
 json.dump(assets, open(f'{OUT}/assets.json', 'w'), indent=1)
 json.dump(plan, open(f'{OUT}/plan.json', 'w'), indent=1, ensure_ascii=False)
 from collections import Counter
-print(len(assets), 'images;', Counter(p['kind'] for p in plan), sum(len(p['stories']) for p in plan), 'story frames')
+print(len(assets), 'images;', Counter(p['kind'] for p in plan), sum(len(p['stories']) for p in plan), 'story frames;', len(bonus), 'library posts')

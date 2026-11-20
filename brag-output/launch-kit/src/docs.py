@@ -2,7 +2,7 @@
 # calendar.csv and a caption.txt in every day's folder. Pages are 1600x1000 (renders to PDF with pdf.js).
 import json, csv, html, os
 K = '/home/user/Image-Scanner/brag-output/launch-kit'; O = f'{K}/out'; BUILD = f'{K}/build'
-P = json.load(open(f'{BUILD}/plan.json'))
+P = json.load(open(f'{BUILD}/plan.json')); BON = json.load(open(f'{BUILD}/bonus.json'))
 FILE = lambda p: f'file://{K}/build/thumbs/{p[:-4]}.jpg'
 HANDLE = '@wierd_stuff_i_make'
 CSS = """
@@ -71,11 +71,11 @@ pages.append(page("""<div class="k">05 · type</div><h2>one display face, one te
  <p style="margin-top:36px">all three are free Google Fonts (OFL). install them for editing: fonts.google.com → Bricolage Grotesque, DM Sans, DM Mono.</p>""", label=L, n=6))
 pages.append(page(f"""<div class="k">06 · layout</div><h2>the grid, the safe zones, the chrome.</h2>
  <div class="cols c3" style="gap:40px;align-items:start">
- <div><img class="th" src="{FILE('Day06_Thu-26-Nov/feed/slide-03.png')}" style="width:100%"><h3 style="margin-top:16px">feed 4:5 · 1080×1350</h3><p>72 px margins. handle top-left, product tag top-right, counter bottom-right, "swipe →" on slide 1.</p></div>
- <div><img class="th" src="{FILE('Day09_Sun-29-Nov/story/story-01.png')}" style="width:62%"><h3 style="margin-top:16px">story 9:16 · 1080×1920</h3><p>keep text between y 250 and 1640. the empty middle/lower band is where the day's sticker goes.</p></div>
- <div><img class="th" src="{FILE('Day10_Mon-30-Nov/feed/cover.png')}" style="width:62%"><h3 style="margin-top:16px">reel cover · 1080×1920</h3><p>title centred, inside the 1080×1350 middle so the grid crop keeps it.</p></div></div>""", label=L, n=7))
+ <div><img class="th" src="{FILE('Day04_Tue-24-Nov/feed/slide-02.png')}" style="width:100%"><h3 style="margin-top:16px">feed 4:5 · 1080×1350</h3><p>72 px margins. handle top-left, product tag top-right, counter bottom-right, "swipe →" on slide 1.</p></div>
+ <div><img class="th" src="{FILE('Day04_Tue-24-Nov/story/story-01.png')}" style="width:62%"><h3 style="margin-top:16px">story 9:16 · 1080×1920</h3><p>keep text between y 250 and 1640. the empty middle/lower band is where the day's sticker goes.</p></div>
+ <div><img class="th" src="{FILE('Day07_Fri-27-Nov/feed/cover.png')}" style="width:62%"><h3 style="margin-top:16px">reel cover · 1080×1920</h3><p>title centred, inside the 1080×1350 middle so the grid crop keeps it.</p></div></div>""", label=L, n=7))
 pages.append(page(f"""<div class="k">07 · imagery</div><h2>real things, cut out. real screens, in a phone.</h2>
- <div class="cols c2" style="align-items:start"><div><img class="th" src="{FILE('Day17_Mon-07-Dec/feed/post-01.png')}" style="width:62%"></div>
+ <div class="cols c2" style="align-items:start"><div><img class="th" src="{FILE('after-launch-library/13_post_before-after/feed/post-01.png')}" style="width:62%"></div>
  <div><h3>cut-outs</h3><p>clothes are real photos cut out by Wardrobe's own Smart AI, floating on paper with a soft shadow. no drawn clothes, no stock models.</p>
  <h3 style="margin-top:28px">screens</h3><p>always the real app, inside the dark phone frame. never mock up a screen that doesn't exist.</p>
  <h3 style="margin-top:28px">people</h3><p>hands and real moments only (photographing clothes, packing). no stock gestures.</p>
@@ -89,27 +89,27 @@ pages.append(page("""<div class="k">09 · voice</div><h2>how we write.</h2><div 
  <div class="card"><h3><span class="tick">✓</span> do</h3><ul><li>lowercase captions, first person "i". short lines.</li><li>say what it does, plainly: "the background disappears."</li><li>the app's own words, capitalised as in the app: Style me, Mark as worn, Try on.</li><li>end with one question people can answer in a word.</li><li>one or two emoji in a caption at most; none in graphics.</li></ul></div>
  <div class="card"><h3><span class="cross">✕</span> don't</h3><ul><li>hype words: revolutionary, game-changer, unleash, seamless, magic.</li><li>made-up numbers ("10,000 users!"). only real ones.</li><li>promises about features that don't exist.</li><li>"link in bio" plus a URL in the caption (instagram doesn't link it).</li><li>correcting the handle's spelling.</li></ul></div></div>""", label=L, n=10))
 pages.append(page(f"""<div class="k">10 · templates in use</div><h2>the system, at a glance.</h2><div style="display:grid;grid-template-columns:repeat(6,1fr);gap:18px">
- {''.join(f'<img class="th" src="{FILE(p)}" style="width:100%">' for p in ['Day01_Sat-21-Nov/feed/slide-01.png','Day01_Sat-21-Nov/feed/slide-02.png','Day03_Mon-23-Nov/feed/slide-01.png','Day09_Sun-29-Nov/feed/slide-02.png','Day15_Sat-05-Dec/feed/slide-01.png','Day18_Tue-08-Dec/feed/slide-01.png','Day23_Sun-13-Dec/feed/slide-02.png','Day13_Thu-03-Dec/feed/slide-03.png','Day22_Sat-12-Dec/feed/post-01.png','Day25_Tue-15-Dec/feed/post-01.png','Day26_Wed-16-Dec/feed/slide-02.png','Day28_Fri-18-Dec/feed/post-01.png'])}</div>""", label=L, n=11))
+ {''.join(f'<img class="th" src="{FILE(p)}" style="width:100%">' for p in ['Day01_Sat-21-Nov/feed/slide-01.png','Day01_Sat-21-Nov/feed/slide-02.png','Day04_Tue-24-Nov/feed/slide-01.png','Day04_Tue-24-Nov/feed/slide-02.png','Day06_Thu-26-Nov/feed/slide-03.png','after-launch-library/06_carousel_cost-per-wear/feed/slide-01.png','after-launch-library/10_carousel_build-log/feed/slide-02.png','after-launch-library/04_carousel_capsule-101/feed/slide-01.png','after-launch-library/14_post_dark-mode/feed/post-01.png','after-launch-library/15_post_10-piece-challenge/feed/post-01.png','after-launch-library/12_carousel_holiday-outfits/feed/slide-02.png','Day04_Tue-24-Nov/feed/slide-09.png'])}</div>""", label=L, n=11))
 open(f'{BUILD}/brand.html', 'w').write('<html><head><meta charset="utf-8">' + CSS + '</head><body>' + ''.join(pages) + '</body></html>')
 
 # ======================= playbook =======================
 L = 'start here'
 pb = []
 pb.append(page(f"""<div style="display:flex;flex-direction:column;justify-content:center;height:100%;gap:36px">{mark(130)}
- <h1 style="color:#ECEEF2">the 30-day launch.<br>start here.</h1><div style="font:500 28px 'DM Mono';color:#A5BBFF">{HANDLE} × #001 Wardrobe · sat 21 nov – sun 20 dec 2026</div></div>""", 'ink', label=L))
-pb.append(page("""<div class="k">what's in this kit</div><h2>everything for 30 days, already made.</h2><div class="cols c2"><div>
- <h3>/days</h3><p>one folder per day: <span class="mono">feed/</span> (carousel slides, a single post, or a reel + its cover) and <span class="mono">story/</span> (that day's story frames), plus <span class="mono">caption.txt</span> with the caption, hashtags, alt text, first comment, posting time and exactly which story sticker to add.</p>
- <h3 style="margin-top:24px">/profile</h3><p>profile picture, 7 highlight covers, bio options.</p>
+ <h1 style="color:#ECEEF2">the 7-day launch.<br>start here.</h1><div style="font:500 28px 'DM Mono';color:#A5BBFF">{HANDLE} × #001 Wardrobe · sat 21 nov – fri 27 nov 2026</div></div>""", 'ink', label=L))
+pb.append(page("""<div class="k">what's in this kit</div><h2>everything for 7 days, already made.</h2><div class="cols c2"><div>
+ <h3>/days</h3><p>one folder per day (7): <span class="mono">feed/</span> (carousel slides, a single post, or a reel + its cover) and <span class="mono">story/</span> (that day's story frames), plus <span class="mono">caption.txt</span> with the caption, hashtags, alt text, first comment, posting time and exactly which story sticker to add.</p>
+ <h3 style="margin-top:24px">/after-launch-library</h3><p>16 more finished posts (7 reels, 6 carousels, 3 single posts), each with its caption.txt, ready from day 8.</p><h3 style="margin-top:24px">/profile</h3><p>profile picture, 7 highlight covers, bio options.</p>
  <h3 style="margin-top:24px">/brand</h3><p>brand guidelines (PDF) and logo files.</p></div><div>
- <h3>calendar.pdf · calendar.csv</h3><p>the whole month at a glance, then one page per day with thumbnails. the csv opens in Sheets or Excel for tracking.</p>
- <h3 style="margin-top:24px">the totals</h3><p>30 feed posts (13 reels/videos, 12 carousels, 5 single posts) and 38 story frames: a story every day, a post or reel every day.</p>
+ <h3>calendar.pdf · calendar.csv</h3><p>the whole week at a glance, then one page per day with thumbnails. the csv opens in Sheets or Excel for tracking.</p>
+ <h3 style="margin-top:24px">the totals</h3><p>7 feed posts (4 reels, 3 carousels) and 18 story frames: stories every day, a post or reel every day. plus 16 library posts for after the launch.</p>
  <h3 style="margin-top:24px">/source</h3><p>the generators, if you want to change copy and re-render.</p></div></div>""", label=L, n=2))
-pb.append(page("""<div class="k">the strategy</div><h2>launch the page, then the product, then the habit.</h2><div class="cols c4" style="gap:26px">
- <div class="card"><div class="k">days 1-6 · 21-26 nov</div><h3>the page wakes up</h3><p>introduce the page and its rules. tease #001 without naming it: the "nothing to wear" problem, a cut-out teaser, a countdown.</p></div>
- <div class="card" style="background:#3D4FE0;color:#fff"><div class="k" style="color:#fff">days 7-13 · 27 nov-3 dec</div><h3>launch week</h3><p style="color:#e3e8ff">launch on black friday with the hook "shop your own closet first". then how-tos, every feature, faq.</p></div>
- <div class="card"><div class="k">days 14-23 · 4-13 dec</div><h3>every feature, up close</h3><p>one feature a day: wardrobe, capsules, outfits, cut-outs, cost per wear, trips, insights, dark mode, the build log.</p></div>
- <div class="card"><div class="k">days 24-30 · 14-20 dec</div><h3>your closet, your december</h3><p>a challenge, holiday outfits, the full tour, a thank-you, and your followers vote on #002.</p></div></div>
- <p style="margin-top:40px;font-size:24px;color:#161922">why it works: people get curious before they get sold to. the page earns follows in week 1, the launch converts them in week 2, and weeks 3-4 turn the app into a habit and give people a reason to stay for #002.</p>""", label=L, n=3))
+pb.append(page("""<div class="k">the strategy</div><h2>tease, launch, explain, close.</h2><div class="cols c4" style="gap:26px">
+ <div class="card"><div class="k">days 1-2 · sat 21-sun 22</div><h3>tease</h3><p>introduce the page and its three rules. tease #001 without naming it: "nothing to wear?", a cut-out teaser, a countdown to monday.</p></div>
+ <div class="card" style="background:#3D4FE0;color:#fff"><div class="k" style="color:#fff">day 3 · mon 23 nov</div><h3>launch</h3><p style="color:#e3e8ff">the launch film at 7 pm. stories with the link all evening. reply to everything.</p></div>
+ <div class="card"><div class="k">days 4-6 · tue 24-thu 26</div><h3>explain</h3><p>every feature in one carousel, how to add clothes, the faq. the "how" turns curious people into users.</p></div>
+ <div class="card"><div class="k">day 7 · fri 27 nov</div><h3>close on black friday</h3><p>"shop your own closet first" with Try on and Style me, a thank-you, and the first question about #002.</p></div></div>
+ <p style="margin-top:40px;font-size:24px;color:#161922">why it works: two days of curiosity before anything is sold, a launch early in the week so it has room to travel, three days that answer "how", and a close on the one day everyone is thinking about buying clothes. then the library keeps the page busy for weeks.</p>""", label=L, n=3))
 pb.append(page("""<div class="k">your daily routine · 20 minutes</div><h2>every single day.</h2><div class="cols c2"><div class="card"><table>
  <tr><th>when</th><th>what</th></tr>
  <tr><td class="mono">9:00 am</td><td>story frame 1 (from <span class="mono">story/</span>). add the sticker the caption.txt names.</td></tr>
@@ -126,18 +126,18 @@ bios = ["useful things, built from scratch, for everyday use.\n#001 Wardrobe: yo
 pb.append(page(f"""<div class="k">profile setup · do this before day 1</div><h2>make the profile ready for strangers.</h2><div class="cols c2"><div>
  <h3>name field</h3><p class="mono" style="color:#161922">weird stuff i make</p><p>(instagram search reads the name field: this way "weird" finds you too.)</p>
  <h3 style="margin-top:22px">bio (pick one)</h3>{''.join(f'<div class="card" style="padding:18px 22px;margin-bottom:12px"><p style="color:#161922">{esc(b)}</p></div>' for b in bios)}
- <h3 style="margin-top:12px">link</h3><p>the Wardrobe link. until 27 nov, link to a "coming 27.11" page or leave it empty.</p></div><div>
+ <h3 style="margin-top:12px">link</h3><p>the Wardrobe link. until 23 nov, link to a "coming 23.11" page or leave it empty.</p></div><div>
  <h3>profile picture</h3><p><span class="mono">profile/profile-picture.png</span> (indigo cursor) during the launch; the mono version between launches.</p>
- <h3 style="margin-top:22px">highlights (in this order)</h3><p>#001 · how to · faq · build log · you · next · hello. covers are in <span class="mono">profile/highlight-covers/</span>; caption.txt says which story goes where.</p>
- <h3 style="margin-top:22px">pinned posts</h3><p>until day 7: the day 1 intro. from day 7: the launch reel, the day 9 "every feature" carousel, and (from day 27) the full tour.</p>
+ <h3 style="margin-top:22px">highlights (in this order)</h3><p>#001 · how to · faq · next · hello (build log and you are ready for later). covers are in <span class="mono">profile/highlight-covers/</span>; caption.txt says which story goes where.</p>
+ <h3 style="margin-top:22px">pinned posts</h3><p>until day 3: the day 1 intro. from day 3: the launch reel and the day 4 "every feature" carousel; later, the full tour from the library.</p>
  <h3 style="margin-top:22px">account</h3><p>switch to a creator or business account so you get insights and the link sticker on stories.</p></div></div>""", label=L, n=5))
 pb.append(page("""<div class="k">engagement · the part that makes it massive</div><h2>show up in the comments.</h2><div class="cols c2"><div>
- <ul><li><b>first hour</b>: reply to every comment, with a question back. comments with replies count twice.</li><li><b>every day</b>: spend 10 minutes commenting (properly, not "nice!") on 10 posts in #capsulewardrobe, #outfitideas, #closetorganization and #buildinpublic.</li><li><b>stories</b>: reshare poll results and answer question-box replies. people who see their answer come back.</li><li><b>ugc</b>: repost every outfit board or closet that tags you (ask first in DMs).</li><li><b>collabs</b>: from day 10, DM 5 small fashion / organisation / maker creators a day with the before/after cut-out and offer a collab post on the capsule or 10-piece challenge.</li><li><b>dms</b>: answer every DM the same day; save good questions for the FAQ.</li></ul></div>
+ <ul><li><b>first hour</b>: reply to every comment, with a question back. comments with replies count twice.</li><li><b>every day</b>: spend 10 minutes commenting (properly, not "nice!") on 10 posts in #capsulewardrobe, #outfitideas, #closetorganization and #buildinpublic.</li><li><b>stories</b>: reshare poll results and answer question-box replies. people who see their answer come back.</li><li><b>ugc</b>: repost every outfit board or closet that tags you (ask first in DMs).</li><li><b>collabs</b>: from day 3, DM 5 small fashion / organisation / maker creators a day with the before/after cut-out and offer a collab post on the capsule or 10-piece challenge.</li><li><b>dms</b>: answer every DM the same day; save good questions for the FAQ.</li></ul></div>
  <div><h3>reply templates</h3>
  <div class="card" style="margin-bottom:12px;padding:20px"><p><b>how do i install it?</b> it's one html file. open the link → iphone: share → "add to home screen". android: ⋮ → "add to home screen". then it opens like an app.</p></div>
  <div class="card" style="margin-bottom:12px;padding:20px"><p><b>where's my data?</b> on your device only. no account, no server. use settings → download backup to keep a copy.</p></div>
  <div class="card" style="margin-bottom:12px;padding:20px"><p><b>does it work on a laptop?</b> yes, it's a web page. your phone is the best for photos.</p></div>
- <div class="card" style="padding:20px"><p><b>is it free?</b> write your answer here before day 7 so every reply says the same thing.</p></div></div></div>""", label=L, n=6))
+ <div class="card" style="padding:20px"><p><b>is it free?</b> write your answer here before day 3 so every reply says the same thing.</p></div></div></div>""", label=L, n=6))
 pb.append(page("""<div class="k">measure · every sunday, 10 minutes</div><h2>what to track, and what to do about it.</h2><div class="cols c2"><div class="card"><table>
  <tr><th>metric</th><th>where</th><th>what it tells you</th></tr>
  <tr><td>reach & views</td><td>insights → overview</td><td>is the content travelling beyond followers?</td></tr>
@@ -148,17 +148,17 @@ pb.append(page("""<div class="k">measure · every sunday, 10 minutes</div><h2>wh
  <tr><td>story taps-forward</td><td>each story</td><td>high = too many frames or a weak frame 1.</td></tr></table>
  <p style="margin-top:14px">log the numbers each sunday in calendar.csv (columns are ready).</p></div>
  <div><h3>if something flops</h3><ul><li>a reel under your average after 24 h: re-post the same video 7 days later with a new first-second hook and cover.</li><li>a carousel with low saves: turn its best slide into a single post.</li><li>polls with few taps: ask easier, funnier questions.</li></ul>
- <h3 style="margin-top:22px">after day 30</h3><ul><li>keep 3-4 posts a week: rotate a how-to reel, a tip carousel, a ugc repost.</li><li>run the 10-piece challenge monthly.</li><li>start the #002 build log the week after the vote.</li></ul></div></div>""", label=L, n=7))
+ <h3 style="margin-top:22px">after day 7</h3><ul><li>post from /after-launch-library: one a day for two weeks, or 3-4 a week. alternate a reel and a carousel.</li><li>keep a story every day: reshare replies, polls and ugc.</li><li>run the 10-piece challenge (library 15) in week 3.</li><li>start the #002 build log once you've picked it.</li></ul></div></div>""", label=L, n=7))
 open(f'{BUILD}/playbook.html', 'w').write('<html><head><meta charset="utf-8">' + CSS + '</head><body>' + ''.join(pb) + '</body></html>')
 
 # ======================= calendar =======================
 L = 'calendar'
 KIND = {'reel': 'reel', 'carousel': 'carousel', 'post': 'post', 'video': 'video'}
-cal = [page("""<div class="k">30 days · 21 nov – 20 dec 2026</div><h2>the calendar.</h2><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:12px">""" +
-  ''.join(f"""<div class="card" style="padding:14px 16px;height:120px;{'background:#3D4FE0;color:#fff' if p['day'] == 7 else ''}">
-   <div class="mono" style="font-size:14px;color:{'#fff' if p['day'] == 7 else '#7C8494'}">day {p['day']:02d} · {p['label']}</div>
-   <div style="font:700 16px/1.2 'Bricolage Grotesque';margin-top:8px">{esc(p['title'])}</div>
-   <div class="mono" style="font-size:13px;margin-top:6px;color:{'#e3e8ff' if p['day'] == 7 else '#3D4FE0'}">{KIND[p['kind']]} · {len(p['stories'])} story</div></div>""" for p in P) + '</div>', label=L)]
+cal = [page("""<div class="k">7 days · sat 21 – fri 27 nov 2026</div><h2>the calendar.</h2><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:12px">""" +
+  ''.join(f"""<div class="card" style="padding:18px 18px;height:560px;{'background:#3D4FE0;color:#fff' if p['day'] == 3 else ''}">
+   <div class="mono" style="font-size:14px;color:{'#fff' if p['day'] == 3 else '#7C8494'}">day {p['day']:02d} · {p['label']}</div>
+   <div style="font:700 22px/1.2 'Bricolage Grotesque';margin-top:10px">{esc(p['title'])}</div><img class="th" src="{FILE(p['feed'][0])}" style="width:100%;margin-top:14px">
+   <div class="mono" style="font-size:13px;margin-top:6px;color:{'#e3e8ff' if p['day'] == 3 else '#3D4FE0'}">{KIND[p['kind']]} · {len(p['stories'])} story</div></div>""" for p in P) + '</div>', label=L)]
 for p in P:
     imgs = [f for f in p['feed'] if f.endswith('.png')]
     feedrow = ''.join(f'<img class="th" src="{FILE(f)}" style="height:{(140 if len(imgs) > 6 else 185) if p["kind"] in ("carousel", "post") else 280}px">' for f in imgs[:9])
@@ -173,22 +173,26 @@ for p in P:
        <h3 style="margin-top:16px">story stickers</h3><ul>{''.join(f'<li style="font-size:16px">frame {i + 1}: {esc(d)}</li>' for i, d in enumerate(p['story_do']))}</ul>
        <h3 style="margin-top:12px">first comment</h3><p style="font-size:16px">{esc(p['first_comment'])}</p>
        {f'<h3 style="margin-top:12px">highlight</h3><p style="font-size:16px">add today\'s stories to "{p["highlight"]}"</p>' if p['highlight'] else ''}</div></div>""", label=L, n=p['day'] + 1))
+cal.append(page('<div class="k">after the launch · ready from day 8</div><h2>the library.</h2><div style="display:grid;grid-template-columns:repeat(8,1fr);gap:14px">' +
+  ''.join(f'<div><img class="th" src="{FILE(b["feed"][0])}" style="width:100%"><div class="mono" style="font-size:13px;margin-top:6px">{b["folder"].split("/")[-1]}</div></div>' for b in BON) + '</div>', label=L))
 open(f'{BUILD}/calendar.html', 'w').write('<html><head><meta charset="utf-8">' + CSS + '</head><body>' + ''.join(cal) + '</body></html>')
 
 # ======================= csv + caption.txt =======================
 with open(f'{O}/calendar.csv', 'w', newline='') as f:
     w = csv.writer(f); w.writerow(['day', 'date', 'weekday', 'phase', 'feed type', 'title', 'feed time', 'feed files', 'story frames', 'story stickers', 'caption', 'hashtags', 'alt text', 'first comment', 'highlight',
                                   'posted? (y/n)', 'reach', 'saves', 'shares', 'comments', 'link taps', 'follows'])
-    for p in P:
-        w.writerow([p['day'], p['date'], p['label'][:3], p['phase'], p['kind'], p['title'], p['time'], ' | '.join(x.split('/', 1)[1] for x in p['feed']), len(p['stories']),
+    for p in P + BON:
+        w.writerow([p['day'] if p['date'] else f"library {p['day']:02d}", p['date'] or 'any day from day 8', p['label'][:3], p['phase'], p['kind'], p['title'], p['time'], ' | '.join(x.split('/', 1)[1] if p['date'] else x.split('/', 2)[2] for x in p['feed']), len(p['stories']),
                     ' | '.join(p['story_do']), p['caption'], p['hashtags'], p['alt'], p['first_comment'], p['highlight']] + [''] * 7)
-for p in P:
-    t = [f"DAY {p['day']:02d} · {p['label']} 2026 · {p['phase']}", f"{p['title']}", '',
-         f"FEED: {p['kind']} at {p['time']}", '  files: ' + ', '.join(x.split('/', 1)[1] for x in p['feed']),
+for p in P + BON:
+    lib = not p['date']
+    files = [x.split('/', 2)[2] if lib else x.split('/', 1)[1] for x in p['feed']]
+    head = f"AFTER-LAUNCH LIBRARY {p['day']:02d} · post any day from day 8" if lib else f"DAY {p['day']:02d} · {p['label']} 2026 · {p['phase']}"
+    t = [head, p['title'], '', f"FEED: {p['kind']} at {p['time']}", '  files: ' + ', '.join(files),
          *(['  reel: upload the mp4, then set cover.png as the cover'] if p['kind'] in ('reel', 'video') else ['  post the slides in order'] if p['kind'] == 'carousel' else []),
          '', 'CAPTION (copy from here):', '', p['caption'], '', p['hashtags'], '', 'ALT TEXT:', p['alt'], '', 'FIRST COMMENT (post it yourself right after):', p['first_comment'], '',
-         f"STORIES: {len(p['stories'])} frame(s), {p['story_time']}", *[f"  story-{i + 1:02d}.png: {d}" for i, d in enumerate(p['story_do'])],
+         *([f"STORIES: {len(p['stories'])} frame(s), {p['story_time']}", *[f"  story-{i + 1:02d}.png: {d}" for i, d in enumerate(p['story_do'])]] if p['stories'] else ['STORY: share this post to your story with a poll or question about it.']),
          *([f"\nHIGHLIGHT: add today's stories to \"{p['highlight']}\""] if p['highlight'] else [])]
     open(f"{O}/{p['folder']}/caption.txt", 'w').write('\n'.join(t) + '\n')
-open(f'{O}/profile/bio-options.txt', 'w').write('NAME FIELD: weird stuff i make\n\nBIO OPTIONS (pick one):\n\n' + '\n\n'.join(bios) + '\n\nLINK: the Wardrobe link (from day 7).\n\nHIGHLIGHT ORDER: #001 · how to · faq · build log · you · next · hello\n')
+open(f'{O}/profile/bio-options.txt', 'w').write('NAME FIELD: weird stuff i make\n\nBIO OPTIONS (pick one):\n\n' + '\n\n'.join(bios) + '\n\nLINK: the Wardrobe link (from day 3, Mon 23 Nov).\n\nHIGHLIGHT ORDER: #001 · how to · faq · next · hello\n')
 print('docs written')
