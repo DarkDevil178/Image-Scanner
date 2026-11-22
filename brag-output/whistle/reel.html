@@ -1,0 +1,138 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:opsz,wght@9..40,500;9..40,700&family=DM+Mono:wght@500&display=block" rel="stylesheet">
+<style>
+:root{--warm:#1C1816;--card:#2A2420;--cream:#F5EDE4;--mute:#A89A8C;--acc:#FF8A3D;--ink:#161922;--paper:#ECEEF2}
+*{box-sizing:border-box;margin:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:var(--warm)}
+#stage{position:relative;width:1080px;height:1920px;overflow:hidden;background:var(--warm);font-family:'DM Sans',sans-serif;color:var(--cream)}
+.full{position:absolute;left:0;top:0;width:1080px;height:1920px;overflow:hidden}
+.plate{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;transform-origin:50% 50%}
+.grade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(28,24,22,.55),rgba(28,24,22,.25) 40%,rgba(28,24,22,.7))}
+.txt{position:absolute;left:70px;right:70px;text-align:center;font:800 120px/1 'Bricolage Grotesque';letter-spacing:-.035em;color:var(--cream)}
+.mono{font:500 34px/1 'DM Mono';letter-spacing:-.01em}
+#phone{position:absolute;left:0;top:0;width:420px;height:874px;border-radius:66px;background:#0b0a09;padding:15px;transform-origin:0 0;
+  box-shadow:0 70px 140px -40px rgba(0,0,0,.7),0 0 0 2px #3a332e inset}
+#screen{position:relative;width:390px;height:844px;border-radius:52px;overflow:hidden;background:var(--warm)}
+#screen img{position:absolute;left:0;top:0;width:390px;height:844px}
+#finger{position:absolute;left:0;top:0;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;background:rgba(245,237,228,.3);border:2.5px solid rgba(255,255,255,.95);box-shadow:0 6px 16px rgba(0,0,0,.35);z-index:9}
+#ripple{position:absolute;left:0;top:0;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;border:3px solid rgba(255,138,61,.95);z-index:8}
+#big{position:absolute;left:0;top:0;width:1080px;text-align:center;font:800 900px/1 'Bricolage Grotesque';letter-spacing:-.06em;color:var(--acc)}
+#flood{position:absolute;left:0;top:0;width:1080px;height:1920px;background:var(--acc);transform-origin:50% 50%}
+.steam{position:absolute;border-radius:50%;background:rgba(255,255,255,.55);filter:blur(40px)}
+</style></head>
+<body><div id="stage">
+  <div class="full" id="bgA"><img class="plate" id="plA"><div class="grade" id="grA"></div></div>
+  <div class="full" id="bgB"><img class="plate" id="plB"><div class="grade" id="grB"></div></div>
+  <div class="full" id="steamL"></div>
+  <div id="big"></div>
+  <div id="phone"><div id="screen"><img id="sA"><img id="sB"><div id="ripple"></div><div id="finger"></div></div></div>
+  <div id="flood"></div>
+  <div class="full" id="scrim" style="background:linear-gradient(180deg,rgba(28,24,22,.96) 0,rgba(28,24,22,.9) 330px,rgba(28,24,22,0) 560px);opacity:0"></div>
+  <div class="txt" id="t1"></div><div class="txt" id="t2"></div>
+  <div class="full" id="end" style="display:flex;flex-direction:column;justify-content:center;align-items:center;gap:44px;text-align:center"></div>
+</div>
+<script>
+const SPEC = __SPEC__, RUN = __RUN__, LEARN = __LEARN__;
+const $ = (s) => document.querySelector(s);
+const cl = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const P = (t, a, b) => cl((t - a) / (b - a));
+const lerp = (a, b, k) => a + (b - a) * k;
+const eOut = (k) => 1 - Math.pow(1 - k, 3), eIn = (k) => k * k * k, eIO = (k) => (k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
+const set = (el, o) => { for (const k in o) el.style[k] = o[k]; };
+const A = (n) => `assets/${n}`, S = (n) => `shots/${n}`;
+const cooker = (s) => `<svg width="${s}" height="${s}" viewBox="0 0 512 512"><g fill="none" stroke="#A89A8C" stroke-width="16" stroke-linecap="round"><path d="M206 78c-14 14-14 34 0 48"/><path d="M256 78c-14 14-14 34 0 48"/><path d="M306 78c-14 14-14 34 0 48"/></g><rect x="236" y="140" width="40" height="52" rx="12" fill="#F5EDE4"/><rect x="62" y="280" width="54" height="30" rx="15" fill="#F5EDE4"/><rect x="396" y="280" width="54" height="30" rx="15" fill="#F5EDE4"/><rect x="110" y="230" width="292" height="170" rx="46" fill="#FF8A3D"/><rect x="96" y="190" width="320" height="52" rx="26" fill="#FFB07A"/></svg>`;
+// time maps: a recorded run (screenshots with their times) played back at any source time
+const runAt = (arr, ts) => { let lo = 0, hi = arr.length - 1; while (lo < hi) { const m = (lo + hi + 1) >> 1; if (arr[m].t <= ts) lo = m; else hi = m - 1; } return arr[lo].f; };
+function shotAt(t) { let s = SPEC.shots[0]; for (const x of SPEC.shots) if (t >= x.at) s = x; return s; }
+const STEAM = Array.from({ length: 9 }, (_, i) => ({ x: 380 + (i * 97) % 340, s: 160 + (i * 53) % 160, sp: 0.6 + (i % 4) * 0.18, ph: i * 0.37 }));
+$('#steamL').innerHTML = STEAM.map(() => '<div class="steam"></div>').join('');
+
+function plate(el, img, gr, sh, lt) {
+  if (!sh.photo) { el.style.opacity = 0; return; }
+  if (img.dataset.src !== sh.photo) { img.src = A(sh.photo); img.dataset.src = sh.photo; }
+  const k = P(lt, 0, sh.dur), z = Math.exp(lerp(Math.log(sh.z0 || 1.0), Math.log(sh.z1 || 1.12), eOut(k)));
+  set(img, { transform: `scale(${z})`, objectPosition: sh.pos || '50% 50%', filter: sh.blur ? `blur(${sh.blur}px)` : 'none' });
+  set(el, { opacity: 1 }); gr.style.opacity = sh.grade ?? 1;
+}
+function screenAt(sh, lt) {
+  if (sh.pre && lt < (sh.r0 || 0)) return S(sh.pre);
+  if (sh.run) { const [a, b] = sh.run; return S(runAt(RUN, lerp(a, b, P(lt, sh.r0 || 0, sh.r1 || sh.dur)))); }
+  if (sh.learn) { const [a, b] = sh.learn; return S(runAt(LEARN, lerp(a, b, P(lt, sh.r0 || 0, sh.r1 || sh.dur)))); }
+  if (sh.seq) { let f = sh.seq[0][1]; for (const [t, n] of sh.seq) if (lt >= t) f = n; return S(f); }
+  return sh.screen ? S(sh.screen) : null;
+}
+function text(el, s, lt, dur, voice) {
+  if (!s) { el.style.opacity = 0; return; }
+  if (el.dataset.k !== s.text) { el.innerHTML = s.text; el.dataset.k = s.text; }
+  const a = s.in ?? 0.25, z = s.out ?? dur - 0.15, i = eOut(P(lt, a, a + 0.45)), o = eIn(P(lt, z - 0.25, z));
+  set(el, { top: (s.y ?? 300) + 'px', fontSize: (s.size || 120) + 'px', color: s.color || 'var(--cream)', opacity: i * (1 - o) });
+  if (voice === 'blur') set(el, { filter: `blur(${(1 - i) * 16 + o * 10}px)`, transform: `translateY(${-o * 16}px)` });
+  else if (voice === 'build') set(el, { filter: 'none', transform: `translateY(${(1 - i) * 40}px) scale(${0.95 + 0.05 * i})` });
+  else set(el, { filter: 'none', transform: `translateY(${(1 - i) * 50 - o * 24}px)` });
+}
+window.render = function (t) {
+  const sh = shotAt(t), lt = t - sh.at, idx = SPEC.shots.indexOf(sh), nx = SPEC.shots[idx + 1], pv = SPEC.shots[idx - 1];
+  sh.dur = (nx ? nx.at : SPEC.total) - sh.at;
+  // seams: a blur-through at every cut (both sides unreadable at the cut), a whip on "skip" cuts
+  let blur = 0, shift = 0;
+  const outK = nx ? P(lt, sh.dur - 0.22, sh.dur) : 0, inK = pv ? 1 - P(lt, 0, 0.26) : 0;
+  if (nx && nx.seam === 'whip') shift = -eIn(outK) * 260; else if (!(nx && nx.seam === 'cut')) blur += eIn(outK) * 22;
+  if (sh.seam === 'whip') shift = (1 - eOut(1 - inK)) * 260 * (inK > 0 ? 1 : 0); else if (sh.seam !== 'cut') blur += eOut(inK) * 22;
+  set($('#stage'), { filter: blur > 0.4 ? `blur(${blur}px)` : 'none' });
+  // the photo plate
+  plate($('#bgA'), $('#plA'), $('#grA'), sh, lt); $('#bgB').style.opacity = 0;
+  if (!sh.photo) set($('#bgA'), { opacity: 0 });
+  // steam over cooker shots
+  [...$('#steamL').children].forEach((d, i) => { const p = STEAM[i], y = 1200 - ((t * 140 * p.sp + p.ph * 900) % 1300);
+    set(d, { left: p.x + Math.sin(t * 0.8 + i) * 40 + 'px', top: y + 'px', width: p.s + 'px', height: p.s * 1.3 + 'px', opacity: sh.steam ? 0.35 * Math.sin(Math.PI * cl((1200 - y) / 1300)) : 0 }); });
+  // the giant count
+  const bg = $('#big');
+  if (sh.big) { let v = sh.big[0][1], vt = 0; for (const [tt, n] of sh.big) if (lt >= tt) { v = n; vt = tt; }
+    const k = eOut(P(lt, vt, vt + 0.35)); if (bg.textContent !== String(v)) bg.textContent = v;
+    set(bg, { opacity: 1, top: (sh.bigY ?? 420) + 'px', transform: `scale(${1.25 - 0.25 * k})`, filter: `blur(${(1 - k) * 18}px)` }); }
+  else if (sh.icon) { if (!bg.querySelector('svg')) bg.innerHTML = cooker(560); const k = eOut(P(lt, 0, 0.6)); set(bg, { opacity: k, top: '560px', transform: `scale(${0.9 + 0.1 * k + 0.02 * lt})`, filter: 'none' }); }
+  else bg.style.opacity = 0;
+  if (!sh.icon && bg.querySelector('svg')) bg.innerHTML = '';
+  // the phone
+  const ph = $('#phone'), src = screenAt(sh, lt);
+  if (src) {
+    const sA = $('#sA'); if (sA.dataset.src !== src) { sA.src = src; sA.dataset.src = src; }
+    const rise = sh.rise ? eOut(P(lt, 0, 0.7)) : 1;
+    let zk = 1, fx = 195, fy = 422;
+    if (sh.zoom) { let i = 0; for (let j = 0; j < sh.zoom.length; j++) if (lt >= sh.zoom[j][0]) i = j; const a = sh.zoom[i], c = sh.zoom[i + 1] || a; const k = c === a ? 0 : eIO(P(lt, a[0], c[0]));
+      zk = lerp(a[1], c[1], k); fx = lerp(a[2] ?? 195, c[2] ?? 195, k); fy = lerp(a[3] ?? 422, c[3] ?? 422, k); }
+    const s0 = sh.ps || 1.55, Sc = s0 * zk, cx = 540, cy = (sh.py ?? 1060) + (1 - rise) * 1100;
+    const ax = lerp(210, 15 + fx, zk > 1 ? cl((zk - 1) / 0.4) : 0), ay = lerp(437, 15 + fy, zk > 1 ? cl((zk - 1) / 0.4) : 0);
+    set(ph, { opacity: 1, transform: `translate(${cx - ax * Sc + shift}px,${cy - ay * Sc}px) scale(${Sc})` });
+    const tp = (sh.taps || []).find((x) => lt >= x[0] - 0.5 && lt <= x[0] + 0.6);
+    if (tp) { const [tt, x, y] = tp, k = eOut(P(lt, tt - 0.5, tt - 0.05)), pr = P(lt, tt - 0.06, tt) * (1 - P(lt, tt + 0.06, tt + 0.16)), rp = P(lt, tt, tt + 0.4);
+      set($('#finger'), { opacity: P(lt, tt - 0.5, tt - 0.35) * (1 - P(lt, tt + 0.4, tt + 0.6)), transform: `translate(${lerp(x + 60, x, k)}px,${lerp(y + 150, y, k)}px) scale(${1 - 0.18 * pr})` });
+      set($('#ripple'), { opacity: rp > 0 && rp < 1 ? 1 - rp : 0, transform: `translate(${x}px,${y}px) scale(${1 + rp * 1.6})` }); }
+    else { $('#finger').style.opacity = 0; $('#ripple').style.opacity = 0; }
+  } else ph.style.opacity = 0;
+  // full-bleed app screen (the alarm, a language)
+  if (sh.fill) { const sA = $('#sA'); const f = S(sh.fill); if (sA.dataset.src !== f) { sA.src = f; sA.dataset.src = f; }
+    const z = 1 + 0.03 * eOut(P(lt, 0, sh.dur)); set(ph, { opacity: 1, transform: `translate(${540 - 210 * 2.86 * z + shift}px,${960 - 437 * 2.86 * z}px) scale(${2.86 * z})` }); }
+  // words: the shot's lines, voices rotating shot by shot
+  const V = ['rise', 'blur', 'build'][idx % 3];
+  text($('#t1'), sh.t1, lt, sh.dur, V);
+  $('#scrim').style.opacity = (sh.t1 && (sh.screen || sh.run || sh.seq) && (sh.t1.y ?? 300) < 400) ? $('#t1').style.opacity : 0; text($('#t2'), sh.t2, lt, sh.dur, V === 'blur' ? 'rise' : 'blur');
+  // the end card: an orange flood from the centre, the mark and the name, a slow creep
+  const end = $('#end');
+  if (sh.end) {
+    const fk = eIO(P(lt, 0, 0.5)); set($('#flood'), { opacity: 1, transform: `scale(${0.5 + 0.5 * fk},${0.02 + 0.98 * fk})`, borderRadius: (1 - fk) * 40 + 'px' });
+    if (!end.innerHTML) end.innerHTML = `<div id="em">${cooker(330)}</div><div id="en" style="font:800 128px/0.95 'Bricolage Grotesque';letter-spacing:-.04em;color:#1C1816">Cooker Whistle<br>Counter</div>
+      <div id="ef" style="font:500 44px/1.3 'DM Sans';color:#1C1816">${sh.end.fact || 'works offline. no app store.'}</div><div id="eb" class="mono" style="background:#1C1816;color:#FF8A3D;padding:18px 34px;border-radius:999px">link in bio</div>
+      <div id="eh" class="mono" style="font-size:30px;color:rgba(28,24,22,.75)">@wierd_stuff_i_make</div>`;
+    const a = eOut(P(lt, 0.35, 0.85)), b2 = eOut(P(lt, 0.75, 1.2));
+    set(end, { opacity: 1, transform: `scale(${1 + 0.012 * Math.max(0, lt - 0.4)})` });
+    if (!sh.end.tease) ['#em', '#en'].forEach((s) => set($(s), { opacity: a, transform: `translateY(${(1 - a) * 50}px)` })); if (!sh.end.tease) ['#ef', '#eb', '#eh'].forEach((s) => set($(s), { opacity: b2, transform: `translateY(${(1 - b2) * 30}px)` }));
+    if (sh.end.tease) { if (!end.dataset.tease) end.innerHTML = `<div style="font:500 40px 'DM Mono';color:#1C1816">product #002</div><div style="font:800 150px/0.95 'Bricolage Grotesque';letter-spacing:-.04em;color:#1C1816">${sh.end.tease}</div><div class="mono" style="font-size:30px;color:rgba(28,24,22,.75)">@wierd_stuff_i_make</div>`; set(end, { opacity: a }); end.dataset.tease = 1; }
+  } else { end.style.opacity = 0; $('#flood').style.opacity = 0; end.innerHTML = ''; delete end.dataset.tease; }
+};
+window.ready = (async () => { await document.fonts.load('800 100px "Bricolage Grotesque"'); await document.fonts.load('500 40px "DM Sans"'); await document.fonts.load('500 30px "DM Mono"'); await document.fonts.ready;
+  const pre = new Set(); SPEC.shots.forEach((s) => { if (s.photo) pre.add(A(s.photo)); if (s.screen) pre.add(S(s.screen)); if (s.fill) pre.add(S(s.fill)); (s.seq || []).forEach((x) => pre.add(S(x[1]))); });
+  if (SPEC.shots.some((s) => s.run)) RUN.forEach((r) => pre.add(S(r.f))); if (SPEC.shots.some((s) => s.learn)) LEARN.forEach((r) => pre.add(S(r.f)));
+  await Promise.all([...pre].map((u) => new Promise((r) => { const i = new Image(); i.onload = i.onerror = r; i.src = u; }))); return true; })();
+</script></body></html>

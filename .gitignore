@@ -24,3 +24,21 @@ brag-output/launch-kit/build/
 brag-output/launch-kit/package/
 brag-output/launch-kit/*.zip
 brag-output/launch-kit/*.png
+# #002 whistle reels: the app copy, captures, licensed media, voice, frames and renders stay local
+brag-output/whistle/app/
+brag-output/whistle/shots/
+brag-output/whistle/assets/*.jpg
+brag-output/whistle/assets/*.webp
+brag-output/whistle/sfx/*.wav
+brag-output/whistle/music/*.mp3
+brag-output/whistle/vo/
+brag-output/whistle/reels/
+brag-output/whistle/*.gen.html
+brag-output/whistle/work/*
+!brag-output/whistle/work/capture.js
+!brag-output/whistle/work/whistle_audio.py
+# #002 launch kit: rendered output and the zip stay local
+brag-output/launch-kit-002/out/
+brag-output/launch-kit-002/build/
+brag-output/launch-kit-002/package/
+brag-output/launch-kit-002/*.zip
