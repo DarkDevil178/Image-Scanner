@@ -42,3 +42,9 @@ brag-output/launch-kit-002/out/
 brag-output/launch-kit-002/build/
 brag-output/launch-kit-002/package/
 brag-output/launch-kit-002/*.zip
+# 999 journey film: frames, renders, licensed audio and narration stay local
+brag-output/journey/work/
+brag-output/journey/out/
+brag-output/journey/vo/
+brag-output/journey/audio/music/*.mp3
+brag-output/journey/audio/sfx/*.wav

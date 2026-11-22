@@ -1,0 +1,36 @@
+{
+ "record": 1,
+ "kind": "music",
+ "file": "a_happy_child_mixkit.mp3",
+ "sha256": "d92c270b0cae8bcdda5545a772435005f97ee73c85237516ded29b8cb66c9127",
+ "bytes": 3599582,
+ "title": "A Happy Child",
+ "artist": "Diego Nava",
+ "source": "Mixkit",
+ "page": "https://mixkit.co/free-stock-music/mood/hopeful/",
+ "file_url": "https://assets.mixkit.co/music/532/532.mp3",
+ "licence": "Mixkit Stock Music Free License",
+ "licence_id": "mixkit-music",
+ "licence_url": "https://mixkit.co/license/#musicFree",
+ "credit_required": false,
+ "credit": "Music: \"A Happy Child\" by Diego Nava (Mixkit)",
+ "content_id": "unknown",
+ "ai_generated": false,
+ "vocals": false,
+ "checked": "2026-11-22",
+ "certificate": null,
+ "licence_seen": {
+  "quote": "Items under the Mixkit Stock Music Free License can be used in your commercial and non-commercial projects for free.",
+  "url": "https://mixkit.co/license/modal/musicFree/",
+  "date": "2026-11-22"
+ },
+ "limits": "web, social, ads and VOD; no TV or radio broadcast, CD/DVD or video games; never remix it into a music-only track, redistribute the file or register it with a rights service",
+ "modifications": "edited at bar lines for the film; levels adjusted",
+ "found": {
+  "by": "music.mjs",
+  "query": "playful hopeful curious acoustic handmade",
+  "listed_notice": "Mixkit Stock Music Free License",
+  "ai_marked": false,
+  "vocal_tags": false
+ }
+}
