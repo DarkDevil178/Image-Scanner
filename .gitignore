@@ -48,3 +48,10 @@ brag-output/journey/out/
 brag-output/journey/vo/
 brag-output/journey/audio/music/*.mp3
 brag-output/journey/audio/sfx/*.wav
+# #002 launch reel: frames, licensed audio, narration and renders stay local
+brag-output/reel002/work/
+brag-output/reel002/out/
+brag-output/reel002/vo/
+brag-output/reel002/audio/music/*.mp3
+brag-output/reel002/audio/sfx/*.wav
+brag-output/reel002/reel.gen.html
