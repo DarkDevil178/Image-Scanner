@@ -3,7 +3,7 @@ const { chromium } = require('playwright'); const fs = require('fs'); const path
 const { panda, pandaSVG, K, tagShape, goggleRing } = require('./chubby.js');
 const O = path.join(__dirname, 'out'); fs.mkdirSync(O + '/poses', { recursive: true });
 const FONTS = `<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=block" rel="stylesheet">`;
-const pose = (o, w, h, vb = '-200 -330 400 600') => pandaSVG(o, w, h, vb);
+const pose = (o, w, h, vb = '-200 -290 400 600') => pandaSVG(o, w, h, vb);
 const card = (inner, style = '') => `<div style="background:#fff;border-radius:34px;padding:44px 50px;box-shadow:0 2px 0 rgba(22,25,34,.06),0 20px 40px -24px rgba(22,25,34,.25);${style}">${inner}</div>`;
 const k = (t) => `<div style="font:500 26px 'DM Mono';color:${K.tealD};letter-spacing:.02em;margin-bottom:18px">${t}</div>`;
 const sw = (c, n, h, note) => `<div style="display:flex;gap:22px;align-items:center;margin-bottom:12px"><div style="width:64px;height:64px;border-radius:16px;background:${c};box-shadow:inset 0 0 0 3px rgba(22,25,34,.12)"></div><div><div style="font:700 28px 'DM Sans'">${n}</div><div style="font:500 22px 'DM Mono';color:#7C8494">${h} · ${note}</div></div></div>`;
@@ -13,13 +13,13 @@ const sheet = `<html><head>${FONTS}<style>*{margin:0;padding:0;box-sizing:border
   background-image:linear-gradient(#DFE2E8 2px,transparent 2px),linear-gradient(90deg,#DFE2E8 2px,transparent 2px);background-size:80px 80px}
   .row{display:flex;gap:40px}</style></head><body>
 <div style="position:absolute;left:110px;top:90px;right:110px;display:flex;justify-content:space-between;align-items:flex-end">
-  <div><div style="font:500 30px 'DM Mono';color:${K.tealD}">@wierd_stuff_i_make · mascot #000 · character sheet v2</div><div style="font:800 150px/1 'Bricolage Grotesque';letter-spacing:-.04em;margin-top:14px">Chubby<span style="color:${K.teal}">.</span></div></div>
-  <div style="font:500 30px 'DM Mono';color:#7C8494;text-align:right">panda inventor · natural proportions<br>flat vector · ink line 7 px @ 400 px tall</div></div>
+  <div><div style="font:500 30px 'DM Mono';color:${K.tealD}">@wierd_stuff_i_make · mascot #000 · character sheet v3</div><div style="font:800 150px/1 'Bricolage Grotesque';letter-spacing:-.04em;margin-top:14px">Chubby<span style="color:${K.teal}">.</span></div></div>
+  <div style="font:500 30px 'DM Mono';color:#7C8494;text-align:right">round sitting panda inventor<br>soft painted vector · light from the upper left</div></div>
 
 <!-- turnaround -->
 <div style="position:absolute;left:110px;top:330px;width:2060px;height:1020px">${card(`${k('01 · turnaround')}
   <div style="position:relative;height:820px">
-    ${[['head top', 109], ['goggles', 140], ['belt', 612], ['feet', 766]].map(([n, y]) => `<div style="position:absolute;left:0;right:0;top:${y}px;border-top:3px dashed #C9CED8"></div><div style="position:absolute;right:0;top:${y - 34}px;font:500 22px 'DM Mono';color:#9AA1B2">${n}</div>`).join('')}
+    ${[['head top', 57], ['goggles', 99], ['belt', 579], ['feet', 744]].map(([n, y]) => `<div style="position:absolute;left:0;right:0;top:${y}px;border-top:3px dashed #C9CED8"></div><div style="position:absolute;right:0;top:${y - 34}px;font:500 22px 'DM Mono';color:#9AA1B2">${n}</div>`).join('')}
     <div class="row" style="position:absolute;left:30px;top:0;gap:70px">${['front', 'side', 'back'].map((v) => `<div>${pose({ view: v }, 520, 780)}${label(v)}</div>`).join('')}</div></div>`, 'height:1020px')}</div>
 
 <!-- bio -->
@@ -27,7 +27,7 @@ const sheet = `<html><head>${FONTS}<style>*{margin:0;padding:0;box-sizing:border
   <div style="display:flex;gap:40px;align-items:center"><div style="width:300px;height:300px;border-radius:50%;background:${K.teal};overflow:hidden;flex:none">${pose({ expr: 'focused' }, 300, 450, '-200 -300 400 600')}</div>
   <div><div style="font:800 96px/1 'Bricolage Grotesque';letter-spacing:-.04em">Chubby</div><div style="font:500 30px 'DM Mono';color:${K.tealD};margin-top:12px">product #000 · the one who builds the rest</div></div></div>
   <div style="margin-top:44px;display:grid;grid-template-columns:200px 1fr;row-gap:22px;font-size:32px;line-height:1.35">
-   <div style="font:500 26px 'DM Mono';color:#7C8494;padding-top:6px">species</div><div>panda, natural proportions: the head about the size of the body. black-and-white, teal gear.</div>
+   <div style="font:500 26px 'DM Mono';color:#7C8494;padding-top:6px">species</div><div>panda, round and soft: a pear-shaped body that sits with its feet out, paw pads showing. black-and-white, teal gear.</div>
    <div style="font:500 26px 'DM Mono';color:#7C8494;padding-top:6px">role</div><div>chaotic inventor. builds every product on the page, one number at a time, all the way to #999.</div>
    <div style="font:500 26px 'DM Mono';color:#7C8494;padding-top:6px">quirk</div><div>breaks things to see how they work, then puts them back better.</div>
    <div style="font:500 26px 'DM Mono';color:#7C8494;padding-top:6px">carries</div><div>round brass goggles, worn up on the forehead; a tool belt: scissors and tape, pencil and ruler, a pouch of AI-token coins.</div>
@@ -54,8 +54,8 @@ const sheet = `<html><head>${FONTS}<style>*{margin:0;padding:0;box-sizing:border
 <div style="position:absolute;left:2690px;top:1390px;width:800px;height:900px">${card(`${k('05 · palette')}
   ${sw(K.ink, 'ink', '#161922', 'fur, line')}${sw(K.fur, 'fur', '#F7F6F2', 'face, body')}${sw(K.teal, 'chubby teal', '#18A999', 'gear')}${sw(K.tealL, 'teal light', '#7FE0D3', 'lenses, coins')}${sw(K.tealD, 'teal deep', '#0E6B61', 'pouches, text')}${sw(K.brass, 'brass', '#C9A24A', 'goggles, buckle')}
   <div style="margin-top:18px">${k('06 · do / don’t')}
-  <div style="font-size:23px;line-height:1.38"><b style="color:#14906d">✓</b> keep the teal gear and the goggles (up on the head) on, always<br><b style="color:#14906d">✓</b> in launch posts, Chubby holds the tag; the tag takes the product colour<br><b style="color:#14906d">✓</b> keep the 7 px ink line at 400 px (scale with the size)<br>
-  <b style="color:#d2413a">✕</b> no recolouring the fur or the teal to a product colour<br><b style="color:#d2413a">✕</b> no stretching, no outlines removed, no extra limbs<br><b style="color:#d2413a">✕</b> never speaks as a real person; never a founder stand-in</div></div>`, 'height:900px')}</div>
+  <div style="font-size:23px;line-height:1.38"><b style="color:#14906d">✓</b> keep the teal gear and the goggles (up on the head) on, always<br><b style="color:#14906d">✓</b> in launch posts, Chubby holds the tag; the tag takes the product colour<br><b style="color:#14906d">✓</b> soft fur edges and light from the upper left; no hard outlines<br>
+  <b style="color:#d2413a">✕</b> no recolouring the fur or the teal to a product colour<br><b style="color:#d2413a">✕</b> no stretching, no hard black outlines, no extra limbs<br><b style="color:#d2413a">✕</b> never speaks as a real person; never a founder stand-in</div></div>`, 'height:900px')}</div>
 </body></html>`;
 
 const avatar = (bg) => `<html><head>${FONTS}</head><body style="margin:0;width:1080px;height:1080px;background:${bg};display:grid;place-items:center;overflow:hidden">
