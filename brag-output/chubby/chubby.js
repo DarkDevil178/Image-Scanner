@@ -44,70 +44,100 @@ function tagShape(n, c, s = 1) {
     <text x="8" y="12" text-anchor="middle" font-family="DM Mono" font-weight="500" font-size="34" fill="${dark ? '#fff' : K.ink}">${n}</text></g>`;
 }
 
-function front(expr, tag) {
-  const armsUp = false, armsFwd = expr === 'focused' || expr === 'oops' || expr === 'proud';
-  let s = `<defs><clipPath id="bodyclip-front"><ellipse cx="0" cy="130" rx="112" ry="100"/></clipPath></defs>`;
-  // legs, then the body, then the arms
-  s += `<ellipse cx="-56" cy="226" rx="46" ry="34" fill="${K.ink}"/><ellipse cx="56" cy="226" rx="46" ry="34" fill="${K.ink}"/>
-    <ellipse cx="-58" cy="232" rx="20" ry="13" fill="#3C4150"/><ellipse cx="58" cy="232" rx="20" ry="13" fill="#3C4150"/>`;
-  s += `<ellipse cx="0" cy="130" rx="112" ry="100" fill="${K.fur}" ${ol()}/><path d="M-120 62 Q0 22 120 62 L120 112 Q0 76 -120 112 Z" fill="${K.ink}" clip-path="url(#bodyclip-front)"/>`;
-  s += belt('front');
-  if (armsUp) s += `<ellipse cx="-118" cy="40" rx="32" ry="64" fill="${K.ink}" transform="rotate(-28 -118 40)"/><ellipse cx="118" cy="40" rx="32" ry="64" fill="${K.ink}" transform="rotate(28 118 40)"/>`;
-  else if (armsFwd) s += `<ellipse cx="-62" cy="128" rx="32" ry="56" fill="${K.ink}" transform="rotate(-48 -62 128)"/><ellipse cx="62" cy="128" rx="32" ry="56" fill="${K.ink}" transform="rotate(48 62 128)"/>`;
-  else s += `<ellipse cx="-110" cy="120" rx="32" ry="62" fill="${K.ink}" transform="rotate(22 -110 120)"/><ellipse cx="110" cy="120" rx="32" ry="62" fill="${K.ink}" transform="rotate(-22 110 120)"/>`;
-  // what the paws hold
-  if (expr === 'focused') s += `<g transform="translate(0,150) rotate(-8)"><rect x="-46" y="-26" width="92" height="56" rx="10" fill="${K.paper}" ${ol()}/><path d="M-30 -8 h40 M-30 6 h60" stroke="#9AA1B2" stroke-width="5" stroke-linecap="round"/>
-      <g transform="translate(30,-40) rotate(35)"><rect x="-6" y="-40" width="12" height="62" rx="2" fill="${K.pencil}" ${ol('stroke-width="5"')}/><path d="M-6 22 L0 38 L6 22 Z" fill="#E9C9A0" ${ol('stroke-width="5"')}/></g></g>
-      <circle cx="-30" cy="150" r="20" fill="${K.ink}"/><circle cx="34" cy="128" r="20" fill="${K.ink}"/>`;
-  if (expr === 'oops') s += `<g transform="translate(0,140)"><rect x="-44" y="-18" width="52" height="46" rx="6" fill="${K.teal}" ${ol()}/><path d="M8 -18 L22 -8 L14 4 L26 14 L8 28" fill="${K.tealD}" ${ol()}/>
-      <path d="M30 -2 c10 -10 18 6 28 -4 c10 -10 16 6 24 -2" fill="none" stroke="${K.ink}" stroke-width="5" stroke-linecap="round"/>
-      <path d="M-4 -40 l10 -14 l2 10 l12 -12" fill="none" stroke="${K.spark}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
-      ${[[-30, -70, 22], [-6, -92, 28], [24, -78, 20]].map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${K.smoke}" ${ol('stroke-width="5"')} opacity=".95"/>`).join('')}</g>
-      <circle cx="-44" cy="150" r="20" fill="${K.ink}"/><circle cx="48" cy="150" r="20" fill="${K.ink}"/>`;
-  if (expr === 'proud') { const tg = tag || { n: '#000', c: K.teal };
-    s += `<g transform="translate(0,138) rotate(-6)">${tagShape(tg.n, tg.c, 1.25)}</g><circle cx="-96" cy="146" r="21" fill="${K.ink}"/><circle cx="96" cy="128" r="21" fill="${K.ink}"/>
-      <path d="M-150 40 l-26 -14 M-158 76 l-30 0 M150 40 l26 -14 M158 76 l30 0" stroke="${K.ink}" stroke-width="6" stroke-linecap="round"/>`; }
-  // head
-  s += `<circle cx="-118" cy="-196" r="48" fill="${K.ink}"/><circle cx="118" cy="-196" r="48" fill="${K.ink}"/><circle cx="-118" cy="-196" r="22" fill="#3C4150"/><circle cx="118" cy="-196" r="22" fill="#3C4150"/>`;
-  s += `<ellipse cx="0" cy="-96" rx="152" ry="130" fill="${K.fur}" ${ol()}/><path d="M-120 -30 Q0 40 120 -30" fill="none" stroke="${K.shade}" stroke-width="10" stroke-linecap="round" opacity=".7"/>`;
-  s += `<rect x="-151" y="-106" width="40" height="22" fill="${K.teal}" ${ol('stroke-width="5"')}/><rect x="111" y="-106" width="40" height="22" fill="${K.teal}" ${ol('stroke-width="5"')}/>`;
-  s += `<ellipse cx="-62" cy="-88" rx="42" ry="52" fill="${K.ink}" transform="rotate(22 -62 -88)"/><ellipse cx="62" cy="-88" rx="42" ry="52" fill="${K.ink}" transform="rotate(-22 62 -88)"/>`;
-  s += eye(-62, -94, expr, -1) + eye(62, -94, expr, 1);
-  s += `<rect x="-18" y="-102" width="36" height="14" rx="5" fill="${K.brass}" ${ol('stroke-width="5"')}/>` + goggleRing(-62, -94) + goggleRing(62, -94);
-  s += `<circle cx="-104" cy="-28" r="17" fill="${K.blush}"/><circle cx="104" cy="-28" r="17" fill="${K.blush}"/>`;
-  s += `<path d="M-14 -40 Q0 -48 14 -40 Q14 -28 0 -24 Q-14 -28 -14 -40 Z" fill="${K.ink}"/>`;
-  if (expr === 'proud') s += `<path d="M-30 -12 Q0 30 30 -12 Z" fill="${K.ink}"/><path d="M-14 6 Q0 18 14 6 Q0 0 -14 6 Z" fill="${K.tongue}"/>`;
-  else if (expr === 'oops') s += `<path d="M-24 -6 q6 -8 12 0 q6 8 12 0 q6 -8 12 0 q6 8 12 0" fill="none" stroke="${K.ink}" stroke-width="5" stroke-linecap="round" transform="translate(-6,0)"/>
-      <path d="M128 -150 q12 20 0 30 q-12 -10 0 -30 Z" fill="${K.tealL}" ${ol('stroke-width="4"')}/>`;
-  else s += `<path d="M0 -24 v6 M-20 -10 q10 12 20 0 q10 12 20 0" fill="none" stroke="${K.ink}" stroke-width="5" stroke-linecap="round"/>` +
-      (expr === 'focused' ? `<path d="M10 -6 q8 18 20 4 q-4 -10 -20 -4 Z" fill="${K.tongue}" ${ol('stroke-width="4"')}/>` : '');
+// ---------- v2: natural proportions (head ~ body), goggles pushed up on the forehead, expressive eyes ----------
+const HY = -140, HRX = 126, HRY = 106;           // head centre and radii
+const BY = 92, BRX = 124, BRY = 140;             // body
+const GY = -222, GR = 26;                         // goggles on the forehead
+// the belt was drawn for the v1 body (cy 130, band at y 148-182): place it on the v2 body
+const beltOn = (view) => `<g transform="translate(0,-24) scale(1.1,1)">${belt(view).replace(/url\(#bodyclip-(\w+)\)/g, 'url(#beltclip-$1)')}</g>`;
+const beltClip = (view) => `<clipPath id="beltclip-${view}"><ellipse cx="0" cy="${BY + 24}" rx="${BRX / 1.1}" ry="${BRY}"/></clipPath>`;
+
+// eyes: a white eye in the black patch, a big pupil, two highlights, a lid and a brow on the fur above. Every expression moves all of them.
+function eyeV2(x, y, expr, s) {   // s = -1 left, +1 right
+  const brow = { neutral: [0, -8], focused: [14 * s, 6], proud: [-6 * s, -16], oops: [-14 * s, -14] }[expr] || [0, -8];
+  const by = y - 44 + brow[1];
+  let out = `<path d="M${x - 20} ${by + 4 * s * 0} Q${x} ${by - 9} ${x + 20} ${by}" transform="rotate(${brow[0]} ${x} ${by})" fill="none" stroke="${K.ink}" stroke-width="9" stroke-linecap="round"/>`;
+  if (expr === 'proud') return out + `<path d="M${x - 15} ${y + 5} Q${x} ${y - 13} ${x + 15} ${y + 5}" fill="none" stroke="#fff" stroke-width="6.5" stroke-linecap="round"/>`;
+  const r = expr === 'oops' ? 18 : 16, pr = expr === 'oops' ? 6.5 : 10.5, px = x + (expr === 'focused' ? 4 * s * 0 + 4 : s * 1.5), py = y + (expr === 'focused' ? 5 : 1);
+  out += `<circle cx="${x}" cy="${y}" r="${r}" fill="#fff"/><circle cx="${px}" cy="${py}" r="${pr}" fill="${K.ink}"/>
+    <circle cx="${px - pr * .45}" cy="${py - pr * .5}" r="${expr === 'oops' ? 2.6 : 4}" fill="#fff"/><circle cx="${px + pr * .45}" cy="${py + pr * .35}" r="1.8" fill="#fff"/>`;
+  if (expr === 'focused') out += `<path d="M${x - r - 2} ${y - 2} L${x + r + 2} ${y - 2} L${x + r + 2} ${y - r - 4} L${x - r - 2} ${y - r - 4} Z" fill="${K.ink}"/><path d="M${x - r} ${y - 2} L${x + r} ${y - 2}" stroke="#fff" stroke-width="3" opacity=".5"/>`;
+  return out;
+}
+function goggleUp(x, y, r = GR) {   // a ring seen from above the brow: the lens tilts up, so it is a slightly flattened ellipse
+  return `<ellipse cx="${x}" cy="${y}" rx="${r + 7}" ry="${r + 4}" fill="none" stroke="${K.ink}" stroke-width="${SW}"/>
+    <ellipse cx="${x}" cy="${y}" rx="${r}" ry="${r - 3}" fill="${K.tealL}" fill-opacity=".55" stroke="${K.brass}" stroke-width="10"/>
+    <ellipse cx="${x}" cy="${y}" rx="${r - 6}" ry="${r - 9}" fill="none" stroke="${K.brassD}" stroke-width="2"/>
+    <path d="M${x - r * .5} ${y - r * .25} A ${r * .6} ${r * .5} 0 0 1 ${x + r * .05} ${y - r * .5}" fill="none" stroke="#fff" stroke-width="4.5" stroke-linecap="round" opacity=".9"/>`;
+}
+function headFront(expr) {
+  let s = `<circle cx="-100" cy="-228" r="40" fill="${K.ink}"/><circle cx="100" cy="-228" r="40" fill="${K.ink}"/><circle cx="-100" cy="-228" r="18" fill="#3C4150"/><circle cx="100" cy="-228" r="18" fill="#3C4150"/>`;
+  s += `<ellipse cx="0" cy="${HY}" rx="${HRX}" ry="${HRY}" fill="${K.fur}" ${ol()}/><path d="M-96 -72 Q0 -30 96 -72" fill="none" stroke="${K.shade}" stroke-width="9" stroke-linecap="round" opacity=".7"/>`;
+  // goggles up on the forehead, strap round the head
+  const hw = HRX * Math.sqrt(1 - Math.pow((GY - HY) / HRY, 2));
+  s += `<rect x="${-hw}" y="${GY - 10}" width="${hw - 70}" height="20" fill="${K.teal}" ${ol('stroke-width="5"')}/><rect x="70" y="${GY - 10}" width="${hw - 70}" height="20" fill="${K.teal}" ${ol('stroke-width="5"')}/>`;
+  s += `<rect x="-14" y="${GY - 7}" width="28" height="13" rx="5" fill="${K.brass}" ${ol('stroke-width="4.5"')}/>` + goggleUp(-44, GY) + goggleUp(44, GY);
+  // the patches and the eyes
+  s += `<ellipse cx="-47" cy="-134" rx="31" ry="40" fill="${K.ink}" transform="rotate(24 -47 -134)"/><ellipse cx="47" cy="-134" rx="31" ry="40" fill="${K.ink}" transform="rotate(-24 47 -134)"/>`;
+  s += eyeV2(-46, -138, expr, -1) + eyeV2(46, -138, expr, 1);
+  s += `<circle cx="-86" cy="-92" r="15" fill="${K.blush}"/><circle cx="86" cy="-92" r="15" fill="${K.blush}"/>`;
+  s += `<path d="M-12 -100 Q0 -107 12 -100 Q12 -90 0 -86 Q-12 -90 -12 -100 Z" fill="${K.ink}"/>`;
+  if (expr === 'proud') s += `<path d="M-26 -76 Q0 -40 26 -76 Z" fill="${K.ink}"/><path d="M-12 -59 Q0 -50 12 -59 Q0 -64 -12 -59 Z" fill="${K.tongue}"/>`;
+  else if (expr === 'oops') s += `<path d="M-22 -70 q5.5 -7 11 0 q5.5 7 11 0 q5.5 -7 11 0 q5.5 7 11 0" fill="none" stroke="${K.ink}" stroke-width="5" stroke-linecap="round" transform="translate(-0,0)"/>
+      <path d="M112 -190 q11 18 0 27 q-11 -9 0 -27 Z" fill="${K.tealL}" ${ol('stroke-width="4"')}/>`;
+  else s += `<path d="M0 -86 v5 M-17 -74 q8.5 10 17 0 q8.5 10 17 0" fill="none" stroke="${K.ink}" stroke-width="5" stroke-linecap="round"/>` +
+      (expr === 'focused' ? `<path d="M8 -71 q7 16 18 3 q-4 -9 -18 -3 Z" fill="${K.tongue}" ${ol('stroke-width="4"')}/>` : '');
   return s;
 }
+function bodyFront(expr, tag, view = 'front') {
+  const fwd = expr === 'focused' || expr === 'oops' || expr === 'proud';
+  let s = `<defs><clipPath id="bodyclip2-${view}"><ellipse cx="0" cy="${BY}" rx="${BRX}" ry="${BRY}"/></clipPath>${beltClip(view)}</defs>`;
+  s += `<ellipse cx="-62" cy="228" rx="50" ry="34" fill="${K.ink}"/><ellipse cx="62" cy="228" rx="50" ry="34" fill="${K.ink}"/><ellipse cx="-64" cy="235" rx="22" ry="13" fill="#3C4150"/><ellipse cx="64" cy="235" rx="22" ry="13" fill="#3C4150"/>`;
+  s += `<ellipse cx="0" cy="${BY}" rx="${BRX}" ry="${BRY}" fill="${K.fur}" ${ol()}/>`;
+  s += `<path d="M-140 -10 Q0 -60 140 -10 L140 44 Q0 0 -140 44 Z" fill="${K.ink}" clip-path="url(#bodyclip2-${view})"/>`;
+  s += beltOn(view);
+  if (fwd) s += `<ellipse cx="-70" cy="78" rx="36" ry="72" fill="${K.ink}" transform="rotate(-42 -70 78)"/><ellipse cx="70" cy="78" rx="36" ry="72" fill="${K.ink}" transform="rotate(42 70 78)"/>`;
+  else s += `<ellipse cx="-122" cy="70" rx="36" ry="78" fill="${K.ink}" transform="rotate(16 -122 70)"/><ellipse cx="122" cy="70" rx="36" ry="78" fill="${K.ink}" transform="rotate(-16 122 70)"/>`;
+  if (expr === 'focused') s += `<g transform="translate(0,108) rotate(-8)"><rect x="-50" y="-30" width="100" height="62" rx="10" fill="${K.paper}" ${ol()}/><path d="M-32 -10 h44 M-32 6 h64" stroke="#9AA1B2" stroke-width="5" stroke-linecap="round"/>
+      <g transform="translate(34,-44) rotate(35)"><rect x="-6" y="-42" width="12" height="64" rx="2" fill="${K.pencil}" ${ol('stroke-width="5"')}/><path d="M-6 22 L0 38 L6 22 Z" fill="#E9C9A0" ${ol('stroke-width="5"')}/></g></g>
+      <circle cx="-34" cy="112" r="22" fill="${K.ink}"/><circle cx="38" cy="88" r="22" fill="${K.ink}"/>`;
+  if (expr === 'oops') s += `<g transform="translate(0,100)"><rect x="-48" y="-20" width="56" height="50" rx="6" fill="${K.teal}" ${ol()}/><path d="M8 -20 L24 -8 L15 5 L28 16 L8 30" fill="${K.tealD}" ${ol()}/>
+      <path d="M32 -2 c10 -10 18 6 28 -4 c10 -10 16 6 24 -2" fill="none" stroke="${K.ink}" stroke-width="5" stroke-linecap="round"/>
+      <path d="M-4 -42 l10 -14 l2 10 l12 -12" fill="none" stroke="${K.spark}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+      ${[[-34, -74, 22], [-8, -94, 26], [22, -80, 19]].map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${K.smoke}" ${ol('stroke-width="5"')}/>`).join('')}</g>
+      <circle cx="-48" cy="112" r="22" fill="${K.ink}"/><circle cx="52" cy="112" r="22" fill="${K.ink}"/>`;
+  if (expr === 'proud') { const tg = tag || { n: '#000', c: K.teal };
+    s += `<g transform="translate(0,98) rotate(-6)">${tagShape(tg.n, tg.c, 1.3)}</g><circle cx="-104" cy="108" r="22" fill="${K.ink}"/><circle cx="104" cy="88" r="22" fill="${K.ink}"/>
+      <path d="M-170 0 l-26 -14 M-178 36 l-30 0 M170 0 l26 -14 M178 36 l30 0" stroke="${K.ink}" stroke-width="6" stroke-linecap="round"/>`; }
+  return s;
+}
+function front(expr, tag) { return bodyFront(expr, tag) + headFront(expr); }
 function side() {
-  let s = `<defs><clipPath id="bodyclip-side"><ellipse cx="0" cy="130" rx="96" ry="100"/></clipPath></defs>`;
-  s += `<ellipse cx="-20" cy="226" rx="54" ry="34" fill="${K.ink}"/><ellipse cx="30" cy="232" rx="50" ry="30" fill="${K.ink}"/>`;
-  s += `<ellipse cx="0" cy="130" rx="96" ry="100" fill="${K.fur}" ${ol()}/><path d="M-100 60 Q0 24 100 62 L100 112 Q0 78 -100 110 Z" fill="${K.ink}" clip-path="url(#bodyclip-side)"/>`;
-  s += belt('side');
-  s += `<ellipse cx="22" cy="122" rx="32" ry="62" fill="${K.ink}" transform="rotate(-14 22 122)"/>`;
-  s += `<circle cx="-48" cy="-200" r="48" fill="${K.ink}"/><circle cx="-48" cy="-200" r="22" fill="#3C4150"/>`;
-  s += `<ellipse cx="-6" cy="-96" rx="140" ry="130" fill="${K.fur}" ${ol()}/><path d="M120 -60 Q164 -46 150 -16 Q132 6 96 -2 Z" fill="${K.fur}" ${ol()}/>`;
-  s += `<rect x="-146" y="-106" width="200" height="22" fill="${K.teal}" ${ol('stroke-width="5"')}/>`;
-  s += `<ellipse cx="78" cy="-90" rx="34" ry="50" fill="${K.ink}" transform="rotate(-18 78 -90)"/>` + eye(84, -96, 'neutral', 1);
-  s += `<ellipse cx="80" cy="-94" rx="22" ry="54" fill="${K.tealL}" fill-opacity=".38" stroke="${K.brass}" stroke-width="13"/><ellipse cx="80" cy="-94" rx="30" ry="62" fill="none" stroke="${K.ink}" stroke-width="${SW}"/>`;
-  s += `<circle cx="104" cy="-24" r="15" fill="${K.blush}"/><path d="M146 -40 q12 -2 12 10 q-4 10 -14 6 Z" fill="${K.ink}"/><path d="M128 -6 q10 8 22 -2" fill="none" stroke="${K.ink}" stroke-width="5" stroke-linecap="round"/>`;
+  let s = `<defs><clipPath id="bodyclip2-side"><ellipse cx="0" cy="${BY}" rx="108" ry="${BRY}"/></clipPath>${beltClip('side')}</defs>`;
+  s += `<ellipse cx="-24" cy="228" rx="58" ry="34" fill="${K.ink}"/><ellipse cx="34" cy="234" rx="54" ry="30" fill="${K.ink}"/>`;
+  s += `<ellipse cx="0" cy="${BY}" rx="108" ry="${BRY}" fill="${K.fur}" ${ol()}/><path d="M-130 -12 Q0 -58 130 -8 L130 46 Q0 4 -130 44 Z" fill="${K.ink}" clip-path="url(#bodyclip2-side)"/>`;
+  s += beltOn('side') + `<ellipse cx="24" cy="72" rx="36" ry="78" fill="${K.ink}" transform="rotate(-12 24 72)"/>`;
+  s += `<circle cx="-40" cy="-232" r="40" fill="${K.ink}"/><circle cx="-40" cy="-232" r="18" fill="#3C4150"/>`;
+  s += `<ellipse cx="-4" cy="${HY}" rx="118" ry="${HRY}" fill="${K.fur}" ${ol()}/><path d="M100 -112 Q140 -100 128 -74 Q112 -56 82 -62 Z" fill="${K.fur}" ${ol()}/>`;
+  { const hw = 118 * Math.sqrt(1 - Math.pow((GY - HY) / HRY, 2)); s += `<rect x="${-4 - hw + 2}" y="${GY - 10}" width="${hw + 52}" height="20" fill="${K.teal}" ${ol('stroke-width="5"')}/>`; }
+  s += `<ellipse cx="64" cy="${GY}" rx="13" ry="28" fill="${K.tealL}" fill-opacity=".55" stroke="${K.brass}" stroke-width="10" transform="rotate(-20 64 ${GY})"/><ellipse cx="64" cy="${GY}" rx="20" ry="35" fill="none" stroke="${K.ink}" stroke-width="${SW}" transform="rotate(-20 64 ${GY})"/>`;
+  s += `<ellipse cx="66" cy="-134" rx="27" ry="40" fill="${K.ink}" transform="rotate(-18 66 -134)"/>` + eyeV2(72, -138, 'neutral', 1);
+  s += `<circle cx="88" cy="-88" r="13" fill="${K.blush}"/><path d="M126 -100 q11 -2 11 9 q-4 9 -13 5 Z" fill="${K.ink}"/><path d="M110 -70 q9 7 20 -2" fill="none" stroke="${K.ink}" stroke-width="5" stroke-linecap="round"/>`;
   return s;
 }
 function back() {
-  let s = `<defs><clipPath id="bodyclip-back"><ellipse cx="0" cy="130" rx="112" ry="100"/></clipPath></defs>`;
-  s += `<ellipse cx="-56" cy="226" rx="46" ry="34" fill="${K.ink}"/><ellipse cx="56" cy="226" rx="46" ry="34" fill="${K.ink}"/>`;
-  s += `<ellipse cx="0" cy="130" rx="112" ry="100" fill="${K.fur}" ${ol()}/><path d="M-120 62 Q0 22 120 62 L120 112 Q0 76 -120 112 Z" fill="${K.ink}" clip-path="url(#bodyclip-back)"/>`;
-  s += belt('back') + `<circle cx="0" cy="214" r="18" fill="${K.fur}" ${ol()}/>`;
-  s += `<ellipse cx="-110" cy="120" rx="32" ry="62" fill="${K.ink}" transform="rotate(22 -110 120)"/><ellipse cx="110" cy="120" rx="32" ry="62" fill="${K.ink}" transform="rotate(-22 110 120)"/>`;
-  s += `<circle cx="-118" cy="-196" r="48" fill="${K.ink}"/><circle cx="118" cy="-196" r="48" fill="${K.ink}"/>`;
-  s += `<ellipse cx="0" cy="-96" rx="152" ry="130" fill="${K.fur}" ${ol()}/>`;
-  s += `<g><rect x="-151" y="-106" width="302" height="22" fill="${K.teal}" ${ol('stroke-width="5"')}/><rect x="-16" y="-110" width="32" height="30" rx="6" fill="${K.brass}" ${ol('stroke-width="5"')}/></g>`;
+  let s = `<defs><clipPath id="bodyclip2-back"><ellipse cx="0" cy="${BY}" rx="${BRX}" ry="${BRY}"/></clipPath>${beltClip('back')}</defs>`;
+  s += `<ellipse cx="-62" cy="228" rx="50" ry="34" fill="${K.ink}"/><ellipse cx="62" cy="228" rx="50" ry="34" fill="${K.ink}"/>`;
+  s += `<ellipse cx="0" cy="${BY}" rx="${BRX}" ry="${BRY}" fill="${K.fur}" ${ol()}/><path d="M-140 -10 Q0 -60 140 -10 L140 44 Q0 0 -140 44 Z" fill="${K.ink}" clip-path="url(#bodyclip2-back)"/>`;
+  s += beltOn('back') + `<circle cx="0" cy="206" r="18" fill="${K.fur}" ${ol()}/>`;
+  s += `<ellipse cx="-122" cy="70" rx="36" ry="78" fill="${K.ink}" transform="rotate(16 -122 70)"/><ellipse cx="122" cy="70" rx="36" ry="78" fill="${K.ink}" transform="rotate(-16 122 70)"/>`;
+  s += `<circle cx="-100" cy="-228" r="40" fill="${K.ink}"/><circle cx="100" cy="-228" r="40" fill="${K.ink}"/>`;
+  s += `<ellipse cx="0" cy="${HY}" rx="${HRX}" ry="${HRY}" fill="${K.fur}" ${ol()}/>`;
+  const hw = HRX * Math.sqrt(1 - Math.pow((GY - HY) / HRY, 2));
+  s += `<rect x="${-hw}" y="${GY - 10}" width="${hw * 2}" height="20" fill="${K.teal}" ${ol('stroke-width="5"')}/><rect x="-14" y="${GY - 13}" width="28" height="26" rx="6" fill="${K.brass}" ${ol('stroke-width="5"')}/>`;
   return s;
 }
+
 function panda(o = {}) { const v = o.view || 'front'; return v === 'side' ? side() : v === 'back' ? back() : front(o.expr || 'neutral', o.tag); }
 function pandaSVG(o = {}, w = 400, h = 600, vb = '-200 -330 400 600') { return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="${vb}">${panda(o)}</svg>`; }
 if (typeof module !== 'undefined') module.exports = { panda, pandaSVG, K, tagShape, goggleRing };

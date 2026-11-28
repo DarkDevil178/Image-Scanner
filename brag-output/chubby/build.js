@@ -13,13 +13,13 @@ const sheet = `<html><head>${FONTS}<style>*{margin:0;padding:0;box-sizing:border
   background-image:linear-gradient(#DFE2E8 2px,transparent 2px),linear-gradient(90deg,#DFE2E8 2px,transparent 2px);background-size:80px 80px}
   .row{display:flex;gap:40px}</style></head><body>
 <div style="position:absolute;left:110px;top:90px;right:110px;display:flex;justify-content:space-between;align-items:flex-end">
-  <div><div style="font:500 30px 'DM Mono';color:${K.tealD}">@wierd_stuff_i_make · mascot #000 · character sheet v1</div><div style="font:800 150px/1 'Bricolage Grotesque';letter-spacing:-.04em;margin-top:14px">Chubby<span style="color:${K.teal}">.</span></div></div>
-  <div style="font:500 30px 'DM Mono';color:#7C8494;text-align:right">chibi panda inventor<br>flat vector · ink line 7 px @ 400 px tall</div></div>
+  <div><div style="font:500 30px 'DM Mono';color:${K.tealD}">@wierd_stuff_i_make · mascot #000 · character sheet v2</div><div style="font:800 150px/1 'Bricolage Grotesque';letter-spacing:-.04em;margin-top:14px">Chubby<span style="color:${K.teal}">.</span></div></div>
+  <div style="font:500 30px 'DM Mono';color:#7C8494;text-align:right">panda inventor · natural proportions<br>flat vector · ink line 7 px @ 400 px tall</div></div>
 
 <!-- turnaround -->
 <div style="position:absolute;left:110px;top:330px;width:2060px;height:1020px">${card(`${k('01 · turnaround')}
   <div style="position:relative;height:820px">
-    ${[['head top', 136], ['goggles', 307], ['belt', 643], ['feet', 754]].map(([n, y]) => `<div style="position:absolute;left:0;right:0;top:${y}px;border-top:3px dashed #C9CED8"></div><div style="position:absolute;right:0;top:${y - 34}px;font:500 22px 'DM Mono';color:#9AA1B2">${n}</div>`).join('')}
+    ${[['head top', 109], ['goggles', 140], ['belt', 612], ['feet', 766]].map(([n, y]) => `<div style="position:absolute;left:0;right:0;top:${y}px;border-top:3px dashed #C9CED8"></div><div style="position:absolute;right:0;top:${y - 34}px;font:500 22px 'DM Mono';color:#9AA1B2">${n}</div>`).join('')}
     <div class="row" style="position:absolute;left:30px;top:0;gap:70px">${['front', 'side', 'back'].map((v) => `<div>${pose({ view: v }, 520, 780)}${label(v)}</div>`).join('')}</div></div>`, 'height:1020px')}</div>
 
 <!-- bio -->
@@ -27,10 +27,10 @@ const sheet = `<html><head>${FONTS}<style>*{margin:0;padding:0;box-sizing:border
   <div style="display:flex;gap:40px;align-items:center"><div style="width:300px;height:300px;border-radius:50%;background:${K.teal};overflow:hidden;flex:none">${pose({ expr: 'focused' }, 300, 450, '-200 -300 400 600')}</div>
   <div><div style="font:800 96px/1 'Bricolage Grotesque';letter-spacing:-.04em">Chubby</div><div style="font:500 30px 'DM Mono';color:${K.tealD};margin-top:12px">product #000 · the one who builds the rest</div></div></div>
   <div style="margin-top:44px;display:grid;grid-template-columns:200px 1fr;row-gap:22px;font-size:32px;line-height:1.35">
-   <div style="font:500 26px 'DM Mono';color:#7C8494;padding-top:6px">species</div><div>panda, chibi round. black-and-white, teal gear.</div>
+   <div style="font:500 26px 'DM Mono';color:#7C8494;padding-top:6px">species</div><div>panda, natural proportions: the head about the size of the body. black-and-white, teal gear.</div>
    <div style="font:500 26px 'DM Mono';color:#7C8494;padding-top:6px">role</div><div>chaotic inventor. builds every product on the page, one number at a time, all the way to #999.</div>
    <div style="font:500 26px 'DM Mono';color:#7C8494;padding-top:6px">quirk</div><div>breaks things to see how they work, then puts them back better.</div>
-   <div style="font:500 26px 'DM Mono';color:#7C8494;padding-top:6px">carries</div><div>round brass goggles, a tool belt: scissors and tape, pencil and ruler, a pouch of AI-token coins.</div>
+   <div style="font:500 26px 'DM Mono';color:#7C8494;padding-top:6px">carries</div><div>round brass goggles, worn up on the forehead; a tool belt: scissors and tape, pencil and ruler, a pouch of AI-token coins.</div>
    <div style="font:500 26px 'DM Mono';color:#7C8494;padding-top:6px">pose</div><div>mid-build, focused, tongue out.</div>
    <div style="font:500 26px 'DM Mono';color:#7C8494;padding-top:6px">story</div><div>"every useful thing starts as a broken one."</div></div>`, 'height:1020px')}</div>
 
@@ -41,7 +41,7 @@ const sheet = `<html><head>${FONTS}<style>*{margin:0;padding:0;box-sizing:border
 <!-- props -->
 <div style="position:absolute;left:1650px;top:1390px;width:1000px;height:900px">${card(`${k('04 · props, close up')}
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:26px 30px">
-   <div><svg width="420" height="200" viewBox="-170 -80 340 160">${goggleRing(-62, 0)}${goggleRing(62, 0)}<rect x="-18" y="-8" width="36" height="14" rx="5" fill="${K.brass}" stroke="${K.ink}" stroke-width="5"/><rect x="-168" y="-11" width="52" height="22" fill="${K.teal}" stroke="${K.ink}" stroke-width="5"/><rect x="116" y="-11" width="52" height="22" fill="${K.teal}" stroke="${K.ink}" stroke-width="5"/></svg>${label('round brass goggles, teal strap')}</div>
+   <div><svg width="420" height="200" viewBox="-170 -80 340 160">${goggleRing(-62, 0)}${goggleRing(62, 0)}<rect x="-18" y="-8" width="36" height="14" rx="5" fill="${K.brass}" stroke="${K.ink}" stroke-width="5"/><rect x="-168" y="-11" width="52" height="22" fill="${K.teal}" stroke="${K.ink}" stroke-width="5"/><rect x="116" y="-11" width="52" height="22" fill="${K.teal}" stroke="${K.ink}" stroke-width="5"/></svg>${label('round brass goggles, worn up on the head')}</div>
    <div><svg width="420" height="200" viewBox="-150 -120 300 160">${[[-34, -40], [0, -56], [34, -36], [-60, 10], [60, 6]].map(([x, y]) => `<g transform="translate(${x},${y})"><circle r="26" fill="${K.tealL}" stroke="${K.ink}" stroke-width="6"/><text y="9" text-anchor="middle" font-family="DM Mono" font-weight="500" font-size="24" fill="${K.tealD}">AI</text></g>`).join('')}</svg>${label('AI-token coins, in the belt pouch')}</div>
    <div><svg width="420" height="220" viewBox="-200 0 400 220"><rect x="-190" y="70" width="380" height="40" fill="${K.teal}" stroke="${K.ink}" stroke-width="7"/><rect x="-24" y="64" width="48" height="52" rx="8" fill="${K.brass}" stroke="${K.ink}" stroke-width="7"/>
      <g transform="translate(-120,80)"><rect x="2" y="-58" width="13" height="66" rx="2" fill="${K.pencil}" stroke="${K.ink}" stroke-width="5"/><path d="M2 -58 L8.5 -76 L15 -58 Z" fill="#E9C9A0" stroke="${K.ink}" stroke-width="5"/><rect x="18" y="-48" width="16" height="58" rx="2" fill="#F3EBD8" stroke="${K.ink}" stroke-width="5"/><rect x="-6" y="0" width="48" height="56" rx="10" fill="${K.tealD}" stroke="${K.ink}" stroke-width="7"/></g>
@@ -54,12 +54,12 @@ const sheet = `<html><head>${FONTS}<style>*{margin:0;padding:0;box-sizing:border
 <div style="position:absolute;left:2690px;top:1390px;width:800px;height:900px">${card(`${k('05 · palette')}
   ${sw(K.ink, 'ink', '#161922', 'fur, line')}${sw(K.fur, 'fur', '#F7F6F2', 'face, body')}${sw(K.teal, 'chubby teal', '#18A999', 'gear')}${sw(K.tealL, 'teal light', '#7FE0D3', 'lenses, coins')}${sw(K.tealD, 'teal deep', '#0E6B61', 'pouches, text')}${sw(K.brass, 'brass', '#C9A24A', 'goggles, buckle')}
   <div style="margin-top:18px">${k('06 · do / don’t')}
-  <div style="font-size:23px;line-height:1.38"><b style="color:#14906d">✓</b> keep the teal gear and the brass goggles on, always<br><b style="color:#14906d">✓</b> in launch posts, Chubby holds the tag; the tag takes the product colour<br><b style="color:#14906d">✓</b> keep the 7 px ink line at 400 px (scale with the size)<br>
+  <div style="font-size:23px;line-height:1.38"><b style="color:#14906d">✓</b> keep the teal gear and the goggles (up on the head) on, always<br><b style="color:#14906d">✓</b> in launch posts, Chubby holds the tag; the tag takes the product colour<br><b style="color:#14906d">✓</b> keep the 7 px ink line at 400 px (scale with the size)<br>
   <b style="color:#d2413a">✕</b> no recolouring the fur or the teal to a product colour<br><b style="color:#d2413a">✕</b> no stretching, no outlines removed, no extra limbs<br><b style="color:#d2413a">✕</b> never speaks as a real person; never a founder stand-in</div></div>`, 'height:900px')}</div>
 </body></html>`;
 
 const avatar = (bg) => `<html><head>${FONTS}</head><body style="margin:0;width:1080px;height:1080px;background:${bg};display:grid;place-items:center;overflow:hidden">
-  <div style="width:1080px;height:1080px;position:relative">${pose({ expr: 'focused' }, 1080, 1080, '-245 -275 490 490').replace('<svg', '<svg style="position:absolute;left:0;top:0"')}</div></body></html>`;
+  <div style="width:1080px;height:1080px;position:relative">${pose({ expr: 'focused' }, 1080, 1080, '-235 -290 470 470').replace('<svg', '<svg style="position:absolute;left:0;top:0"')}</div></body></html>`;
 
 (async () => {
   const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 3600, height: 2400 } });
