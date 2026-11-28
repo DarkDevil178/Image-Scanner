@@ -1,80 +1,78 @@
-// node build.js : the Chubby character sheet (3600x2400 PNG + PDF), the profile avatars and single-pose PNGs.
+// node build.js : the Chubby character sheet (3600x2400 PNG + PDF), avatars and every pose as a transparent PNG and SVG.
 const { chromium } = require('playwright'); const fs = require('fs'); const path = require('path');
-const { panda, pandaSVG, K, tagShape, goggleRing } = require('./chubby.js');
-const O = path.join(__dirname, 'out'); fs.mkdirSync(O + '/poses', { recursive: true });
-const FONTS = `<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=block" rel="stylesheet">`;
-const pose = (o, w, h, vb = '-200 -290 400 600') => pandaSVG(o, w, h, vb);
-const card = (inner, style = '') => `<div style="background:#fff;border-radius:34px;padding:44px 50px;box-shadow:0 2px 0 rgba(22,25,34,.06),0 20px 40px -24px rgba(22,25,34,.25);${style}">${inner}</div>`;
-const k = (t) => `<div style="font:500 26px 'DM Mono';color:${K.tealD};letter-spacing:.02em;margin-bottom:18px">${t}</div>`;
-const sw = (c, n, h, note) => `<div style="display:flex;gap:22px;align-items:center;margin-bottom:12px"><div style="width:64px;height:64px;border-radius:16px;background:${c};box-shadow:inset 0 0 0 3px rgba(22,25,34,.12)"></div><div><div style="font:700 28px 'DM Sans'">${n}</div><div style="font:500 22px 'DM Mono';color:#7C8494">${h} · ${note}</div></div></div>`;
-const label = (t) => `<div style="font:500 26px 'DM Mono';color:#7C8494;text-align:center;margin-top:6px">${t}</div>`;
+const { pandaSVG, P, LIB } = require('./chubby.js');
+const O = path.join(__dirname, 'out'); fs.mkdirSync(O + '/poses', { recursive: true }); fs.mkdirSync(O + '/svg', { recursive: true });
+const FONTS = `<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800&family=Caveat:wght@700&display=block" rel="stylesheet">`;
+const BR = '#6B3F1F', BRL = '#8A5A35', CREAM = '#FBF1E4', CARD = 'rgba(255,248,238,.88)', LINE = '#EBD5B8';
+const pill = (t, size = 54) => `<div style="display:inline-block;background:${BR};color:#FFF7EC;font:600 ${size}px/1 Fredoka;padding:18px 44px 22px;border-radius:999px;box-shadow:0 6px 0 rgba(80,40,10,.18)">${t}</div>`;
+const tag = (t) => `<div style="display:inline-block;background:#F3E2C8;color:${BR};font:600 34px/1 Fredoka;padding:12px 30px 14px;border-radius:999px;margin-top:6px">${t}</div>`;
+const panel = (x, y, w, h, title, inner) => `<div style="position:absolute;left:${x}px;top:${y}px;width:${w}px;height:${h}px;background:${CARD};border:3px solid ${LINE};border-radius:48px;box-shadow:0 20px 50px -30px rgba(110,60,20,.35)">
+  <div style="position:absolute;left:0;right:0;top:-42px;text-align:center">${pill(title)}</div>${inner}</div>`;
+const fig = (name, w, h, vb, label) => `<div style="display:flex;flex-direction:column;align-items:center">${pandaSVG(LIB[name], w, h, vb)}${label ? tag(label) : ''}</div>`;
+const pawIcon = (s, c = BR) => `<svg width="${s}" height="${s}" viewBox="0 0 100 100"><ellipse cx="50" cy="64" rx="24" ry="20" fill="${c}"/>${[[22, 38], [40, 24], [60, 24], [78, 38]].map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="10" ry="12" fill="${c}"/>`).join('')}</svg>`;
+const heartIcon = (s, c = BR) => `<svg width="${s}" height="${s}" viewBox="0 0 60 60"><path d="M30 50 C4 32 6 10 22 10 C28 10 30 16 30 16 C30 16 32 10 38 10 C54 10 56 32 30 50 Z" fill="none" stroke="${c}" stroke-width="5"/></svg>`;
+// bamboo leaves for the corners
+const leaf = (x, y, r, s, c) => `<path transform="translate(${x},${y}) rotate(${r}) scale(${s})" d="M0 0 C40 -18 120 -14 170 0 C120 14 40 18 0 0 Z" fill="${c}"/>`;
+const bamboo = (side) => { const X = side === 'L' ? 0 : 3600, d = side === 'L' ? 1 : -1; let s = '';
+  for (let i = 0; i < 3; i++) s += `<rect x="${X + d * (30 + i * 70) - (d < 0 ? 26 : 0)}" y="${-40 + i * 60}" width="26" height="${1300 - i * 240}" rx="13" fill="rgba(160,190,90,${.28 - i * .07})"/>`;
+  [[90, 120, -20], [60, 300, 30], [150, 520, -35], [40, 760, 20], [120, 980, -10]].forEach(([x, y, r], i) => { s += leaf(X + d * x, y, d > 0 ? r : 180 - r, 1.3 - i * .1, `rgba(120,170,60,${.55 - i * .06})`); });
+  return s; };
 
-const sheet = `<html><head>${FONTS}<style>*{margin:0;padding:0;box-sizing:border-box}body{width:3600px;height:2400px;background:#ECEEF2;font-family:'DM Sans';color:#161922;overflow:hidden;
-  background-image:linear-gradient(#DFE2E8 2px,transparent 2px),linear-gradient(90deg,#DFE2E8 2px,transparent 2px);background-size:80px 80px}
-  .row{display:flex;gap:40px}</style></head><body>
-<div style="position:absolute;left:110px;top:90px;right:110px;display:flex;justify-content:space-between;align-items:flex-end">
-  <div><div style="font:500 30px 'DM Mono';color:${K.tealD}">@wierd_stuff_i_make · mascot #000 · character sheet v3</div><div style="font:800 150px/1 'Bricolage Grotesque';letter-spacing:-.04em;margin-top:14px">Chubby<span style="color:${K.teal}">.</span></div></div>
-  <div style="font:500 30px 'DM Mono';color:#7C8494;text-align:right">round sitting panda inventor<br>soft painted vector · light from the upper left</div></div>
+const DETAILS = [['Name', 'Chubby'], ['Species', 'Panda'], ['Height', '~ 1.2 m (cute scale)'], ['Weight', '~ 30 kg (cuddly!)'], ['Personality', 'Calm, Cheerful,<br>Kind, Curious'], ['Likes', 'Peace, Good Food,<br>Nature, Happiness']];
+const SW = [[P.black, 'Panda Black'], [P.white, 'Panda White'], [P.brown, 'Warm Brown'], [P.pink, 'Soft Pink'], [P.green, 'Leaf Green']];
+const VIBES = ['Cute &amp; Friendly', 'Calm &amp; Positive', 'Brings Joy', 'Perfect for Reels,<br>Stories &amp; More!'];
+const HEAD = '-235 -300 470 420';   // head-and-shoulders crop for the expressions
 
+const sheet = `<html><head>${FONTS}<style>*{margin:0;padding:0;box-sizing:border-box}body{width:3600px;height:2400px;overflow:hidden;font-family:Nunito;color:${BR};
+  background:radial-gradient(ellipse 1400px 900px at 18% 30%,#FFF3D9 0%,rgba(255,243,217,0) 70%),radial-gradient(ellipse 1600px 1000px at 80% 90%,#F9E6CC 0%,rgba(249,230,204,0) 70%),${CREAM}}</style></head><body>
+<svg width="3600" height="2400" style="position:absolute;left:0;top:0">${bamboo('L')}${bamboo('R')}
+  <path d="M0 2330 C600 2260 1200 2300 1800 2320 C2400 2340 3000 2280 3600 2320 L3600 2400 L0 2400 Z" fill="rgba(150,190,90,.35)"/></svg>
+<!-- title and the hero -->
+<div style="position:absolute;left:230px;top:50px;display:flex;align-items:flex-start;gap:20px"><div style="font:700 250px/1 Fredoka;letter-spacing:-.01em;color:${BR};text-shadow:0 8px 0 rgba(255,255,255,.7)">Chubby</div><div style="margin-top:30px">${pawIcon(120)}</div></div>
+<div style="position:absolute;left:230px;top:320px;font:700 84px/1 Caveat;color:${BR};transform:rotate(-4deg)">Small Panda... Big Happiness!</div>
+<div style="position:absolute;left:1110px;top:250px">${heartIcon(70)}</div>
+<div style="position:absolute;left:160px;top:420px;width:1040px;height:1200px">
+  <svg width="1040" height="160" style="position:absolute;left:0;top:1060px;z-index:0"><ellipse cx="520" cy="60" rx="480" ry="52" fill="rgba(139,195,74,.38)"/></svg>
+  <div style="position:absolute;left:0;top:0;z-index:1">${pandaSVG(LIB.front, 1040, 1200, '-260 -300 520 600')}</div></div>
+<div style="position:absolute;left:990px;top:620px">${pawIcon(0)}<svg width="140" height="120"><path d="M30 20 l18 40 M70 10 l0 44 M108 24 l-18 38" stroke="${P.gold}" stroke-width="12" stroke-linecap="round"/></svg></div>
+<!-- key details -->
+<div style="position:absolute;left:90px;top:1640px;width:1080px;height:660px;background:${CARD};border:3px solid ${LINE};border-radius:48px">
+  <div style="position:absolute;left:50px;top:-42px">${pill('Key Details')}</div>
+  <div style="position:absolute;left:60px;top:80px;display:grid;grid-template-columns:44px 270px 30px 1fr;row-gap:14px;align-items:start;font:700 38px/1.2 Nunito">
+   ${DETAILS.map(([k, v]) => `<div style="padding-top:4px">${pawIcon(34)}</div><div>${k}</div><div>:</div><div style="font-weight:600;color:#3A2716">${v}</div>`).join('')}
+   <div style="padding-top:4px">${pawIcon(34)}</div><div>Catchphrase</div><div>:</div><div style="font:700 62px/1 Caveat;color:${BR};transform:rotate(-3deg);margin-top:-6px">“Small Panda...<br>&nbsp;Big Happiness!”</div></div></div>
 <!-- turnaround -->
-<div style="position:absolute;left:110px;top:330px;width:2060px;height:1020px">${card(`${k('01 · turnaround')}
-  <div style="position:relative;height:820px">
-    ${[['head top', 57], ['goggles', 99], ['belt', 579], ['feet', 744]].map(([n, y]) => `<div style="position:absolute;left:0;right:0;top:${y}px;border-top:3px dashed #C9CED8"></div><div style="position:absolute;right:0;top:${y - 34}px;font:500 22px 'DM Mono';color:#9AA1B2">${n}</div>`).join('')}
-    <div class="row" style="position:absolute;left:30px;top:0;gap:70px">${['front', 'side', 'back'].map((v) => `<div>${pose({ view: v }, 520, 780)}${label(v)}</div>`).join('')}</div></div>`, 'height:1020px')}</div>
-
-<!-- bio -->
-<div style="position:absolute;left:2210px;top:330px;width:1280px;height:1020px">${card(`${k('02 · bio')}
-  <div style="display:flex;gap:40px;align-items:center"><div style="width:300px;height:300px;border-radius:50%;background:${K.teal};overflow:hidden;flex:none">${pose({ expr: 'focused' }, 300, 450, '-200 -300 400 600')}</div>
-  <div><div style="font:800 96px/1 'Bricolage Grotesque';letter-spacing:-.04em">Chubby</div><div style="font:500 30px 'DM Mono';color:${K.tealD};margin-top:12px">product #000 · the one who builds the rest</div></div></div>
-  <div style="margin-top:44px;display:grid;grid-template-columns:200px 1fr;row-gap:22px;font-size:32px;line-height:1.35">
-   <div style="font:500 26px 'DM Mono';color:#7C8494;padding-top:6px">species</div><div>panda, round and soft: a pear-shaped body that sits with its feet out, paw pads showing. black-and-white, teal gear.</div>
-   <div style="font:500 26px 'DM Mono';color:#7C8494;padding-top:6px">role</div><div>chaotic inventor. builds every product on the page, one number at a time, all the way to #999.</div>
-   <div style="font:500 26px 'DM Mono';color:#7C8494;padding-top:6px">quirk</div><div>breaks things to see how they work, then puts them back better.</div>
-   <div style="font:500 26px 'DM Mono';color:#7C8494;padding-top:6px">carries</div><div>round brass goggles, worn up on the forehead; a tool belt: scissors and tape, pencil and ruler, a pouch of AI-token coins.</div>
-   <div style="font:500 26px 'DM Mono';color:#7C8494;padding-top:6px">pose</div><div>mid-build, focused, tongue out.</div>
-   <div style="font:500 26px 'DM Mono';color:#7C8494;padding-top:6px">story</div><div>"every useful thing starts as a broken one."</div></div>`, 'height:1020px')}</div>
-
+${panel(1230, 140, 1360, 900, 'Character Turnaround', `<div style="position:absolute;left:10px;right:10px;top:200px;display:flex;justify-content:space-around">
+  ${[['front', 'Front'], ['side', 'Side'], ['back', 'Back'], ['q34', '3/4']].map(([n, l]) => fig(n, 330, 440, '-210 -280 420 560', l)).join('')}</div>`)}
 <!-- expressions -->
-<div style="position:absolute;left:110px;top:1390px;width:1500px;height:900px">${card(`${k('03 · expressions')}
-  <div class="row" style="gap:20px">${[['focused', 'focused · tongue out'], ['proud', 'proud · ta-da'], ['oops', 'oops · it broke']].map(([e, l]) => `<div>${pose({ expr: e, tag: e === 'proud' ? { n: '#002', c: '#FF8A3D' } : null }, 440, 660)}${label(l)}</div>`).join('')}</div>`, 'height:900px')}</div>
-
-<!-- props -->
-<div style="position:absolute;left:1650px;top:1390px;width:1000px;height:900px">${card(`${k('04 · props, close up')}
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:26px 30px">
-   <div><svg width="420" height="200" viewBox="-170 -80 340 160">${goggleRing(-62, 0)}${goggleRing(62, 0)}<rect x="-18" y="-8" width="36" height="14" rx="5" fill="${K.brass}" stroke="${K.ink}" stroke-width="5"/><rect x="-168" y="-11" width="52" height="22" fill="${K.teal}" stroke="${K.ink}" stroke-width="5"/><rect x="116" y="-11" width="52" height="22" fill="${K.teal}" stroke="${K.ink}" stroke-width="5"/></svg>${label('round brass goggles, worn up on the head')}</div>
-   <div><svg width="420" height="200" viewBox="-150 -120 300 160">${[[-34, -40], [0, -56], [34, -36], [-60, 10], [60, 6]].map(([x, y]) => `<g transform="translate(${x},${y})"><circle r="26" fill="${K.tealL}" stroke="${K.ink}" stroke-width="6"/><text y="9" text-anchor="middle" font-family="DM Mono" font-weight="500" font-size="24" fill="${K.tealD}">AI</text></g>`).join('')}</svg>${label('AI-token coins, in the belt pouch')}</div>
-   <div><svg width="420" height="220" viewBox="-200 0 400 220"><rect x="-190" y="70" width="380" height="40" fill="${K.teal}" stroke="${K.ink}" stroke-width="7"/><rect x="-24" y="64" width="48" height="52" rx="8" fill="${K.brass}" stroke="${K.ink}" stroke-width="7"/>
-     <g transform="translate(-120,80)"><rect x="2" y="-58" width="13" height="66" rx="2" fill="${K.pencil}" stroke="${K.ink}" stroke-width="5"/><path d="M2 -58 L8.5 -76 L15 -58 Z" fill="#E9C9A0" stroke="${K.ink}" stroke-width="5"/><rect x="18" y="-48" width="16" height="58" rx="2" fill="#F3EBD8" stroke="${K.ink}" stroke-width="5"/><rect x="-6" y="0" width="48" height="56" rx="10" fill="${K.tealD}" stroke="${K.ink}" stroke-width="7"/></g>
-     <g transform="translate(-50,124) rotate(8)"><path d="M0 0 L-8 46 M0 0 L8 46" stroke="#9AA1B2" stroke-width="9" stroke-linecap="round"/><circle cx="-11" cy="-12" r="11" fill="none" stroke="${K.teal}" stroke-width="7"/><circle cx="11" cy="-12" r="11" fill="none" stroke="${K.teal}" stroke-width="7"/></g>
-     <g transform="translate(150,92)"><circle r="28" fill="${K.paper}" stroke="${K.ink}" stroke-width="7"/><circle r="11" fill="${K.fur}" stroke="${K.ink}" stroke-width="5"/></g></svg>${label('tool belt: pencil, ruler, scissors, tape')}</div>
-   <div style="display:flex;flex-direction:column;align-items:center;justify-content:center"><svg width="420" height="200" viewBox="-200 -100 400 200"><g transform="translate(0,-40)">${tagShape('#001', '#3D4FE0', 1.05)}</g><g transform="translate(0,46) rotate(-4)">${tagShape('#002', '#FF8A3D', 1.05)}</g></svg>${label('the number tag, in the product colour')}</div>
-  </div>`, 'height:900px')}</div>
-
-<!-- palette + rules -->
-<div style="position:absolute;left:2690px;top:1390px;width:800px;height:900px">${card(`${k('05 · palette')}
-  ${sw(K.ink, 'ink', '#161922', 'fur, line')}${sw(K.fur, 'fur', '#F7F6F2', 'face, body')}${sw(K.teal, 'chubby teal', '#18A999', 'gear')}${sw(K.tealL, 'teal light', '#7FE0D3', 'lenses, coins')}${sw(K.tealD, 'teal deep', '#0E6B61', 'pouches, text')}${sw(K.brass, 'brass', '#C9A24A', 'goggles, buckle')}
-  <div style="margin-top:18px">${k('06 · do / don’t')}
-  <div style="font-size:23px;line-height:1.38"><b style="color:#14906d">✓</b> keep the teal gear and the goggles (up on the head) on, always<br><b style="color:#14906d">✓</b> in launch posts, Chubby holds the tag; the tag takes the product colour<br><b style="color:#14906d">✓</b> soft fur edges and light from the upper left; no hard outlines<br>
-  <b style="color:#d2413a">✕</b> no recolouring the fur or the teal to a product colour<br><b style="color:#d2413a">✕</b> no stretching, no hard black outlines, no extra limbs<br><b style="color:#d2413a">✕</b> never speaks as a real person; never a founder stand-in</div></div>`, 'height:900px')}</div>
+${panel(2640, 110, 880, 900, 'Expressions', `<div style="position:absolute;left:20px;right:20px;top:120px;display:grid;grid-template-columns:repeat(3,1fr);row-gap:70px;justify-items:center">
+  ${[['happy', 'Happy'], ['excited', 'Excited'], ['wink', 'Wink'], ['thinking', 'Thinking'], ['surprised', 'Surprised'], ['sad', 'Sad']].map(([n, l]) => fig(n, 270, 241, HEAD, l)).join('')}</div>`)}
+<!-- poses library -->
+${panel(1230, 1140, 1360, 1150, 'Poses Library', `<div style="position:absolute;left:10px;right:10px;top:60px;display:grid;grid-template-columns:repeat(4,1fr);row-gap:10px;justify-items:center">
+  ${[['meditating', 'Meditating'], ['jump', 'Happy Jump'], ['thinking', 'Thinking'], ['shy', 'Shy'], ['relaxing', 'Relaxing'], ['eating', 'Eating'], ['waving', 'Waving'], ['sleeping', 'Sleeping']].map(([n, l]) => fig(n, 320, 400, '-280 -320 560 640', l)).join('')}</div>`)}
+<!-- palette -->
+${panel(2640, 1140, 420, 1150, 'Color Palette', `<div style="position:absolute;left:46px;top:130px">${SW.map(([c, n]) => `<div style="display:flex;gap:26px;align-items:center;margin-bottom:56px"><div style="width:110px;height:110px;border-radius:50%;background:${c};box-shadow:inset 0 0 0 3px rgba(0,0,0,.08)"></div><div style="font:700 32px/1.25 Nunito">${n}<br><span style="font-weight:600;color:${BRL}">${c}</span></div></div>`).join('')}</div>`)}
+<!-- vibes -->
+${panel(3100, 1140, 420, 1150, 'Vibes', `<div style="position:absolute;left:40px;right:30px;top:150px">${VIBES.map((v) => `<div style="display:flex;gap:20px;align-items:flex-start;margin-bottom:56px"><div style="width:52px;height:52px;flex:none;border-radius:50%;background:${P.green};display:grid;place-items:center;color:#fff;font:800 32px Nunito">✓</div><div style="font:700 36px/1.25 Nunito">${v}</div></div>`).join('')}
+  <div style="font:700 66px/1.05 Caveat;transform:rotate(-6deg);margin-top:70px">Let's spread<br>happiness together!</div><div style="position:absolute;right:10px;top:880px">${pawIcon(90)}</div></div>`)}
+<div style="position:absolute;right:120px;bottom:22px;font:700 30px Nunito;color:${BRL}">@wierd_stuff_i_make</div>
 </body></html>`;
 
-const avatar = (bg) => `<html><head>${FONTS}</head><body style="margin:0;width:1080px;height:1080px;background:${bg};display:grid;place-items:center;overflow:hidden">
-  <div style="width:1080px;height:1080px;position:relative">${pose({ expr: 'focused' }, 1080, 1080, '-235 -290 470 470').replace('<svg', '<svg style="position:absolute;left:0;top:0"')}</div></body></html>`;
+const avatar = (bg, o = { arms: 'pray', face: 'happy' }) => `<html><head>${FONTS}</head><body style="margin:0;width:1080px;height:1080px;overflow:hidden;background:${bg}">
+  ${pandaSVG(o, 1080, 1080, '-250 -290 500 500')}</body></html>`;
 
 (async () => {
   const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 3600, height: 2400 } });
-  const go = async (html, out, w, h, transparent = false) => { await p.setViewportSize({ width: w, height: h }); await p.setContent(html); await p.evaluate(() => document.fonts.ready); await p.waitForTimeout(400);
+  const go = async (html, out, w, h, transparent = false) => { await p.setViewportSize({ width: w, height: h }); await p.setContent(html); await p.evaluate(() => document.fonts.ready); await p.waitForTimeout(500);
     await p.screenshot({ path: out, clip: { x: 0, y: 0, width: w, height: h }, omitBackground: transparent }); };
   await go(sheet, O + '/chubby-character-sheet.png', 3600, 2400);
-  await p.setViewportSize({ width: 3600, height: 2400 }); await p.setContent(sheet); await p.evaluate(() => document.fonts.ready); await p.waitForTimeout(400);
   await p.pdf({ path: O + '/chubby-character-sheet.pdf', width: '3600px', height: '2400px', printBackground: true });
-  await go(avatar(K.teal), O + '/avatar-teal.png', 1080, 1080);
-  await go(avatar('#ECEEF2'), O + '/avatar-paper.png', 1080, 1080);
-  await go(avatar('#161922'), O + '/avatar-ink.png', 1080, 1080);
-  const P = { front: { view: 'front' }, side: { view: 'side' }, back: { view: 'back' }, focused: { expr: 'focused' }, oops: { expr: 'oops' },
-    'proud-002': { expr: 'proud', tag: { n: '#002', c: '#FF8A3D' } }, 'proud-001': { expr: 'proud', tag: { n: '#001', c: '#3D4FE0' } }, 'proud-003-blank': { expr: 'proud', tag: { n: '#003', c: '#ECEEF2' } } };
-  for (const [n, o] of Object.entries(P)) await go(`<html><head>${FONTS}</head><body style="margin:0;background:transparent">${pose(o, 1200, 1800)}</body></html>`, `${O}/poses/chubby-${n}.png`, 1200, 1800, true);
-  fs.writeFileSync(O + '/chubby.svg', pose({ view: 'front' }, 400, 600));
-  fs.writeFileSync(O + '/chubby-focused.svg', pose({ expr: 'focused' }, 400, 600));
-  console.log('built'); await b.close();
+  await go(avatar('radial-gradient(circle at 50% 40%,#FFF6E6,#F6E2C4)'), O + '/avatar-cream.png', 1080, 1080);
+  await go(avatar('radial-gradient(circle at 50% 40%,#CFE7A6,#8BC34A)'), O + '/avatar-green.png', 1080, 1080);
+  await go(avatar('radial-gradient(circle at 50% 40%,#FFE3E3,#F7C8C8)', LIB.meditating), O + '/avatar-pink-calm.png', 1080, 1080);
+  for (const n of Object.keys(LIB)) { const lie = LIB[n].legs === 'lie';
+    const vb = lie ? '-290 -40 580 340' : '-280 -320 560 640', [w, h] = lie ? [1450, 850] : [1120, 1280];
+    await go(`<html><head>${FONTS}</head><body style="margin:0;background:transparent">${pandaSVG(LIB[n], w, h, vb)}</body></html>`, `${O}/poses/chubby-${n}.png`, w, h, true);
+    fs.writeFileSync(`${O}/svg/chubby-${n}.svg`, pandaSVG(LIB[n], w / 2, h / 2, vb)); }
+  console.log('built', Object.keys(LIB).length, 'poses'); await b.close();
 })();

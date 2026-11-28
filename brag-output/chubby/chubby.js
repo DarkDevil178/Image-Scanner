@@ -1,183 +1,159 @@
-// Chubby: the @wierd_stuff_i_make mascot. A round, sitting panda inventor in a soft painted style.
-// panda({ view: 'front'|'side'|'back', expr: 'neutral'|'focused'|'proud'|'oops', tag: {n:'#002', c:'#FF8A3D'} }) -> SVG inner markup,
-// drawn in a 400x560 box with the origin at the centre of the feet line minus 250 (feet at y = 250).
-const K = {
-  ink: '#161922', fur: '#F7F6F2', shade: '#E4E2DC', teal: '#18A999', tealL: '#7FE0D3', tealD: '#0E6B61',
-  brass: '#C9A24A', brassD: '#8A6A22', blush: 'rgba(255,128,140,.38)', tongue: '#FF8FA3', pencil: '#F2C14E', paper: '#ECEEF2', smoke: '#B9BFCC', spark: '#FF8A3D',
-};
-const SW = 7; // the ink line
-const ol = (extra = '') => `stroke="${K.ink}" stroke-width="${SW}" stroke-linejoin="round" stroke-linecap="round" ${extra}`;
-
-function goggleRing(x, y, r = 46) {
-  return `<circle cx="${x}" cy="${y}" r="${r + 8}" fill="none" stroke="${K.ink}" stroke-width="${SW}"/>
-    <circle cx="${x}" cy="${y}" r="${r}" fill="${K.tealL}" fill-opacity=".38" stroke="${K.brass}" stroke-width="13"/>
-    <circle cx="${x}" cy="${y}" r="${r - 7}" fill="none" stroke="${K.brassD}" stroke-width="2.5"/>
-    ${[0, 1, 2, 3].map((i) => { const a = i * Math.PI / 2 + .6; return `<circle cx="${(x + Math.cos(a) * (r + 1)).toFixed(1)}" cy="${(y + Math.sin(a) * (r + 1)).toFixed(1)}" r="3" fill="${K.brassD}"/>`; }).join('')}
-    <path d="M${x - r * .55} ${y - r * .35} A ${r * .7} ${r * .7} 0 0 1 ${x - r * .05} ${y - r * .62}" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" opacity=".85"/>`;
-}
-function tagShape(n, c, s = 1) {
-  const dark = c === K.ink || c === '#3D4FE0';
-  return `<g transform="scale(${s})"><path d="M-70 -30 L70 -30 L70 30 L-70 30 L-92 8 L-92 -8 Z" fill="${c}" ${ol()}/><circle cx="-74" cy="0" r="7" fill="${K.paper}" ${ol('stroke-width="4"')}/>
-    <text x="8" y="12" text-anchor="middle" font-family="DM Mono" font-weight="500" font-size="34" fill="${dark ? '#fff' : K.ink}">${n}</text></g>`;
-}
-
-// ---------- v3: soft painted style. A round, sitting panda: pear body, feet out with paw pads, droopy patches,
-// closed happy eyes with lashes, warm key light from the left, fuzzy fur edges, no hard outline. Chubby keeps its gear.
-const F = { fur: '#FBF8F2', furS: '#E2D9CC', dark: '#2E2A28', darkS: '#1A1716', darkL: '#4A433F', pad: '#B98868', padL: '#D2A586', pink: 'rgba(255,150,150,.45)' };
+// Chubby: "Small Panda... Big Happiness!" A round, soft, sitting panda in a warm painted style.
+// panda({ view: 'front'|'side'|'back'|'q34', face, arms, legs: 'sit'|'jump'|'lie', extras: [...], tilt }) -> SVG inner markup.
+// Drawn around the origin: the ground line is y = 270, the box is -260..260 x -300..300.
+const P = { black: '#2D2D2D', blackS: '#1C1C1C', blackL: '#4A4646', white: '#F8F8F8', whiteS: '#E6DED3', brown: '#A67C52', brownL: '#C9A27A', pink: '#F7C8C8', green: '#8BC34A', greenD: '#5E9A2E', heart: '#F0707E', gold: '#F2C14E', ink: '#5A3A22' };
 let UID = 0;
-function defs3(u) {
+const ell = (cx, cy, rx, ry, rot = 0) => { const r = rot * Math.PI / 180, c = Math.cos(r), s = Math.sin(r), p = [];
+  for (let i = 0; i <= 48; i++) { const a = i / 48 * 2 * Math.PI, x = rx * Math.cos(a), y = ry * Math.sin(a); p.push(`${(cx + x * c - y * s).toFixed(1)},${(cy + x * s + y * c).toFixed(1)}`); }
+  return 'M' + p.join(' L') + 'Z'; };
+function defs(u) {
   return `<defs>
-  <filter id="fz${u}" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency="0.22" numOctaves="2" seed="4" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="3.2" xChannelSelector="R" yChannelSelector="G" result="d"/><feGaussianBlur in="d" stdDeviation="0.7"/></filter>
-  <filter id="soft${u}" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="14"/></filter>
-  <radialGradient id="fw${u}" cx="38%" cy="32%" r="75%"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".55" stop-color="${F.fur}"/><stop offset="1" stop-color="${F.furS}"/></radialGradient>
-  <radialGradient id="dk${u}" cx="35%" cy="30%" r="80%"><stop offset="0" stop-color="${F.darkL}"/><stop offset=".5" stop-color="${F.dark}"/><stop offset="1" stop-color="${F.darkS}"/></radialGradient>
-  <radialGradient id="pd${u}" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="${F.padL}"/><stop offset="1" stop-color="${F.pad}"/></radialGradient>
-  <radialGradient id="bl${u}"><stop offset="0" stop-color="rgba(255,140,140,.55)"/><stop offset="1" stop-color="rgba(255,140,140,0)"/></radialGradient>
-  <linearGradient id="sh${u}" x1="0" x2="1" y1="0" y2=".3"><stop offset=".45" stop-color="rgba(60,40,30,0)"/><stop offset="1" stop-color="rgba(60,40,30,.22)"/></linearGradient>
-  <linearGradient id="tl${u}" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#22BFB0"/><stop offset="1" stop-color="#128F82"/></linearGradient>
-  <radialGradient id="br${u}" cx="35%" cy="30%" r="80%"><stop offset="0" stop-color="#E6C470"/><stop offset="1" stop-color="#9C7A2C"/></radialGradient>
+  <filter id="fz${u}" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency="0.24" numOctaves="2" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="3.4" xChannelSelector="R" yChannelSelector="G" result="d"/><feGaussianBlur in="d" stdDeviation="0.6"/></filter>
+  <filter id="sf${u}" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="14"/></filter>
+  <radialGradient id="w${u}" cx="38%" cy="30%" r="78%"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".55" stop-color="${P.white}"/><stop offset="1" stop-color="${P.whiteS}"/></radialGradient>
+  <radialGradient id="k${u}" cx="34%" cy="28%" r="82%"><stop offset="0" stop-color="${P.blackL}"/><stop offset=".5" stop-color="${P.black}"/><stop offset="1" stop-color="${P.blackS}"/></radialGradient>
+  <radialGradient id="pd${u}" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="${P.brownL}"/><stop offset="1" stop-color="${P.brown}"/></radialGradient>
+  <radialGradient id="bl${u}"><stop offset="0" stop-color="rgba(247,160,170,.75)"/><stop offset="1" stop-color="rgba(247,160,170,0)"/></radialGradient>
+  <linearGradient id="sh${u}" x1="0" x2="1" y1="0" y2=".35"><stop offset=".45" stop-color="rgba(120,80,40,0)"/><stop offset="1" stop-color="rgba(120,80,40,.2)"/></linearGradient>
+  <radialGradient id="ir${u}" cx="45%" cy="38%" r="65%"><stop offset="0" stop-color="#6B4428"/><stop offset=".55" stop-color="#33200F"/><stop offset="1" stop-color="#120A05"/></radialGradient>
   </defs>`;
 }
-// a furry shape: the fill, a shade from the right, all through the fuzz filter
-const fur = (u, d, kind = 'w') => `<g filter="url(#fz${u})"><path d="${d}" fill="url(#${kind === 'w' ? 'fw' : 'dk'}${u})"/><path d="${d}" fill="url(#sh${u})"/></g>`;
-const ell = (cx, cy, rx, ry, rot = 0) => { const r = rot * Math.PI / 180, c = Math.cos(r), s = Math.sin(r), pts = [];
-  for (let i = 0; i <= 48; i++) { const a = i / 48 * 2 * Math.PI, x = rx * Math.cos(a), y = ry * Math.sin(a); pts.push(`${(cx + x * c - y * s).toFixed(1)},${(cy + x * s + y * c).toFixed(1)}`); }
-  return 'M' + pts.join(' L') + 'Z'; };
-function paw(u, x, y, rot, flip) {   // a foot seen from the sole: dark foot, big pad, four toe beans
-  return `<g transform="translate(${x},${y}) rotate(${rot})">${fur(u, ell(0, 0, 72, 60), 'd')}
-    <ellipse cx="${flip * 4}" cy="14" rx="34" ry="28" fill="url(#pd${u})"/>${[[-36, -22], [-14, -36], [12, -38], [34, -24]].map(([a, b]) => `<ellipse cx="${a * flip}" cy="${b}" rx="10" ry="12" fill="url(#pd${u})"/>`).join('')}
-    <ellipse cx="${flip * -6}" cy="6" rx="14" ry="8" fill="rgba(255,255,255,.18)"/></g>`;
-}
-function goggles3(u, y, s = 1) {
-  const ring = (x) => `<circle cx="${x}" cy="${y}" r="${25 * s}" fill="rgba(160,235,225,.55)" stroke="url(#br${u})" stroke-width="${9 * s}"/><circle cx="${x}" cy="${y}" r="${30 * s}" fill="none" stroke="rgba(40,25,10,.35)" stroke-width="2"/>
-    <path d="M${x - 12 * s} ${y - 8 * s} q6 -9 15 -10" stroke="#fff" stroke-width="${4 * s}" fill="none" stroke-linecap="round" opacity=".9"/>`;
-  return `<rect x="-14" y="${y - 6}" width="28" height="11" rx="5" fill="url(#br${u})"/>` + ring(-40 * s) + ring(40 * s);
-}
-function face3(u, expr, cy) {
-  // droopy patches, sloping down and out
-  let s = `<path d="${ell(-60, cy + 6, 44, 34, 30)}" fill="url(#dk${u})" filter="url(#fz${u})"/><path d="${ell(60, cy + 6, 44, 34, -30)}" fill="url(#dk${u})" filter="url(#fz${u})"/>`;
-  // ---- expressive eyes: a glossy brown iris, two shines, a teal reflection from the goggles, lids that set the mood, flicked lashes ----
-  const id = (k) => `e${u}${k}${Math.round(Math.random() * 0)}`;
-  s += `<defs><radialGradient id="ir${u}" cx="45%" cy="38%" r="65%"><stop offset="0" stop-color="#7A4A2A"/><stop offset=".55" stop-color="#3B2416"/><stop offset="1" stop-color="#140B07"/></radialGradient></defs>`;
-  const lash = (x, y, sd, n = 2) => Array.from({ length: n }, (_, i) => `<path d="M${x + sd * (18 + i * 4)} ${y + i * 5} q${sd * 8} ${-4} ${sd * 13} ${-11 + i * 5}" stroke="#120C0A" stroke-width="3.6" fill="none" stroke-linecap="round"/>`).join('');
-  const ball = (x, sd, o) => {   // o: { ry, dx, dy, ir, pu, lid (0..1 of the eye covered from the top), tilt (lid slant), wet }
-    const rx = 21, ry = o.ry || 24, k = `${u}${sd > 0 ? 'r' : 'l'}`, ix = x + (o.dx || 0) * sd * (o.mirror ? -1 : 1), iy = cy + (o.dy || 0), ir = o.ir || 15, pu = o.pu || 8;
-    const top = cy - ry, lidY = top + 2 * ry * (o.lid || 0), t = (o.tilt || 0) * sd;
-    let e = `<clipPath id="ec${k}"><ellipse cx="${x}" cy="${cy}" rx="${rx}" ry="${ry}"/></clipPath>`;
-    e += `<ellipse cx="${x}" cy="${cy}" rx="${rx + 3}" ry="${ry + 3}" fill="#120C0A"/><ellipse cx="${x}" cy="${cy}" rx="${rx}" ry="${ry}" fill="#FFFDF9"/>`;
-    e += `<g clip-path="url(#ec${k})"><circle cx="${ix}" cy="${iy}" r="${ir}" fill="url(#ir${u})"/><circle cx="${ix}" cy="${iy}" r="${ir}" fill="none" stroke="#0E0705" stroke-width="2.5"/>
-      <circle cx="${ix}" cy="${iy}" r="${pu}" fill="#0A0504"/><path d="M${ix - ir * .75} ${iy + ir * .45} Q${ix} ${iy + ir * 1.0} ${ix + ir * .75} ${iy + ir * .45}" stroke="rgba(150,232,222,.75)" stroke-width="3" fill="none" stroke-linecap="round"/>
-      <ellipse cx="${ix - ir * .38}" cy="${iy - ir * .42}" rx="${ir * .36}" ry="${ir * .44}" fill="#fff"/><circle cx="${ix + ir * .42}" cy="${iy + ir * .38}" r="${ir * .16}" fill="#fff"/>
-      ${o.wet ? `<path d="M${x - rx + 4} ${cy + ry * .55} Q${x} ${cy + ry * .95} ${x + rx - 4} ${cy + ry * .55}" stroke="rgba(190,235,255,.9)" stroke-width="3.5" fill="none"/>` : ''}
-      ${o.lid ? `<path d="M${x - rx - 6} ${top - 8} L${x + rx + 6} ${top - 8} L${x + rx + 6} ${lidY + t} L${x - rx - 6} ${lidY - t} Z" fill="url(#dk${u})"/>` : ''}</g>`;
-    // the lid line (upper lash line) follows the lid
-    e += o.lid ? `<path d="M${x - rx - 3} ${lidY - t} L${x + rx + 3} ${lidY + t}" stroke="#120C0A" stroke-width="5" stroke-linecap="round"/>` + lash(x, Math.min(lidY + t, lidY - t) + 2, sd)
-               : `<path d="M${x - rx - 2} ${cy - 4} Q${x} ${top - 9} ${x + rx + 2} ${cy - 4}" stroke="#120C0A" stroke-width="5" fill="none" stroke-linecap="round"/>` + lash(x, cy - ry * .55, sd);
-    return e;
-  };
-  const happy = (x, sd) => `<path d="M${x - 20} ${cy + 6} Q${x} ${cy - 18} ${x + 20} ${cy + 6}" fill="none" stroke="#120C0A" stroke-width="10" stroke-linecap="round"/><path d="M${x - 20} ${cy + 6} Q${x} ${cy - 18} ${x + 20} ${cy + 6}" fill="none" stroke="#FFFDF9" stroke-width="4.5" stroke-linecap="round"/>
-    <path d="M${x - 14} ${cy + 16} Q${x} ${cy + 10} ${x + 14} ${cy + 16}" stroke="rgba(255,253,249,.55)" stroke-width="3" fill="none" stroke-linecap="round"/>` + lash(x, cy - 4, sd);
-  const EYE = {
-    neutral: (x, sd) => ball(x, sd, { ry: 25, dx: 1.5, dy: -2, lid: .12 }),
-    curious: (x, sd) => ball(x, sd, { ry: 26, dx: 3, dy: -4, ir: 15, pu: 7 }),
-    focused: (x, sd) => ball(x, sd, { ry: 23, dx: 4, dy: 7, lid: .46, tilt: 5, mirror: true }),
-    proud: happy,
-    oops: (x, sd) => ball(x, sd, { ry: 27, dx: -3, dy: 5, ir: 10, pu: 4.5, wet: true }),
-  }[expr] || ((x, sd) => ball(x, sd, { ry: 25 }));
-  s += EYE(-60, -1) + EYE(60, 1);
-  // bold brows that carry the feeling: [inner offset, outer offset] (negative = higher)
-  const BR = { neutral: [-2, 0], curious: [-10, -4], focused: [12, -8], proud: [-8, -6], oops: [-16, 6] }[expr] || [0, 0];
-  const by = cy - 50;
-  s += [-1, 1].map((sd) => { const ix = sd * 36, ox = sd * 88, iy = by + BR[0], oy = by + BR[1];
-    return `<path d="M${ix} ${iy} Q${(ix + ox) / 2} ${Math.min(iy, oy) - 10} ${ox} ${oy}" stroke="#1E1A18" stroke-width="9" fill="none" stroke-linecap="round"/>`; }).join('');
-  // blush, nose, mouth
-  s += `<ellipse cx="-98" cy="${cy + 44}" rx="26" ry="16" fill="url(#bl${u})"/><ellipse cx="98" cy="${cy + 44}" rx="26" ry="16" fill="url(#bl${u})"/>`;
-  s += `<path d="M-13 ${cy + 30} Q0 ${cy + 24} 13 ${cy + 30} Q12 ${cy + 40} 0 ${cy + 44} Q-12 ${cy + 40} -13 ${cy + 30} Z" fill="#1A1514"/><ellipse cx="-4" cy="${cy + 30}" rx="5" ry="2.5" fill="rgba(255,255,255,.55)"/>`;
-  const my = cy + 52;
-  if (expr === 'proud') s += `<path d="M-20 ${my - 2} Q0 ${my + 26} 20 ${my - 2} Z" fill="#3A1E1E"/><path d="M-10 ${my + 10} Q0 ${my + 18} 10 ${my + 10} Q0 ${my + 6} -10 ${my + 10} Z" fill="#FF8FA3"/>`;
-  else if (expr === 'oops') s += `<path d="M-16 ${my + 4} q4 -6 8 0 q4 6 8 0 q4 -6 8 0 q4 6 8 0" stroke="#1A1514" stroke-width="3.5" fill="none" stroke-linecap="round" transform="translate(-0,0)"/><path d="M118 ${cy - 74} q10 16 0 24 q-10 -8 0 -24 Z" fill="#9EE6DC" stroke="#4FB3A7" stroke-width="2"/>`;
-  else s += `<path d="M0 ${my - 8} v6 M-14 ${my} q7 8 14 0 q7 8 14 0" stroke="#1A1514" stroke-width="3.5" fill="none" stroke-linecap="round"/>` + (expr === 'focused' ? `<path d="M6 ${my + 3} q6 12 15 2 q-3 -7 -15 -2 Z" fill="#FF8FA3"/>` : '');
-  return s;
-}
-function belt3(u, y = 128, view = 'front') {
-  let s = `<g clip-path="url(#bc${u})"><rect x="-200" y="${y}" width="400" height="30" fill="url(#tl${u})"/><rect x="-200" y="${y}" width="400" height="5" fill="rgba(255,255,255,.25)"/></g>`;
-  if (view === 'back') return s + `<g transform="translate(-30,${y + 16})"><circle r="19" fill="#E9E4DA"/><circle r="8" fill="#CFC6B8"/></g>`;
-  if (view === 'front') s += `<rect x="-18" y="${y - 4}" width="36" height="38" rx="7" fill="url(#br${u})"/><rect x="-7" y="${y + 7}" width="14" height="16" rx="3" fill="rgba(60,40,10,.45)"/>
-    <g transform="translate(-92,${y + 4})"><rect x="2" y="-52" width="12" height="58" rx="2" fill="#F2C14E"/><path d="M2 -52 L8 -68 L14 -52 Z" fill="#E9C9A0"/><path d="M6 -63 L8 -68 L10 -63 Z" fill="#2E2A28"/>
-      <rect x="17" y="-42" width="14" height="50" rx="2" fill="#F3EBD8"/>${[0, 1, 2, 3].map((i) => `<path d="M17 ${-34 + i * 10} h6" stroke="#8A7F70" stroke-width="2.5"/>`).join('')}
-      <rect x="-6" y="0" width="44" height="44" rx="10" fill="#0E6B61"/><rect x="-6" y="0" width="44" height="8" rx="4" fill="rgba(255,255,255,.15)"/></g>
-    <g transform="translate(-40,${y + 30}) rotate(10)"><path d="M0 0 L-6 30 M0 0 L6 30" stroke="#A9AFBC" stroke-width="6" stroke-linecap="round"/><circle cx="-8" cy="-9" r="8" fill="none" stroke="#18A999" stroke-width="5"/><circle cx="8" cy="-9" r="8" fill="none" stroke="#18A999" stroke-width="5"/></g>`;
-  s += `<g transform="translate(${view === 'side' ? 30 : 84},${y + 8})">${[[-15, -10], [2, -17], [16, -8]].map(([x, yy]) => `<g transform="translate(${x},${yy})"><circle r="12" fill="#9EE6DC" stroke="#4FB3A7" stroke-width="2.5"/><text y="4.5" text-anchor="middle" font-family="DM Mono" font-weight="500" font-size="11" fill="#0E6B61">AI</text></g>`).join('')}
-    <path d="M-28 -2 Q-31 40 0 44 Q31 40 28 -2 Z" fill="url(#tl${u})"/><path d="M-28 -2 Q0 10 28 -2" fill="none" stroke="rgba(0,0,0,.25)" stroke-width="3"/><circle cx="0" cy="20" r="7" fill="url(#br${u})"/></g>`;
-  if (view === 'front') s += `<g transform="translate(140,${y + 12})"><circle r="18" fill="#E9E4DA"/><circle r="7" fill="#CFC6B8"/></g>`;
-  return s;
-}
-function hands(u, expr, tag) {
-  // arms come from the shoulders and meet at the chest
-  const armL = 'M-138 -6 C-160 40 -130 110 -60 112 C-20 112 -4 86 -4 60 C-6 30 -40 10 -70 -10 Z';
-  const armR = 'M138 -6 C160 40 130 110 60 112 C20 112 4 86 4 60 C6 30 40 10 70 -10 Z';
-  let s = '';
-  if (expr === 'neutral') return s + fur(u, armL, 'd') + fur(u, armR, 'd') + fur(u, 'M-22 70 C-26 40 -14 4 0 -4 C14 4 26 40 22 70 C14 80 -14 80 -22 70 Z', 'd');   // paws together, like the reference
-  if (expr === 'focused') s += `<g transform="translate(0,64) rotate(-8)"><rect x="-56" y="-30" width="112" height="66" rx="10" fill="#F6F1E8"/><rect x="-56" y="-30" width="112" height="66" rx="10" fill="url(#sh${u})"/><path d="M-36 -10 h48 M-36 8 h70" stroke="#B9B0A2" stroke-width="5" stroke-linecap="round"/>
-      <g transform="translate(40,-46) rotate(35)"><rect x="-6" y="-42" width="12" height="64" rx="2" fill="#F2C14E"/><path d="M-6 22 L0 38 L6 22 Z" fill="#E9C9A0"/></g></g>`;
-  if (expr === 'oops') s += `<g transform="translate(0,58)"><rect x="-50" y="-22" width="58" height="52" rx="7" fill="url(#tl${u})"/><path d="M8 -22 L24 -10 L15 4 L28 16 L8 30" fill="#0E6B61"/>
-      <path d="M32 -2 c10 -10 18 6 28 -4 c10 -10 16 6 24 -2" fill="none" stroke="#5A524C" stroke-width="4" stroke-linecap="round"/><path d="M-6 -44 l10 -14 l2 10 l12 -12" fill="none" stroke="#FF8A3D" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-      ${[[-36, -76, 22], [-8, -98, 27], [24, -82, 19]].map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#C9CED8" opacity=".95" filter="url(#fz${u})"/>`).join('')}</g>`;
-  if (expr === 'proud') { const tg = tag || { n: '#000', c: '#18A999' }; s += `<g transform="translate(0,70) rotate(-6)">${tagShape(tg.n, tg.c, 1.3)}</g>`;
-    return fur(u, 'M-120 -6 C-160 30 -170 80 -130 96 C-110 100 -100 80 -108 60 C-112 40 -90 14 -80 -10 Z', 'd') + fur(u, 'M120 -6 C160 30 166 60 126 74 C106 78 98 60 104 42 C108 24 90 8 80 -10 Z', 'd') + s + `<circle cx="-122" cy="86" r="24" fill="url(#dk${u})" filter="url(#fz${u})"/><circle cx="118" cy="62" r="24" fill="url(#dk${u})" filter="url(#fz${u})"/>`; }
-  return fur(u, armL, 'd') + fur(u, armR, 'd') + s + `<circle cx="${expr === 'proud' ? -122 : -58}" cy="${expr === 'proud' ? 84 : 92}" r="24" fill="url(#dk${u})" filter="url(#fz${u})"/><circle cx="${expr === 'proud' ? 118 : 58}" cy="${expr === 'proud' ? 60 : 70}" r="24" fill="url(#dk${u})" filter="url(#fz${u})"/>`;
-}
-function front(expr, tag) {
-  const u = ++UID; const HCY = -118;
-  let s = defs3(u) + `<defs><clipPath id="bc${u}"><path d="${ell(0, 112, 150, 140)}"/></clipPath></defs>`;
-  s += `<ellipse cx="0" cy="262" rx="190" ry="24" fill="rgba(60,40,30,.22)" filter="url(#soft${u})"/>`;
-  s += fur(u, 'M-112 24 C-118 -14 -66 -32 0 -32 C66 -32 118 -14 112 24 C150 84 172 176 146 226 C118 262 -118 262 -146 226 C-172 176 -150 84 -112 24 Z');          // the pear body
-  s += `<g filter="url(#fz${u})"><path d="M-118 22 C-84 -34 84 -34 118 22 C128 56 104 78 80 64 C40 44 -40 44 -80 64 C-104 78 -128 56 -118 22 Z" fill="url(#dk${u})"/></g>`;    // shoulders
-  s += `<ellipse cx="-20" cy="170" rx="90" ry="60" fill="rgba(255,255,255,.35)" filter="url(#soft${u})"/>`;
-  s += belt3(u, 140) + paw(u, -118, 222, -18, -1) + paw(u, 118, 222, 18, 1);
-  s += hands(u, expr, tag);
-  // head
-  s += `<g filter="url(#fz${u})"><circle cx="-108" cy="${HCY - 104}" r="36" fill="url(#dk${u})"/><circle cx="108" cy="${HCY - 104}" r="36" fill="url(#dk${u})"/></g><circle cx="-108" cy="${HCY - 104}" r="15" fill="${F.darkL}" opacity=".7"/><circle cx="108" cy="${HCY - 104}" r="15" fill="${F.darkL}" opacity=".7"/>`;
-  s += fur(u, ell(0, HCY, 150, 128));
-  s += `<ellipse cx="-50" cy="${HCY - 60}" rx="70" ry="40" fill="rgba(255,255,255,.5)" filter="url(#soft${u})"/>`;
-  s += `<g>${goggles3(u, HCY - 96)}</g><path d="M-138 ${HCY - 96} Q-100 ${HCY - 112} -68 ${HCY - 100} M68 ${HCY - 100} Q100 ${HCY - 112} 138 ${HCY - 96}" stroke="url(#tl${u})" stroke-width="13" fill="none" stroke-linecap="round"/>`;
-  s += face3(u, expr, HCY + 6);
-  return s;
-}
-function side() {
-  const u = ++UID; const HCY = -118;
-  let s = defs3(u) + `<defs><clipPath id="bc${u}"><path d="${ell(0, 112, 130, 140)}"/></clipPath></defs>`;
-  s += `<ellipse cx="0" cy="262" rx="170" ry="22" fill="rgba(60,40,30,.22)" filter="url(#soft${u})"/>`;
-  s += fur(u, 'M-120 110 C-128 10 -90 -20 0 -24 C90 -20 128 10 124 110 C120 200 80 250 0 252 C-80 250 -118 200 -120 110 Z');
-  s += `<g filter="url(#fz${u})"><path d="M-124 60 C-100 -10 110 -10 126 60 L126 20 C90 -40 -90 -40 -124 20 Z" fill="url(#dk${u})"/></g>`;
-  s += belt3(u, 140, 'side');
-  s += `<g transform="translate(80,226) rotate(8)">${fur(u, ell(0, 0, 86, 42), 'd')}<ellipse cx="62" cy="0" rx="14" ry="30" fill="url(#pd${u})"/></g>`;
-  s += fur(u, 'M30 -10 C70 20 70 90 40 110 C10 120 -10 96 0 60 C8 30 0 10 30 -10 Z', 'd');
-  s += `<circle cx="-50" cy="${HCY - 104}" r="36" fill="url(#dk${u})" filter="url(#fz${u})"/>`;
-  s += fur(u, ell(0, HCY, 134, 126)) + fur(u, ell(124, HCY + 34, 40, 30));
-  s += `<path d="M-120 ${HCY - 98} Q0 ${HCY - 124} 80 ${HCY - 100}" stroke="url(#tl${u})" stroke-width="13" fill="none" stroke-linecap="round"/><ellipse cx="78" cy="${HCY - 100}" rx="12" ry="24" fill="rgba(160,235,225,.55)" stroke="url(#br${u})" stroke-width="8" transform="rotate(-20 78 ${HCY - 100})"/>`;
-  s += `<path d="${ell(76, HCY + 10, 40, 30, -26)}" fill="url(#dk${u})" filter="url(#fz${u})"/><defs><radialGradient id="ir${u}" cx="45%" cy="38%" r="65%"><stop offset="0" stop-color="#7A4A2A"/><stop offset=".55" stop-color="#3B2416"/><stop offset="1" stop-color="#140B07"/></radialGradient></defs>
-  <ellipse cx="82" cy="${HCY + 8}" rx="13" ry="20" fill="#120C0A"/><ellipse cx="82" cy="${HCY + 8}" rx="10.5" ry="17.5" fill="#FFFDF9"/><ellipse cx="86" cy="${HCY + 8}" rx="7" ry="12" fill="url(#ir${u})"/><ellipse cx="84" cy="${HCY + 2}" rx="2.6" ry="3.6" fill="#fff"/>
-  <path d="M72 ${HCY - 6} Q84 ${HCY - 16} 94 ${HCY - 6}" stroke="#120C0A" stroke-width="4.5" fill="none" stroke-linecap="round"/><path d="M92 ${HCY - 8} q8 -3 12 -10" stroke="#120C0A" stroke-width="3.4" fill="none" stroke-linecap="round"/>
-  <path d="M64 ${HCY - 36} Q84 ${HCY - 46} 104 ${HCY - 36}" stroke="#1E1A18" stroke-width="8" fill="none" stroke-linecap="round"/>`;
-  s += `<ellipse cx="96" cy="${HCY + 52}" rx="20" ry="12" fill="url(#bl${u})"/><path d="M152 ${HCY + 26} q10 0 10 9 q-4 8 -12 4 Z" fill="#1A1514"/><path d="M134 ${HCY + 54} q9 6 18 -2" stroke="#1A1514" stroke-width="3.5" fill="none" stroke-linecap="round"/>`;
-  return s;
-}
-function back() {
-  const u = ++UID; const HCY = -118;
-  let s = defs3(u) + `<defs><clipPath id="bc${u}"><path d="${ell(0, 112, 150, 140)}"/></clipPath></defs>`;
-  s += `<ellipse cx="0" cy="262" rx="190" ry="24" fill="rgba(60,40,30,.22)" filter="url(#soft${u})"/>`;
-  s += `<g transform="translate(-120,236)">${fur(u, ell(0, 0, 60, 30), 'd')}</g><g transform="translate(120,236)">${fur(u, ell(0, 0, 60, 30), 'd')}</g>`;
-  s += fur(u, 'M-112 24 C-118 -14 -66 -32 0 -32 C66 -32 118 -14 112 24 C150 84 172 176 146 226 C118 262 -118 262 -146 226 C-172 176 -150 84 -112 24 Z');
-  s += `<g filter="url(#fz${u})"><path d="M-118 22 C-84 -34 84 -34 118 22 C128 56 104 78 80 64 C40 44 -40 44 -80 64 C-104 78 -128 56 -118 22 Z" fill="url(#dk${u})"/></g>`;
-  s += belt3(u, 140, 'back') + `<circle cx="0" cy="226" r="20" fill="url(#fw${u})" filter="url(#fz${u})"/>`;
-  s += fur(u, 'M-138 -6 C-168 40 -150 120 -112 130 C-96 100 -100 40 -84 0 Z', 'd') + fur(u, 'M138 -6 C168 40 150 120 112 130 C96 100 100 40 84 0 Z', 'd');
-  s += `<g filter="url(#fz${u})"><circle cx="-108" cy="${HCY - 104}" r="36" fill="url(#dk${u})"/><circle cx="108" cy="${HCY - 104}" r="36" fill="url(#dk${u})"/></g>`;
-  s += fur(u, ell(0, HCY, 150, 128));
-  s += `<path d="M-142 ${HCY - 90} Q0 ${HCY - 120} 142 ${HCY - 90}" stroke="url(#tl${u})" stroke-width="14" fill="none" stroke-linecap="round"/><rect x="-14" y="${HCY - 120}" width="28" height="22" rx="6" fill="url(#br${u})"/>`;
-  return s;
-}
+const fur = (u, d, k = 'w') => `<g filter="url(#fz${u})"><path d="${d}" fill="url(#${k}${u})"/><path d="${d}" fill="url(#sh${u})"/></g>`;
+const blob = (u, cx, cy, rx, ry, rot = 0, k = 'k') => fur(u, ell(cx, cy, rx, ry, rot), k);
 
-function panda(o = {}) { const v = o.view || 'front'; return v === 'side' ? side() : v === 'back' ? back() : front(o.expr || 'neutral', o.tag); }
-function pandaSVG(o = {}, w = 400, h = 600, vb = '-200 -290 400 600') { return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="${vb}">${panda(o)}</svg>`; }
-if (typeof module !== 'undefined') module.exports = { panda, pandaSVG, K, tagShape, goggleRing };
+// ---------------- the face ----------------
+function face(u, f, cx, cy, s = 1, look = 0) {   // f: calm happy excited wink thinking surprised sad shy sleep eat; look: horizontal shift for 3/4 and side
+  const X = (x) => cx + x * s + look, Y = (y) => cy + y * s, S = (v) => v * s;
+  let o = '';
+  // droopy patches
+  o += fur(u, ell(X(-56), Y(6), S(44), S(33), 30), 'k') + fur(u, ell(X(56), Y(6), S(44), S(33), -30), 'k');
+  const arcUp = (x) => `<path d="M${X(x - 17)} ${Y(8)} Q${X(x)} ${Y(-9)} ${X(x + 17)} ${Y(8)}" fill="none" stroke="#FBF7F1" stroke-width="${S(5.5)}" stroke-linecap="round"/>`;
+  const arcDown = (x) => `<path d="M${X(x - 16)} ${Y(0)} Q${X(x)} ${Y(12)} ${X(x + 16)} ${Y(0)}" fill="none" stroke="#FBF7F1" stroke-width="${S(5)}" stroke-linecap="round"/>`;
+  const sadArc = (x, sd) => `<path d="M${X(x - 16)} ${Y(8 + sd * -4)} Q${X(x)} ${Y(-2)} ${X(x + 16)} ${Y(8 + sd * 4)}" fill="none" stroke="#FBF7F1" stroke-width="${S(5)}" stroke-linecap="round" transform="rotate(${sd * 14} ${X(x)} ${Y(4)})"/>`;
+  const open = (x, dx = 0, dy = 0, big = 1) => { const rx = S(15 * big), ry = S(17 * big), ix = X(x + dx), iy = Y(4 + dy);
+    return `<ellipse cx="${X(x)}" cy="${Y(4)}" rx="${rx}" ry="${ry}" fill="#FFFDF9"/><circle cx="${ix}" cy="${iy}" r="${S(11 * big)}" fill="url(#ir${u})"/><circle cx="${ix}" cy="${iy}" r="${S(5.5 * big)}" fill="#0A0504"/>
+      <ellipse cx="${ix - S(4)}" cy="${iy - S(5)}" rx="${S(4.2)}" ry="${S(5)}" fill="#fff"/><circle cx="${ix + S(4.5)}" cy="${iy + S(4)}" r="${S(1.8)}" fill="#fff"/>`; };
+  const E = {
+    calm: () => arcDown(-56) + arcDown(56), happy: () => arcUp(-56) + arcUp(56), excited: () => arcUp(-56) + arcUp(56),
+    wink: () => open(-56, 2, -1) + arcUp(56), thinking: () => open(-56, 5, -6) + open(56, 5, -6), surprised: () => open(-56, 0, 0, 1.12) + open(56, 0, 0, 1.12),
+    sad: () => sadArc(-56, -1) + sadArc(56, 1), shy: () => arcUp(-56) + arcUp(56), sleep: () => arcDown(-56) + arcDown(56), eat: () => arcUp(-56) + arcUp(56),
+  }[f] || (() => arcUp(-56) + arcUp(56));
+  o += E();
+  // blush (stronger when shy)
+  const bl = f === 'shy' ? 1.4 : 1;
+  o += `<ellipse cx="${X(-92)}" cy="${Y(44)}" rx="${S(26 * bl)}" ry="${S(15 * bl)}" fill="url(#bl${u})"/><ellipse cx="${X(92)}" cy="${Y(44)}" rx="${S(26 * bl)}" ry="${S(15 * bl)}" fill="url(#bl${u})"/>`;
+  // nose
+  o += `<path d="M${X(-12)} ${Y(28)} Q${X(0)} ${Y(22)} ${X(12)} ${Y(28)} Q${X(11)} ${Y(37)} ${X(0)} ${Y(41)} Q${X(-11)} ${Y(37)} ${X(-12)} ${Y(28)} Z" fill="#1E1A18"/><ellipse cx="${X(-3)}" cy="${Y(28)}" rx="${S(4.5)}" ry="${S(2.2)}" fill="rgba(255,255,255,.6)"/>`;
+  // mouth
+  const my = 50, st = `stroke="#3A2A20" stroke-width="${S(3.4)}" fill="none" stroke-linecap="round"`;
+  const M = {
+    excited: `<path d="M${X(-24)} ${Y(my - 4)} Q${X(0)} ${Y(my + 34)} ${X(24)} ${Y(my - 4)} Z" fill="#5A2A22"/><path d="M${X(-12)} ${Y(my + 12)} Q${X(0)} ${Y(my + 22)} ${X(12)} ${Y(my + 12)} Q${X(0)} ${Y(my + 7)} ${X(-12)} ${Y(my + 12)} Z" fill="#F28C9A"/>`,
+    surprised: `<ellipse cx="${X(0)}" cy="${Y(my + 6)}" rx="${S(8)}" ry="${S(10)}" fill="#5A2A22"/>`,
+    thinking: `<path d="M${X(-8)} ${Y(my + 4)} Q${X(2)} ${Y(my)} ${X(10)} ${Y(my + 4)}" ${st}/>`,
+    sad: `<path d="M${X(-12)} ${Y(my + 8)} Q${X(0)} ${Y(my - 2)} ${X(12)} ${Y(my + 8)}" ${st}/>`,
+    eat: `<path d="M${X(-14)} ${Y(my)} q${S(7)} ${S(8)} ${S(14)} 0 q${S(7)} ${S(8)} ${S(14)} 0" ${st}/><ellipse cx="${X(16)}" cy="${Y(my + 4)}" rx="${S(7)}" ry="${S(5)}" fill="${P.green}"/>`,
+  }[f] || `<path d="M${X(0)} ${Y(my - 8)} v${S(5)} M${X(-14)} ${Y(my)} q${S(7)} ${S(8)} ${S(14)} 0 q${S(7)} ${S(8)} ${S(14)} 0" ${st}/>`;
+  return o + M;
+}
+// ---------------- parts ----------------
+function paw(u, x, y, rot, flip) {
+  return `<g transform="translate(${x},${y}) rotate(${rot})">${blob(u, 0, 0, 70, 58)}
+    <ellipse cx="${flip * 4}" cy="14" rx="33" ry="27" fill="url(#pd${u})"/>${[[-35, -21], [-13, -35], [12, -37], [33, -23]].map(([a, b]) => `<ellipse cx="${a * flip}" cy="${b}" rx="9.5" ry="11.5" fill="url(#pd${u})"/>`).join('')}</g>`;
+}
+const handPad = (u, x, y, r = 24) => blob(u, x, y, r, r * .95);
+function headFront(u, f, hx, hy, q = 0) {   // q: 3/4 turn (0..1)
+  let s = blob(u, hx - 112 + q * 26, hy - 100, 35, 34) + blob(u, hx + 112 + q * 8, hy - 100, 35, 34);
+  s += `<circle cx="${hx - 112 + q * 26}" cy="${hy - 100}" r="14" fill="${P.blackL}" opacity=".6"/><circle cx="${hx + 112 + q * 8}" cy="${hy - 100}" r="14" fill="${P.blackL}" opacity=".6"/>`;
+  s += fur(u, ell(hx, hy, 152, 128));
+  s += `<ellipse cx="${hx - 46}" cy="${hy - 64}" rx="72" ry="40" fill="rgba(255,255,255,.55)" filter="url(#sf${u})"/>`;
+  s += `<path d="M${hx - 10} ${hy - 124} q6 -14 14 -2 q6 -12 12 2" stroke="${P.whiteS}" stroke-width="5" fill="none" stroke-linecap="round"/>`;   // a little fluff tuft
+  return s + face(u, f, hx, hy + 8, 1 - q * .08, q * 30);
+}
+const BODY = 'M-112 24 C-118 -14 -66 -32 0 -32 C66 -32 118 -14 112 24 C150 84 172 176 146 226 C118 262 -118 262 -146 226 C-172 176 -150 84 -112 24 Z';
+const COLLAR = 'M-118 22 C-84 -34 84 -34 118 22 C128 56 104 78 80 64 C40 44 -40 44 -80 64 C-104 78 -128 56 -118 22 Z';
+function arms(u, a) {
+  const L = 'M-138 -6 C-160 40 -130 110 -60 112 C-20 112 -4 86 -4 60 C-6 30 -40 10 -70 -10 Z', R = 'M138 -6 C160 40 130 110 60 112 C20 112 4 86 4 60 C6 30 40 10 70 -10 Z';
+  const prayPaws = 'M-24 72 C-28 40 -14 4 0 -6 C14 4 28 40 24 72 C14 82 -14 82 -24 72 Z';
+  if (a === 'pray') return fur(u, L, 'k') + fur(u, R, 'k') + fur(u, prayPaws, 'k') + `<path d="M0 -2 L0 70" stroke="${P.blackS}" stroke-width="2.5" opacity=".6"/>`;
+  if (a === 'up') return blob(u, -150, -50, 34, 78, 32) + blob(u, 150, -50, 34, 78, -32) + handPad(u, -184, -112) + handPad(u, 184, -112) +
+      `<ellipse cx="-184" cy="-112" rx="12" ry="10" fill="url(#pd${u})"/><ellipse cx="184" cy="-112" rx="12" ry="10" fill="url(#pd${u})"/>`;
+  if (a === 'cheeks') return blob(u, -112, 10, 36, 70, 10) + blob(u, 112, 10, 36, 70, -10) + '|||' + blob(u, -100, -40, 30, 54, 12) + blob(u, 100, -40, 30, 54, -12) + handPad(u, -90, -78, 28) + handPad(u, 90, -78, 28);
+  if (a === 'chin') return fur(u, L, 'k') + blob(u, 96, 10, 34, 62, -20) + handPad(u, -30, 104, 24) + '|||' + blob(u, 66, -30, 28, 50, -40) + handPad(u, 34, -62, 25);
+  if (a === 'wave') return fur(u, L, 'k') + handPad(u, -40, 100, 24) + blob(u, 150, -60, 34, 76, -24) + handPad(u, 176, -122, 26) + `<ellipse cx="176" cy="-122" rx="12" ry="10" fill="url(#pd${u})"/>` +
+      `<path d="M212 -150 q14 10 10 26 M222 -176 q22 16 16 44" stroke="${P.gold}" stroke-width="6" fill="none" stroke-linecap="round"/>`;
+  if (a === 'bamboo') return fur(u, L, 'k') + fur(u, R, 'k') + '|||' + `<g transform="translate(30,-30) rotate(24) scale(.8)"><rect x="-9" y="-70" width="18" height="170" rx="8" fill="${P.green}"/><rect x="-9" y="-12" width="18" height="6" fill="${P.greenD}"/><rect x="-9" y="48" width="18" height="6" fill="${P.greenD}"/>
+      <path d="M0 -60 q-40 -16 -60 -6 q26 14 60 6 Z M6 -40 q40 -26 62 -16 q-26 20 -62 16 Z" fill="${P.green}"/></g>` + handPad(u, -24, 60, 25) + handPad(u, 30, 24, 25);
+  if (a === 'hug') return fur(u, 'M-140 -8 C-162 74 -80 124 0 114 C80 124 162 74 140 -8 C110 -34 -110 -34 -140 -8 Z', 'k') + `<path d="M-110 60 Q0 96 110 60" stroke="${P.blackS}" stroke-width="3" fill="none" opacity=".6"/>` + handPad(u, -46, 96, 22) + handPad(u, 46, 96, 22);
+  if (a === 'shy') return fur(u, L, 'k') + fur(u, R, 'k') + handPad(u, -20, 96, 24) + handPad(u, 20, 96, 24);
+  return blob(u, -126, 70, 34, 76, 14) + blob(u, 126, 70, 34, 76, -14);
+}
+function extra(e, u) {
+  if (e === 'heart') return `<path d="M150 -230 c-12 -18 -40 -6 -30 16 l30 28 l30 -28 c10 -22 -18 -34 -30 -16 Z" fill="${P.heart}"/>`;
+  if (e === 'hearts') return `<path d="M120 -240 c-10 -15 -34 -5 -25 13 l25 23 l25 -23 c9 -18 -15 -28 -25 -13 Z" fill="${P.heart}"/><path d="M160 -270 c-6 -9 -20 -3 -15 8 l15 14 l15 -14 c5 -11 -9 -17 -15 -8 Z" fill="${P.heart}"/>`;
+  if (e === 'q') return `<text x="160" y="-200" font-family="Fredoka" font-weight="600" font-size="88" fill="${P.ink}">?</text>`;
+  if (e === 'bang') return `<text x="160" y="-200" font-family="Fredoka" font-weight="600" font-size="88" fill="#F28A3C">!</text>`;
+  if (e === 'zzz') return `<text x="120" y="-170" font-family="Fredoka" font-weight="600" font-size="46" fill="#6A8FB8">z</text><text x="150" y="-210" font-family="Fredoka" font-weight="600" font-size="60" fill="#6A8FB8">z</text><text x="190" y="-258" font-family="Fredoka" font-weight="600" font-size="76" fill="#6A8FB8">z</text>`;
+  if (e === 'spark') return `<path d="M-150 -250 l-14 -22 M-120 -270 l-4 -26 M150 -250 l14 -22 M120 -270 l4 -26 M180 -220 l24 -10" stroke="${P.gold}" stroke-width="7" stroke-linecap="round"/>`;
+  if (e === 'sweat') return `<path d="M128 -190 q12 18 0 28 q-12 -10 0 -28 Z" fill="#A9D8F2"/>`;
+  return '';
+}
+// ---------------- whole figures ----------------
+function sitFront(u, o) {
+  const q = o.view === 'q34' ? 1 : 0, hy = -112, jump = o.legs === 'jump';
+  let s = `<ellipse cx="0" cy="266" rx="${jump ? 120 : 186}" ry="${jump ? 16 : 24}" fill="rgba(110,70,30,.2)" filter="url(#sf${u})"/>`;
+  let fig = '';
+  if (jump) fig += blob(u, -62, 236, 40, 58, 20) + blob(u, 72, 226, 40, 54, -34) + `<ellipse cx="-70" cy="276" rx="26" ry="15" fill="url(#pd${u})"/><ellipse cx="88" cy="262" rx="24" ry="14" fill="url(#pd${u})" transform="rotate(-30 88 262)"/>`;
+  fig += fur(u, BODY) + fur(u, COLLAR, 'k') + `<ellipse cx="-22" cy="168" rx="90" ry="60" fill="rgba(255,255,255,.4)" filter="url(#sf${u})"/><ellipse cx="0" cy="226" rx="110" ry="30" fill="rgba(166,124,82,.14)" filter="url(#sf${u})"/>`;
+  if (!jump) fig += paw(u, -118 + q * 10, 222, -18, -1) + paw(u, 118 + q * 14, 222, 18, 1);
+  const [ab, af = ''] = arms(u, o.arms || 'pray').split('|||'); const qs = (x) => (q ? `<g transform="translate(18,0)">${x}</g>` : x);
+  fig += qs(ab);
+  fig += `<g transform="rotate(${o.tilt || 0} 0 -20)">${headFront(u, o.face || 'happy', q * 8, hy, q)}${qs(af)}${(o.extras || []).map((e) => extra(e, u)).join('')}</g>`;
+  return s + `<g transform="translate(0,${jump ? -58 : 0})">${fig}</g>`;
+}
+function sitSide(u, o) {
+  let s = `<ellipse cx="0" cy="266" rx="170" ry="22" fill="rgba(110,70,30,.2)" filter="url(#sf${u})"/>`;
+  s += fur(u, 'M-120 110 C-128 10 -90 -24 0 -28 C90 -24 128 10 124 110 C120 200 80 252 0 254 C-80 252 -118 200 -120 110 Z');
+  s += fur(u, 'M-124 30 C-100 -26 100 -26 124 30 C126 60 100 74 70 60 C20 46 -40 50 -80 62 C-110 70 -128 58 -124 30 Z', 'k');
+  s += `<g transform="translate(70,226) rotate(6)">${blob(u, 0, 0, 84, 42)}<ellipse cx="64" cy="2" rx="15" ry="30" fill="url(#pd${u})"/></g>`;
+  s += fur(u, 'M20 -10 C70 10 96 60 84 92 C74 110 50 104 52 80 C54 56 20 30 0 20 Z', 'k') + handPad(u, 84, 74, 24);
+  s += blob(u, -46, -212, 35, 34) + fur(u, ell(0, -112, 136, 126)) + fur(u, ell(122, -78, 42, 32));
+  s += `<ellipse cx="-30" cy="-160" rx="60" ry="36" fill="rgba(255,255,255,.5)" filter="url(#sf${u})"/>`;
+  s += fur(u, ell(78, -100, 38, 30, -28), 'k') + `<path d="M64 -96 Q80 -110 96 -98" fill="none" stroke="#FBF7F1" stroke-width="5.5" stroke-linecap="round"/>`;
+  s += `<ellipse cx="96" cy="-58" rx="22" ry="13" fill="url(#bl${u})"/><path d="M152 -86 q11 0 11 9 q-4 9 -13 5 Z" fill="#1E1A18"/><path d="M134 -56 q9 7 19 -2" stroke="#3A2A20" stroke-width="3.4" fill="none" stroke-linecap="round"/>`;
+  return s;
+}
+function sitBack(u) {
+  let s = `<ellipse cx="0" cy="266" rx="186" ry="24" fill="rgba(110,70,30,.2)" filter="url(#sf${u})"/>`;
+  s += blob(u, -122, 238, 60, 30) + blob(u, 122, 238, 60, 30);
+  s += fur(u, BODY) + fur(u, 'M-118 22 C-84 -34 84 -34 118 22 C130 70 120 120 100 128 C60 96 -60 96 -100 128 C-120 120 -130 70 -118 22 Z', 'k');
+  s += blob(u, 0, 226, 24, 22);
+  s += blob(u, -112, -212, 35, 34) + blob(u, 112, -212, 35, 34) + fur(u, ell(0, -112, 152, 128)) + `<ellipse cx="-46" cy="-170" rx="72" ry="40" fill="rgba(255,255,255,.5)" filter="url(#sf${u})"/>`;
+  return s;
+}
+function lie(u, o) {   // relaxing / sleeping: lying on the tummy, chin on the paws
+  const sleep = o.face === 'sleep';
+  let s = `<ellipse cx="20" cy="266" rx="230" ry="22" fill="rgba(110,70,30,.2)" filter="url(#sf${u})"/>`;
+  s += blob(u, 190, 226, 64, 46, -10);                                              // back leg
+  s += fur(u, ell(50, 184, 200, 88));                                               // body
+  s += fur(u, 'M-80 140 C-40 120 30 130 60 150 C70 190 50 250 10 262 C-40 268 -90 250 -100 210 Z', 'k');   // shoulders and front legs
+  s += `<ellipse cx="200" cy="250" rx="30" ry="14" fill="url(#pd${u})"/>`;
+  s += blob(u, -60, 248, 74, 26) + blob(u, 40, 250, 64, 24);                        // paws under the chin
+  const hx = -112, hy = sleep ? 168 : 150;
+  s += `<g transform="rotate(${sleep ? -10 : -6} ${hx} ${hy}) translate(${hx},${hy}) scale(.78) translate(${-hx},${-hy})">${headFront(u, o.face, hx, hy)}</g>`;
+  return s + (o.extras || []).map((e) => `<g transform="translate(${e === 'zzz' ? 20 : -60},${sleep ? 260 : 220})">${extra(e, u)}</g>`).join('');
+}
+function panda(o = {}) {
+  const u = ++UID; const v = o.view || 'front';
+  const body = o.legs === 'lie' ? lie(u, o) : v === 'side' ? sitSide(u, o) : v === 'back' ? sitBack(u) : sitFront(u, o);
+  return defs(u) + body;
+}
+function pandaSVG(o = {}, w = 520, h = 600, vb = '-260 -300 520 600') { return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="${vb}">${panda(o)}</svg>`; }
+// the library: every named figure on the sheet
+const LIB = {
+  front: { arms: 'pray', face: 'calm' }, side: { view: 'side' }, back: { view: 'back' }, q34: { view: 'q34', arms: 'hug', face: 'happy' },
+  happy: { arms: 'cheeks', face: 'happy', extras: ['spark'] }, excited: { arms: 'up', face: 'excited' }, wink: { arms: 'shy', face: 'wink', extras: ['heart'], tilt: -6 },
+  thinking: { arms: 'chin', face: 'thinking', extras: ['q'], tilt: 6 }, surprised: { arms: 'cheeks', face: 'surprised', extras: ['bang'] }, sad: { arms: 'hug', face: 'sad', tilt: -4 },
+  meditating: { arms: 'pray', face: 'calm' }, jump: { arms: 'up', face: 'excited', legs: 'jump', extras: ['spark'] }, shy: { arms: 'shy', face: 'shy', extras: ['hearts'], tilt: -8 },
+  relaxing: { legs: 'lie', face: 'happy', extras: ['heart'] }, eating: { arms: 'bamboo', face: 'eat' }, waving: { arms: 'wave', face: 'excited' }, sleeping: { legs: 'lie', face: 'sleep', extras: ['zzz'] },
+};
+if (typeof module !== 'undefined') module.exports = { panda, pandaSVG, P, LIB };
