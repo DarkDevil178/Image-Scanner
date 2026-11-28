@@ -55,3 +55,7 @@ brag-output/reel002/vo/
 brag-output/reel002/audio/music/*.mp3
 brag-output/reel002/audio/sfx/*.wav
 brag-output/reel002/reel.gen.html
+# Chubby mascot: renders and the zip stay local
+brag-output/chubby/out/
+brag-output/chubby/work/
+brag-output/chubby/*.zip
