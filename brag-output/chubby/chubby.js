@@ -56,15 +56,40 @@ function goggles3(u, y, s = 1) {
 function face3(u, expr, cy) {
   // droopy patches, sloping down and out
   let s = `<path d="${ell(-60, cy + 6, 44, 34, 30)}" fill="url(#dk${u})" filter="url(#fz${u})"/><path d="${ell(60, cy + 6, 44, 34, -30)}" fill="url(#dk${u})" filter="url(#fz${u})"/>`;
-  const lashes = (x, sd) => [0, 1, 2].map((i) => `<path d="M${x + sd * (22 + i * 2)} ${cy - 2 + i * 7} l${sd * 9} ${-3 + i * 3}" stroke="#F3EEE6" stroke-width="2.6" stroke-linecap="round"/>`).join('');
-  const closed = (x, sd) => `<path d="M${x - 18} ${cy + 4} Q${x} ${cy - 12} ${x + 18} ${cy + 4}" fill="none" stroke="#F3EEE6" stroke-width="5" stroke-linecap="round"/>` + lashes(x, sd);
-  const open = (x, sd, big) => { const r = big ? 17 : 14, pr = big ? 8 : 11; return `<ellipse cx="${x}" cy="${cy}" rx="${r}" ry="${r + 2}" fill="#fff"/><circle cx="${x + sd * 2}" cy="${cy + 2}" r="${pr}" fill="#1A1514"/><circle cx="${x - 3}" cy="${cy - 4}" r="${big ? 3 : 4.5}" fill="#fff"/><circle cx="${x + 4}" cy="${cy + 5}" r="2" fill="#fff"/>` + lashes(x, sd); };
-  const half = (x, sd) => `<ellipse cx="${x}" cy="${cy + 3}" rx="15" ry="11" fill="#fff"/><circle cx="${x + 3}" cy="${cy + 5}" r="9" fill="#1A1514"/><circle cx="${x}" cy="${cy + 2}" r="3" fill="#fff"/><path d="M${x - 19} ${cy - 1} Q${x} ${cy - 6} ${x + 19} ${cy - 1}" stroke="#F3EEE6" stroke-width="4" fill="none" stroke-linecap="round"/>` + lashes(x, sd);
-  const E = { neutral: closed, proud: closed, focused: half, oops: (x, sd) => open(x, sd, true), curious: (x, sd) => open(x, sd, false) }[expr] || closed;
-  s += E(-60, -1) + E(60, 1);
-  // brows: soft dark strokes on the fur, moving with the mood
-  const bt = { neutral: 0, proud: -6, focused: 10, oops: -12, curious: -4 }[expr] ?? 0;
-  s += [-1, 1].map((sd) => `<path d="M${sd * 44} ${cy - 46 + (expr === 'focused' ? 4 : 0)} q${sd * 16} ${-8} ${sd * 32} ${-2}" transform="rotate(${sd * -bt} ${sd * 60} ${cy - 48})" stroke="rgba(46,42,40,.75)" stroke-width="6" fill="none" stroke-linecap="round"/>`).join('');
+  // ---- expressive eyes: a glossy brown iris, two shines, a teal reflection from the goggles, lids that set the mood, flicked lashes ----
+  const id = (k) => `e${u}${k}${Math.round(Math.random() * 0)}`;
+  s += `<defs><radialGradient id="ir${u}" cx="45%" cy="38%" r="65%"><stop offset="0" stop-color="#7A4A2A"/><stop offset=".55" stop-color="#3B2416"/><stop offset="1" stop-color="#140B07"/></radialGradient></defs>`;
+  const lash = (x, y, sd, n = 2) => Array.from({ length: n }, (_, i) => `<path d="M${x + sd * (18 + i * 4)} ${y + i * 5} q${sd * 8} ${-4} ${sd * 13} ${-11 + i * 5}" stroke="#120C0A" stroke-width="3.6" fill="none" stroke-linecap="round"/>`).join('');
+  const ball = (x, sd, o) => {   // o: { ry, dx, dy, ir, pu, lid (0..1 of the eye covered from the top), tilt (lid slant), wet }
+    const rx = 21, ry = o.ry || 24, k = `${u}${sd > 0 ? 'r' : 'l'}`, ix = x + (o.dx || 0) * sd * (o.mirror ? -1 : 1), iy = cy + (o.dy || 0), ir = o.ir || 15, pu = o.pu || 8;
+    const top = cy - ry, lidY = top + 2 * ry * (o.lid || 0), t = (o.tilt || 0) * sd;
+    let e = `<clipPath id="ec${k}"><ellipse cx="${x}" cy="${cy}" rx="${rx}" ry="${ry}"/></clipPath>`;
+    e += `<ellipse cx="${x}" cy="${cy}" rx="${rx + 3}" ry="${ry + 3}" fill="#120C0A"/><ellipse cx="${x}" cy="${cy}" rx="${rx}" ry="${ry}" fill="#FFFDF9"/>`;
+    e += `<g clip-path="url(#ec${k})"><circle cx="${ix}" cy="${iy}" r="${ir}" fill="url(#ir${u})"/><circle cx="${ix}" cy="${iy}" r="${ir}" fill="none" stroke="#0E0705" stroke-width="2.5"/>
+      <circle cx="${ix}" cy="${iy}" r="${pu}" fill="#0A0504"/><path d="M${ix - ir * .75} ${iy + ir * .45} Q${ix} ${iy + ir * 1.0} ${ix + ir * .75} ${iy + ir * .45}" stroke="rgba(150,232,222,.75)" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <ellipse cx="${ix - ir * .38}" cy="${iy - ir * .42}" rx="${ir * .36}" ry="${ir * .44}" fill="#fff"/><circle cx="${ix + ir * .42}" cy="${iy + ir * .38}" r="${ir * .16}" fill="#fff"/>
+      ${o.wet ? `<path d="M${x - rx + 4} ${cy + ry * .55} Q${x} ${cy + ry * .95} ${x + rx - 4} ${cy + ry * .55}" stroke="rgba(190,235,255,.9)" stroke-width="3.5" fill="none"/>` : ''}
+      ${o.lid ? `<path d="M${x - rx - 6} ${top - 8} L${x + rx + 6} ${top - 8} L${x + rx + 6} ${lidY + t} L${x - rx - 6} ${lidY - t} Z" fill="url(#dk${u})"/>` : ''}</g>`;
+    // the lid line (upper lash line) follows the lid
+    e += o.lid ? `<path d="M${x - rx - 3} ${lidY - t} L${x + rx + 3} ${lidY + t}" stroke="#120C0A" stroke-width="5" stroke-linecap="round"/>` + lash(x, Math.min(lidY + t, lidY - t) + 2, sd)
+               : `<path d="M${x - rx - 2} ${cy - 4} Q${x} ${top - 9} ${x + rx + 2} ${cy - 4}" stroke="#120C0A" stroke-width="5" fill="none" stroke-linecap="round"/>` + lash(x, cy - ry * .55, sd);
+    return e;
+  };
+  const happy = (x, sd) => `<path d="M${x - 20} ${cy + 6} Q${x} ${cy - 18} ${x + 20} ${cy + 6}" fill="none" stroke="#120C0A" stroke-width="10" stroke-linecap="round"/><path d="M${x - 20} ${cy + 6} Q${x} ${cy - 18} ${x + 20} ${cy + 6}" fill="none" stroke="#FFFDF9" stroke-width="4.5" stroke-linecap="round"/>
+    <path d="M${x - 14} ${cy + 16} Q${x} ${cy + 10} ${x + 14} ${cy + 16}" stroke="rgba(255,253,249,.55)" stroke-width="3" fill="none" stroke-linecap="round"/>` + lash(x, cy - 4, sd);
+  const EYE = {
+    neutral: (x, sd) => ball(x, sd, { ry: 25, dx: 1.5, dy: -2, lid: .12 }),
+    curious: (x, sd) => ball(x, sd, { ry: 26, dx: 3, dy: -4, ir: 15, pu: 7 }),
+    focused: (x, sd) => ball(x, sd, { ry: 23, dx: 4, dy: 7, lid: .46, tilt: 5, mirror: true }),
+    proud: happy,
+    oops: (x, sd) => ball(x, sd, { ry: 27, dx: -3, dy: 5, ir: 10, pu: 4.5, wet: true }),
+  }[expr] || ((x, sd) => ball(x, sd, { ry: 25 }));
+  s += EYE(-60, -1) + EYE(60, 1);
+  // bold brows that carry the feeling: [inner offset, outer offset] (negative = higher)
+  const BR = { neutral: [-2, 0], curious: [-10, -4], focused: [12, -8], proud: [-8, -6], oops: [-16, 6] }[expr] || [0, 0];
+  const by = cy - 50;
+  s += [-1, 1].map((sd) => { const ix = sd * 36, ox = sd * 88, iy = by + BR[0], oy = by + BR[1];
+    return `<path d="M${ix} ${iy} Q${(ix + ox) / 2} ${Math.min(iy, oy) - 10} ${ox} ${oy}" stroke="#1E1A18" stroke-width="9" fill="none" stroke-linecap="round"/>`; }).join('');
   // blush, nose, mouth
   s += `<ellipse cx="-98" cy="${cy + 44}" rx="26" ry="16" fill="url(#bl${u})"/><ellipse cx="98" cy="${cy + 44}" rx="26" ry="16" fill="url(#bl${u})"/>`;
   s += `<path d="M-13 ${cy + 30} Q0 ${cy + 24} 13 ${cy + 30} Q12 ${cy + 40} 0 ${cy + 44} Q-12 ${cy + 40} -13 ${cy + 30} Z" fill="#1A1514"/><ellipse cx="-4" cy="${cy + 30}" rx="5" ry="2.5" fill="rgba(255,255,255,.55)"/>`;
@@ -131,7 +156,10 @@ function side() {
   s += `<circle cx="-50" cy="${HCY - 104}" r="36" fill="url(#dk${u})" filter="url(#fz${u})"/>`;
   s += fur(u, ell(0, HCY, 134, 126)) + fur(u, ell(124, HCY + 34, 40, 30));
   s += `<path d="M-120 ${HCY - 98} Q0 ${HCY - 124} 80 ${HCY - 100}" stroke="url(#tl${u})" stroke-width="13" fill="none" stroke-linecap="round"/><ellipse cx="78" cy="${HCY - 100}" rx="12" ry="24" fill="rgba(160,235,225,.55)" stroke="url(#br${u})" stroke-width="8" transform="rotate(-20 78 ${HCY - 100})"/>`;
-  s += `<path d="${ell(76, HCY + 10, 40, 30, -26)}" fill="url(#dk${u})" filter="url(#fz${u})"/><path d="M62 ${HCY + 14} Q78 ${HCY} 94 ${HCY + 12}" fill="none" stroke="#F3EEE6" stroke-width="5" stroke-linecap="round"/>`;
+  s += `<path d="${ell(76, HCY + 10, 40, 30, -26)}" fill="url(#dk${u})" filter="url(#fz${u})"/><defs><radialGradient id="ir${u}" cx="45%" cy="38%" r="65%"><stop offset="0" stop-color="#7A4A2A"/><stop offset=".55" stop-color="#3B2416"/><stop offset="1" stop-color="#140B07"/></radialGradient></defs>
+  <ellipse cx="82" cy="${HCY + 8}" rx="13" ry="20" fill="#120C0A"/><ellipse cx="82" cy="${HCY + 8}" rx="10.5" ry="17.5" fill="#FFFDF9"/><ellipse cx="86" cy="${HCY + 8}" rx="7" ry="12" fill="url(#ir${u})"/><ellipse cx="84" cy="${HCY + 2}" rx="2.6" ry="3.6" fill="#fff"/>
+  <path d="M72 ${HCY - 6} Q84 ${HCY - 16} 94 ${HCY - 6}" stroke="#120C0A" stroke-width="4.5" fill="none" stroke-linecap="round"/><path d="M92 ${HCY - 8} q8 -3 12 -10" stroke="#120C0A" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+  <path d="M64 ${HCY - 36} Q84 ${HCY - 46} 104 ${HCY - 36}" stroke="#1E1A18" stroke-width="8" fill="none" stroke-linecap="round"/>`;
   s += `<ellipse cx="96" cy="${HCY + 52}" rx="20" ry="12" fill="url(#bl${u})"/><path d="M152 ${HCY + 26} q10 0 10 9 q-4 8 -12 4 Z" fill="#1A1514"/><path d="M134 ${HCY + 54} q9 6 18 -2" stroke="#1A1514" stroke-width="3.5" fill="none" stroke-linecap="round"/>`;
   return s;
 }
