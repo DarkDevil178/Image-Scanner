@@ -1,0 +1,349 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=block" rel="stylesheet">
+<style>
+:root{--bg:#eceef2;--ink:#161922;--ink2:#3c4150;--muted:#7c8494;--accent:#3d4fe0}
+*{box-sizing:border-box;margin:0}
+html,body{overflow:hidden;background:var(--bg)}
+#stage{position:relative;overflow:hidden;background:var(--bg);font-family:"DM Sans",sans-serif;color:var(--ink)}
+.blob{position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none}
+.abs{position:absolute}
+.disp{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;letter-spacing:-.035em;line-height:1.0}
+.kick{font:600 30px/1 "DM Sans",sans-serif;letter-spacing:.02em;color:var(--accent)}
+#phone{position:absolute;left:0;top:0;width:420px;height:874px;border-radius:66px;background:#0f1116;padding:15px;transform-origin:0 0;
+  box-shadow:0 60px 120px -40px rgba(22,25,34,.45),0 0 0 2px #2a2d35 inset}
+#screen{position:relative;width:390px;height:844px;border-radius:52px;overflow:hidden;background:#eceef2}
+#screen img.full{position:absolute;left:0;top:0;width:390px;height:844px}
+.layer{position:absolute;left:0;top:0;width:390px;height:844px;overflow:hidden}
+.row{position:absolute;overflow:hidden}
+.row img{position:absolute;top:0;height:100%}
+.tmeta{position:absolute;font:600 11px/1 "DM Sans";color:rgba(0,0,0,.5);display:flex;gap:5px;z-index:3}
+.tmeta .cnt{font-weight:500;opacity:.8}
+#finger{position:absolute;left:0;top:0;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;background:rgba(22,25,34,.28);border:2.5px solid rgba(255,255,255,.95);box-shadow:0 6px 16px rgba(0,0,0,.25);z-index:60}
+#ripple{position:absolute;left:0;top:0;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;border:3px solid rgba(61,79,224,.85);z-index:59}
+#lockov{position:absolute;width:28px;height:28px;border-radius:9px;background:#161922;display:grid;place-items:center;z-index:5}
+#scan{position:absolute;height:4px;margin-top:-2px;background:linear-gradient(90deg,transparent,#a5bbff 15%,#fff 50%,#a5bbff 85%,transparent);z-index:6}
+#cap{position:absolute;text-align:left}
+#card{position:absolute;left:0;top:0;text-align:center}
+#flood{position:absolute;left:0;top:0;background:#3D4FE0;transform-origin:50% 50%}
+.cut{position:absolute;left:0;top:0;transform-origin:50% 50%;filter:drop-shadow(0 16px 20px rgba(22,25,34,.18))}
+</style></head>
+<body><div id="stage">
+  <div class="blob" id="b1" style="width:900px;height:900px;background:rgba(61,79,224,.09)"></div>
+  <div class="blob" id="b2" style="width:820px;height:820px;background:rgba(170,190,255,.22)"></div>
+  <div id="cuts"></div>
+  <div id="title" class="abs disp" style="text-align:center"></div>
+  <div id="card"><div class="kick" id="cardn"></div><div class="disp" id="cardt"></div></div>
+  <div id="cap"><div class="disp" id="capt"></div></div>
+  <div id="phone"><div id="screen">
+    <div class="layer" id="LA"></div>
+    <div class="layer" id="LB"></div>
+    <div id="scan"></div>
+    <div id="lockov"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
+    <div id="ripple"></div><div id="finger"></div>
+  </div></div>
+  <div id="flood"></div>
+  <div id="lock" class="abs" style="left:0;top:0;text-align:center">
+    <div id="lockrow" style="display:flex;justify-content:center;align-items:center;gap:28px">
+      <svg id="mark" viewBox="0 0 24 24" fill="#fff" stroke="#fff" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7.5V6a2 2 0 1 0-2-2" fill="none"/><path d="M12 7.5 3.5 14a1.5 1.5 0 0 0 .9 2.7h15.2a1.5 1.5 0 0 0 .9-2.7z"/></svg>
+      <div id="lname" style="font:600 1px/1 'Bricolage Grotesque',sans-serif;letter-spacing:-.035em;color:#fff">Wardrobe</div></div>
+    <div id="lfact" style="font:500 1px/1.25 'DM Sans',sans-serif;color:#fff">One HTML file, no account.</div>
+  </div>
+</div>
+<script>
+const V = /v=1/.test(location.search);
+const SW = V ? 1080 : 1920, SH = V ? 1920 : 1080;
+const R = __RECTS__, SCRIPT = __SCRIPT__;
+const $ = (s) => document.querySelector(s);
+const cl = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const P = (t, a, b) => cl((t - a) / (b - a));
+const lerp = (a, b, k) => a + (b - a) * k;
+const eOut = (k) => 1 - Math.pow(1 - k, 3), eIn = (k) => k * k * k;
+const eIO = (k) => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
+const set = (el, o) => { for (const k in o) el.style[k] = o[k]; };
+set($('#stage'), { width: SW + 'px', height: SH + 'px' }); set(document.body, { width: SW + 'px', height: SH + 'px' });
+set($('#flood'), { width: SW + 'px', height: SH + 'px' });
+const IMG = (n) => `shots/${n}.png`;
+const center = (key) => { if (Array.isArray(key)) return key; const [a, b] = key.split('.'); const r = R[a][b]; return [r.x + r.w / 2, r.y + r.h / 2]; };
+const rectOf = (key) => { const [a, b] = key.split('.'); return R[a][b]; };
+const sheetTop = (n) => (R.sheetTop[n] ?? 60);
+
+// ---------------- layout per orientation ----------------
+const L = V ? { pc: [540, 1215], ps: 1.2, cap: { x: 60, y: 250, w: 960, size: 92, align: 'center' }, card: { size: 150 }, tsize: 128 }
+            : { pc: [1330, 540], ps: 1.08, cap: { x: 140, y: 0, w: 720, size: 100, align: 'left' }, card: { size: 170 }, tsize: 150 };
+
+// ---------------- the beats (seconds from each beat's start) ----------------
+const ROWS = R.rows; // tops, bottoms, shoes
+const swipeRow = (t, r, from, to) => ({ t, kind: 'swipe', row: r, from, to });
+const B = window.__B = {
+  c0: { intro: true },
+  c1a: { cap: 'A guide to a good photo', states: [{ t: 0, img: 'w-home' }, { t: 1.4, img: 'a-sheet', tr: 'sheet' }, { t: 5.2, img: 'a-guide2', tr: 'fade', d: 0.5 }],
+         taps: [{ t: 1.15, at: 'w-home.add' }, { t: 4.7, at: [330, 560], to: [70, 560], d: 0.5 }], zoom: [[0, 1], [3.2, 1], [4.0, 1.55, 195, 560], [8.6, 1.55, 195, 560], [9.4, 1]] },
+  c1b: { cap: 'Cut out on your phone', states: [{ t: 0, img: 'a-sheet' }, { t: 1.1, img: 'a-cut-00', tr: 'fade', d: 0.4 }, { t: 4.6, img: 'a-cut-done', tr: 'wipe', d: 1.5, rect: 'a-cut-done.cwrap' }],
+         taps: [{ t: 0.85, at: [195, 300] }], zoom: [[0, 1], [1.8, 1.4, 195, 322], [8.4, 1.4, 195, 322], [9.6, 1]] },
+  c1c: { cap: 'Touch up any edge', states: [{ t: 0, img: 'a-cut-done' }, { t: 2.6, img: 'a-restore', tr: 'fade', d: 0.25 }, { t: 5.5, img: 'a-zoom', tr: 'fade', d: 0.35 }],
+         taps: [{ t: 2.5, at: 'a-cut-done.restore' }, { t: 4.95, at: 'a-cut-done.zin' }, { t: 5.4, at: 'a-cut-done.zin' }],
+         zoom: [[0, 1], [1.0, 1.7, 195, 560], [4.0, 1.7, 195, 560], [4.8, 1.35, 195, 330], [7.6, 1.35, 195, 330], [8.4, 1]] },
+  c1d: { cap: 'Add the details', states: [{ t: 0, img: 'a-zoom' }, { t: 0.5, img: 'a-cut-done', tr: 'fade', d: 0.3 }, { t: 1.3, img: 'a-form1', tr: 'scroll', d: 0.7 }, { t: 5.6, img: 'a-form1b', tr: 'fade', d: 0.6 }, { t: 8.7, img: 'a-form2', tr: 'scroll', d: 0.7 }],
+         taps: [{ t: 5.2, at: 'a-form1b.name' }, { t: 7.9, at: 'a-form1b.price' }],
+         zoom: [[0, 1], [2.3, 1.55, 195, 150], [4.5, 1.55, 195, 260], [5.3, 1.45, 195, 470], [8.2, 1.45, 195, 470], [9.2, 1]] },
+  c1e: { cap: 'Kept to real scale', states: [{ t: 0, img: 'a-form2' }, { t: 4.9, img: 'a-form3', tr: 'scroll', d: 0.6 }, { t: 7.3, img: 'a-saved', tr: 'sheetdown', d: 0.5 }],
+         taps: [{ t: 7.0, at: 'a-form3.save' }], zoom: [[0, 1], [0.8, 1.9, 120, 276], [4.0, 1.9, 120, 276], [4.8, 1]] },
+  c2a: { cap: 'Every piece in one place', states: [{ t: 0, img: 'w-home' }, { t: 1.4, scroll: 'w', from: 0, to: 1060, t0: 1.4, t1: 7.6 }, { t: 7.9, scroll: 'w', from: 1060, to: 0, t0: 7.9, t1: 9.4 }] },
+  c2b: { cap: 'Search and sort', states: [{ t: 0, img: 'w-home' }, { t: 1.0, img: 'w-q2', tr: 'fade', d: 0.2 }, { t: 1.8, img: 'w-q5', tr: 'fade', d: 0.25 }, { t: 3.6, img: 'w-shoes', tr: 'fade', d: 0.3 }],
+         taps: [{ t: 0.8, at: 'w-home.q' }, { t: 3.45, at: 'w-shoes.tab' }], zoom: [[0, 1], [0.6, 1.4, 195, 300], [4.9, 1.4, 195, 300], [5.6, 1]] },
+  c2c: { cap: 'What each wear costs', states: [{ t: 0, img: 'w-shoes' }, { t: 0.55, img: 'w-home', tr: 'fade', d: 0.25 }, { t: 2.15, img: 'w-detail', tr: 'sheet' }, { t: 8.75, img: 'w-detail-worn', tr: 'fade', d: 0.3 }],
+         taps: [{ t: 0.4, at: [34, 294] }, { t: 1.95, at: 'w-home.trousers' }, { t: 8.6, at: 'w-detail.wear' }],
+         zoom: [[0, 1], [3.8, 1], [4.6, 1.6, 195, 690], [8.0, 1.6, 195, 660], [10.8, 1.6, 195, 660], [11.6, 1]] },
+  c3a: { cap: 'Mix and match, to scale', states: [{ t: 0, img: 'w-home' }, { t: 0.9, tryon: true, tr: 'push' }],
+         taps: [{ t: 0.7, at: [127, 800] }, swipeRow(3.0, 0, 0, 1), swipeRow(4.4, 0, 1, 0), swipeRow(5.8, 1, 0, 1), swipeRow(7.2, 2, 0, 1), swipeRow(8.2, 2, 1, 2)] },
+  c3b: { cap: 'Lock, shuffle, layer', states: [{ t: 0, tryon: true }, { t: 5.9, img: 't-extras', tr: 'fade', d: 0.4 }],
+         taps: [{ t: 1.0, at: 't-base.lockTop' }, { t: 2.9, at: 't-base.shuffle' }, { t: 5.7, at: 't-base.extras' }],
+         lock: [1.05, 99], shuffle: [3.0, 4.4], zoom: [[0, 1], [0.6, 1.5, 300, 200], [2.0, 1.5, 300, 200], [2.6, 1]] },
+  c3c: { cap: 'Style me', states: [{ t: 0, img: 't-extras' }, { t: 0.6, tryon: true, tr: 'fade', d: 0.35 }, { t: 3.9, img: 't-style', tr: 'fade', d: 0.25 }, { t: 9.3, img: 't-nope', tr: 'fade', d: 0.25 }],
+         taps: [{ t: 0.45, at: 't-base.extras' }, { t: 1.4, at: 't-base.styleme' }, { t: 9.1, at: 't-base.nope' }], style: [1.6, 3.7] },
+  c4a: { cap: 'Arrange the board', states: [{ t: 0, img: 't-nope' }, { t: 1.0, img: 'o-board', tr: 'push' }, { t: 2.65, img: 'o-board-sel', tr: 'fade', d: 0.15 }, { t: 4.0, img: 'o-board-moved', tr: 'fade', d: 0.7 }, { t: 6.5, img: 'o-board-colour', tr: 'fade', d: 0.3 }],
+         taps: [{ t: 0.8, at: 't-base.create' }, { t: 2.5, at: [137, 279] }, { t: 3.9, at: [137, 279], to: [177, 249], d: 0.8 }, { t: 6.3, at: 'o-board.color' }] },
+  c4b: { cap: 'Save, share, reuse', states: [{ t: 0, img: 'o-board-colour' }, { t: 0.6, img: 'o-board', tr: 'fade', d: 0.3 }, { t: 1.5, img: 'o-grid', tr: 'push' }, { t: 3.7, img: 'o-sheet', tr: 'sheet' }],
+         taps: [{ t: 0.45, at: [195, 560] }, { t: 1.3, at: 'o-board.save' }, { t: 3.5, at: [100, 260] }], zoom: [[0, 1], [5.0, 1], [5.8, 1.5, 195, 700], [8.8, 1.5, 195, 700], [9.6, 1]] },
+  c5a: { cap: 'Your week, planned', states: [{ t: 0, img: 'w-home' }, { t: 0.85, img: 'p-agenda', tr: 'push' }, { t: 3.6, img: 'p-month', tr: 'fade', d: 0.35 }, { t: 6.6, img: 'p-agenda', tr: 'fade', d: 0.35 }],
+         taps: [{ t: 0.65, at: [357, 800] }, { t: 3.4, at: [195, 104] }, { t: 6.4, at: [140, 104] }] },
+  c5b: { cap: 'With the forecast', states: [{ t: 0, img: 'p-agenda' }, { t: 5.2, img: 'p-auto', tr: 'fade', d: 0.3 }],
+         taps: [{ t: 5.0, at: 'p-agenda.auto' }], zoom: [[0, 1], [0.7, 1.8, 260, 150], [3.0, 1.8, 260, 150], [3.8, 1.45, 220, 600], [7.6, 1.45, 220, 600], [8.4, 1]] },
+  c5c: { cap: 'Mark as worn', states: [{ t: 0, img: 'p-before' }, { t: 1.7, img: 'p-worn', tr: 'fade', d: 0.3 }],
+         taps: [{ t: 1.55, at: 'p-before.worn' }], zoom: [[0, 1], [0.6, 1.6, 230, 160], [4.6, 1.6, 230, 160], [5.3, 1]] },
+  c6a: { cap: 'Capsules', states: [{ t: 0, img: 'p-worn' }, { t: 0.95, img: 'l-home', tr: 'sheet' }, { t: 4.0, img: 'l-cap', tr: 'fade', d: 0.45 }],
+         taps: [{ t: 0.75, at: 'w-home.lists' }, { t: 3.8, at: 'l-home.cap' }], zoom: [[0, 1], [5.0, 1], [5.8, 1.6, 195, 150], [9.0, 1.6, 195, 150], [9.8, 1]] },
+  c6b: { cap: 'Trips', states: [{ t: 0, img: 'l-cap' }, { t: 0.6, img: 'l-home', tr: 'fade', d: 0.35 }, { t: 1.65, img: 'l-trip', tr: 'fade', d: 0.45 }, { t: 4.25, img: 'l-trip2', tr: 'fade', d: 0.2 }],
+         taps: [{ t: 0.45, at: [70, 112] }, { t: 1.45, at: 'l-home.trip' }, { t: 4.1, at: 'l-trip.item' }], zoom: [[0, 1], [2.3, 1.4, 195, 500], [6.8, 1.4, 195, 500], [7.6, 1]] },
+  c6c: { cap: 'Wish list', states: [{ t: 0, img: 'l-trip2' }, { t: 0.6, img: 'l-home', tr: 'fade', d: 0.35 }, { t: 1.45, img: 'l-wish', tr: 'fade', d: 0.35 }],
+         taps: [{ t: 0.45, at: [70, 112] }, { t: 1.3, at: 'l-home.wish' }], zoom: [[0, 1], [2.4, 1.55, 195, 640], [6.2, 1.55, 195, 640], [7.0, 1]] },
+  c7a: { cap: 'Your numbers', states: [{ t: 0, img: 'p-worn' }, { t: 0.95, img: 'i-top', tr: 'sheet' }],
+         taps: [{ t: 0.75, at: 'w-home.ins' }], zoom: [[0, 1], [2.4, 1.45, 195, 220], [4.8, 1.45, 195, 220], [5.6, 1.45, 195, 520], [7.8, 1.45, 195, 520], [8.6, 1]] },
+  c7b: { cap: 'What to wear, what to let go', states: [{ t: 0, img: 'i-top' }, { t: 0.6, sscroll: 'i', from: 0, to: 1200, t0: 0.6, t1: 8.0 }] },
+  c8a: { cap: 'Light, dark, your colour', states: [{ t: 0, img: 'p-worn' }, { t: 0.85, img: 's-top', tr: 'sheet' }, { t: 2.7, img: 's-dark', tr: 'fade', d: 0.45 }, { t: 4.3, img: 's-rose', tr: 'fade', d: 0.35 }],
+         taps: [{ t: 0.65, at: 'w-home.set' }, { t: 2.55, at: [173, 188] }, { t: 4.15, at: [131, 273] }], zoom: [[0, 1], [1.6, 1.45, 195, 230], [6.4, 1.45, 195, 230], [7.3, 1]] },
+  c8b: { cap: 'Back up to one file', states: [{ t: 0, img: 's-rose' }, { t: 1.15, img: 's-top', tr: 'fade', d: 0.45 }, { t: 2.2, sscroll: 's', from: 0, to: 470, t0: 2.2, t1: 5.2 }],
+         taps: [{ t: 0.55, at: [123, 188] }, { t: 1.0, at: [39, 273] }], zoom: [[0, 1], [5.4, 1.4, 195, 560], [7.2, 1.4, 195, 560]] },
+  c8c: { cap: 'One HTML file.<br>No account.', claim: true, states: [{ t: 0, img: 'w-home', tr: 'fade', d: 0.5 }], zoom: [[0, 1.4, 195, 560], [0.6, 1], [5.5, 0.82]] },
+  end: { end: true },
+};
+const CARD_N = { 1: 'Add clothes', 2: 'Your wardrobe', 3: 'Try on', 4: 'Outfits', 5: 'Plan', 6: 'Capsules, trips and wishes', 7: 'Insights', 8: 'Make it yours' };
+
+// ---------------- the timeline ----------------
+const PAD = 2.0, CARD = 3.0, INTRO_PAD = 2.4, VO_LEAD = 0.55, END = 5.5;
+const T = []; let acc = 0;
+for (const s of SCRIPT) {
+  let dur = s.card ? CARD : s.id === 'c0' ? s.dur + INTRO_PAD + 0.6 : Math.max(5.2, s.dur + PAD);
+  T.push({ id: s.id, ch: s.ch, start: acc, dur, vo: s.dur || 0, card: s.card, voAt: s.card ? null : acc + (s.id === 'c0' ? 0.9 : VO_LEAD) }); acc += dur;
+}
+T.push({ id: 'end', start: acc, dur: END }); acc += END;
+window.TIMELINE = T; window.TOTAL = acc;
+
+// ---------------- screen layers ----------------
+const pool = {};
+function img(src) { if (!pool[src]) { const i = new Image(); i.src = src; pool[src] = i; } return pool[src]; }
+const preload = [];
+['w-home','w-tall','w-q2','w-q5','w-shoes','w-detail','w-detail-worn','t-base','t-bg','t-lock','t-extras','t-style','t-nope','o-board','o-board-sel','o-board-moved','o-board-colour','o-grid','o-sheet','p-agenda','p-month','p-auto','p-before','p-worn','l-home','l-cap','l-trip','l-trip2','l-wish','i-top','i-tall','s-top','s-tall','s-dark','s-rose','w-dark-rose','t-dark-rose','a-sheet','a-guide2','a-cut-00','a-cut-done','a-zoom','a-restore','a-form1','a-form1b','a-form2','a-form3','a-saved'].forEach((n) => preload.push(img(IMG(n))));
+const STRIPS = ROWS.map((r, i) => Array.from({ length: r.n }, (_, j) => { const s = `shots/strips/r${i}-${j}.png`; preload.push(img(s)); return s; }));
+const ITEMS = ['tee','longsleeve','hoodie','denim','workjacket','trousers','skirt','boots','loafer','formal','sneakers2','briefcase','scarf','bag'];
+ITEMS.forEach((n) => preload.push(img(`items/${n}.png`)));
+
+// a state renders into a layer element as HTML (cached by key)
+function stateHTML(st, b, lt) {
+  if (st.img) return `<img class="full" src="${IMG(st.img)}">`;
+  if (st.scroll === 'w') {
+    const k = eIO(P(lt, st.t0, st.t1)), off = lerp(st.from, st.to, k), tw = R.tall['w-tall'];
+    const top = tw.headerBottom, bot = tw.navTop;
+    return `<img class="full" src="${IMG('w-home')}"><div style="position:absolute;left:0;top:${top}px;width:390px;height:${bot - top}px;overflow:hidden;background:#eceef2">
+      <img src="${IMG('w-tall')}" style="position:absolute;left:0;top:${-top - off}px;width:390px"></div>`;
+  }
+  if (st.sscroll) {
+    const base = st.sscroll === 'i' ? 'i-top' : 's-top', tall = st.sscroll === 'i' ? 'i-tall' : 's-tall', ti = R.tall[tall];
+    const k = eIO(P(lt, st.t0, st.t1)), off = lerp(st.from, st.to, k), head = ti.baseTop + 58;
+    return `<img class="full" src="${IMG(base)}"><div style="position:absolute;left:0;top:${head}px;width:390px;height:${844 - head}px;overflow:hidden;background:#fff">
+      <img src="${IMG(tall)}" style="position:absolute;left:0;top:${-(ti.tallTop + 58) - off}px;width:390px"></div>`;
+  }
+  if (st.tryon) {
+    const pos = tryPos(b, lt);
+    let h = `<img class="full" src="${IMG('t-bg')}">`;
+    ROWS.forEach((r, i) => {
+      const p = pos[i], i0 = Math.floor(p), fr = p - i0, n = r.n, m = (v) => ((v % n) + n) % n;
+      const blur = pos.v && pos.v[i] > 6 ? `filter:blur(${Math.min(3, (pos.v[i] - 6) * 0.12)}px);` : '';
+      h += `<div class="row" style="left:${r.x}px;top:${r.y}px;width:${r.w}px;height:${r.h}px;${blur}">
+        <img src="${STRIPS[i][m(i0)]}" style="left:${-fr * r.w}px;width:${r.w}px"><img src="${STRIPS[i][m(i0 + 1)]}" style="left:${(1 - fr) * r.w}px;width:${r.w}px"></div>
+        <div class="tmeta" style="left:${r.x + 12}px;top:${r.y}px">${['Top', 'Bottom', 'Shoes'][i]}<span class="cnt">${m(Math.round(p)) + 1}/${n}</span></div>`;
+    });
+    return h;
+  }
+  return '';
+}
+// Try on row positions over a beat (continuous indexes)
+const START_POS = { c3a: [0, 0, 0], c3b: [0, 1, 2], c3c: [0, 0, 0] };
+function tryPos(b, lt) {
+  const pos = [...(START_POS[b.id] || [0, 0, 0])];
+  for (const tp of ((B[b.id] || {}).taps || [])) if (tp.kind === 'swipe') { const k = eIO(P(lt, tp.t, tp.t + 0.45)); if (lt >= tp.t) pos[tp.row] = lerp(tp.from, tp.to, k); }
+  const vel = [0, 0, 0];
+  if ((B[b.id] || {}).shuffle) { const [a, z] = (B[b.id] || {}).shuffle; const k = P(lt, a, z), e = 1 - Math.pow(1 - k, 2.4);
+    pos[1] = lerp(1, 0 + 2 * 3, e); pos[2] = lerp(2, 0 + 4 * 3, e); if (k > 0 && k < 1) { vel[1] = vel[2] = (1 - k) * 40; } }
+  if ((B[b.id] || {}).style) { const [a, z] = (B[b.id] || {}).style; const land = [z - 0.9, z - 0.45, z], fin = (R.styled || []).map((x) => parseInt(x) - 1), tgt = [fin[0] + 2 * 4, fin[1] + 2 * 4, fin[2] + 4 * 3];
+    for (let i = 0; i < 3; i++) { const k = P(lt, a, land[i]), e = 1 - Math.pow(1 - k, 2.6); pos[i] = lerp(0, tgt[i], e); if (k > 0 && k < 1) vel[i] = (1 - k) * 45; } }
+  pos.v = vel; return pos;
+}
+
+function renderScreen(b, lt) {
+  const sts = (B[b.id] || {}).states || [{ t: 0, img: 'w-home' }];
+  let i = 0; for (let j = 0; j < sts.length; j++) if (lt >= sts[j].t) i = j;
+  const cur = sts[i], prev = sts[i - 1];
+  const d = cur.d ?? (cur.tr === 'sheet' || cur.tr === 'sheetdown' ? 0.42 : cur.tr === 'push' ? 0.38 : 0.3);
+  const k = cur.tr && prev ? P(lt, cur.t, cur.t + d) : 1;
+  const A = $('#LA'), Bl = $('#LB');
+  A.innerHTML = prev && k < 1 ? stateHTML(prev, b, lt) : stateHTML(cur, b, lt);
+  Bl.innerHTML = prev && k < 1 ? stateHTML(cur, b, lt) : '';
+  set(A, { transform: 'none', opacity: 1, clipPath: 'none', filter: 'none' }); set(Bl, { transform: 'none', opacity: 1, clipPath: 'none', boxShadow: 'none', filter: 'none' });
+  $('#scan').style.opacity = 0;
+  if (!(prev && k < 1)) return;
+  const e = eIO(k), eo = eOut(k);
+  if (cur.tr === 'fade') set(Bl, { opacity: e });
+  if (cur.tr === 'push') { set(A, { transform: `translateX(${-120 * e}px)` }); set(Bl, { transform: `translateX(${390 * (1 - e)}px)`, boxShadow: '-24px 0 40px rgba(22,25,34,.16)' }); }
+  if (cur.tr === 'scroll') { set(A, { transform: `translateY(${-300 * e}px)`, opacity: 1 - e }); set(Bl, { transform: `translateY(${300 * (1 - e)}px)`, opacity: e }); }
+  if (cur.tr === 'sheet') { const top = sheetTop(cur.img); set(A, { filter: `brightness(${1 - 0.45 * eo})` }); set(Bl, { clipPath: `inset(${top}px 0 0 0 round 28px 28px 0 0)`, transform: `translateY(${(844 - top) * (1 - eo)}px)` }); }
+  if (cur.tr === 'sheetdown') { const top = sheetTop(prev.img); A.innerHTML = stateHTML(cur, b, lt); Bl.innerHTML = stateHTML(prev, b, lt);
+    set(A, { filter: `brightness(${0.55 + 0.45 * eo})` }); set(Bl, { clipPath: `inset(${top}px 0 0 0 round 28px 28px 0 0)`, transform: `translateY(${(844 - top) * eIn(k)}px)` }); }
+  if (cur.tr === 'wipe') { const r = rectOf(cur.rect); const y = r.y + r.h * e; set(Bl, { clipPath: `inset(0 0 ${844 - y}px 0)` });
+    set($('#scan'), { opacity: 1, left: r.x + 'px', width: r.w + 'px', top: y + 'px' }); }
+}
+
+// ---------------- finger ----------------
+function fingerAt(b, lt) {
+  const taps = ((B[b.id] || {}).taps || []).map((tp) => {
+    if (tp.kind === 'swipe') { const r = ROWS[tp.row], y = r.y + r.h * 0.55; const fw = tp.to > tp.from; return { t: tp.t, at: [fw ? 320 : 70, y], to: [fw ? 70 : 320, y], d: 0.45 }; }
+    return { ...tp, at: center(tp.at) };
+  });
+  if (!taps.length) return null;
+  let i = -1; for (let j = 0; j < taps.length; j++) if (lt >= taps[j].t - 0.5) i = j;
+  if (i < 0) return null;
+  const tp = taps[i], prv = taps[i - 1], nxt = taps[i + 1];
+  const start = prv && tp.t - (prv.t + (prv.d || 0)) < 1.4 ? (prv.to || prv.at) : [tp.at[0] + 70, tp.at[1] + 160];
+  const enterOp = prv && tp.t - (prv.t + (prv.d || 0)) < 1.4 ? 1 : P(lt, tp.t - 0.5, tp.t - 0.3);
+  const endT = tp.t + (tp.d || 0);
+  const leaving = !nxt || nxt.t - endT >= 1.4;
+  let x, y;
+  if (lt < tp.t) { const k = eOut(P(lt, tp.t - 0.5, tp.t - 0.05)); x = lerp(start[0], tp.at[0], k); y = lerp(start[1], tp.at[1], k); }
+  else if (tp.to && lt < endT) { const k = eIO(P(lt, tp.t, endT)); x = lerp(tp.at[0], tp.to[0], k); y = lerp(tp.at[1], tp.to[1], k); }
+  else { x = (tp.to || tp.at)[0]; y = (tp.to || tp.at)[1]; }
+  const op = enterOp * (leaving ? 1 - P(lt, endT + 0.35, endT + 0.6) : 1);
+  const press = tp.to ? (lt >= tp.t && lt < endT ? 0.6 : 0) : P(lt, tp.t - 0.06, tp.t) * (1 - P(lt, tp.t + 0.06, tp.t + 0.16));
+  const rip = tp.to ? 0 : P(lt, tp.t, tp.t + 0.4);
+  return { x, y, op, press, rip };
+}
+
+// ---------------- camera ----------------
+function camAt(b, lt) {
+  const z = (B[b.id] || {}).zoom; if (!z) return { z: 1, f: [195, 422] };
+  let i = 0; for (let j = 0; j < z.length; j++) if (lt >= z[j][0]) i = j;
+  const a = z[i], c = z[i + 1] || a;
+  const k = c === a ? 0 : eIO(P(lt, a[0], c[0]));
+  const fa = a.length > 2 ? [a[2], a[3]] : [195, 422], fc = c.length > 2 ? [c[2], c[3]] : [195, 422];
+  return { z: lerp(a[1], c[1], k), f: [lerp(fa[0], fc[0], k), lerp(fa[1], fc[1], k)] };
+}
+
+// ---------------- text ----------------
+const VOICES = ['rise', 'blur', 'build'];
+function textIn(el, t, a, z, voice, dy = 40) {
+  const i = eOut(P(t, a, a + 0.45)), o = eIn(P(t, z - 0.3, z));
+  if (voice === 'blur') set(el, { opacity: i * (1 - o), filter: `blur(${(1 - i) * 14 + o * 8}px)`, transform: `translateY(${-o * 16}px)` });
+  else if (voice === 'build') set(el, { opacity: i * (1 - o), filter: 'none', transform: `translateY(${(1 - i) * dy}px) scale(${0.96 + 0.04 * i})`, letterSpacing: `${-0.035 + 0.02 * (1 - i)}em` });
+  else set(el, { opacity: i * (1 - o), filter: 'none', transform: `translateY(${(1 - i) * dy - o * 20}px)` });
+}
+
+// ---------------- the frame ----------------
+function beatAt(t) { let b = T[0]; for (const x of T) if (t >= x.start) b = x; return b; }
+window.render = function (t) {
+  set($('#b1'), { left: (SW * 0.55 + Math.sin(t * 0.21) * 160) + 'px', top: (-260 + Math.cos(t * 0.17) * 90) + 'px' });
+  set($('#b2'), { left: (-260 + Math.cos(t * 0.19) * 140) + 'px', top: (SH * 0.45 + Math.sin(t * 0.23) * 100) + 'px' });
+  const b = beatAt(t), lt = t - b.start, spec = B[b.id] || {};
+  const nb = T[T.indexOf(b) + 1], pb = T[T.indexOf(b) - 1];
+  // reset
+  ['#title', '#card', '#cap', '#flood', '#lock', '#cuts'].forEach((s) => ($(s).style.opacity = 0));
+  // ---- phone placement: exits into a chapter card, returns after it ----
+  let [cx, cy] = L.pc, ps = L.ps, pop = 1, pyOff = 0, pblur = 0;
+  if (b.card) { pop = 0; }
+  if (nb && nb.card && lt > b.dur - 0.55) { const k = eIn(P(lt, b.dur - 0.55, b.dur)); pyOff = k * SH * 0.55; pblur = k * 10; }
+  if (pb && pb.card && lt < 0.7) { const k = eOut(P(lt, 0, 0.7)); pyOff = (1 - k) * SH * 0.55; pblur = (1 - k) * 10; }
+  if (b.id === 'c0') { const k = eOut(P(lt, b.dur - 2.6, b.dur - 1.6)); pop = P(lt, b.dur - 2.6, b.dur - 2.4); pyOff = (1 - k) * SH * 0.6; }
+  if (b.id === 'end') pop = 0;
+  // ---- camera ----
+  const cam = camAt(b, lt), S = ps * cam.z;
+  const ax = lerp(210, 15 + cam.f[0], cam.z > 1 ? cl((cam.z - 1) / 0.35) : 0), ay = lerp(437, 15 + cam.f[1], cam.z > 1 ? cl((cam.z - 1) / 0.35) : 0);
+  if (!V) { const left = cx - ax * S, lim = L.cap.x + L.cap.w + 50; if (left < lim) cx += lim - left; }
+  if (V && (B[b.id] || {}).cap) { const top = cy - ay * S, lim = L.cap.y + 300; if (top < lim) cy += lim - top; }
+  set($('#phone'), { opacity: pop, transform: `translate(${cx - ax * S}px,${cy - ay * S + pyOff}px) scale(${S})`, filter: pblur > 0.3 ? `blur(${pblur}px)` : 'none' });
+  if (pop > 0) {
+    renderScreen(b, lt);
+    const lk = spec.lock; const lo = $('#lockov');
+    if (lk && lt >= lk[0]) { const r = R['t-base'].lockTop; set(lo, { opacity: 1, left: r.x + 'px', top: r.y + 'px' }); } else lo.style.opacity = 0;
+    const f = fingerAt(b, lt);
+    if (f) { set($('#finger'), { opacity: f.op, transform: `translate(${f.x}px,${f.y}px) scale(${1 - 0.18 * f.press})` });
+             set($('#ripple'), { opacity: f.rip > 0 && f.rip < 1 ? (1 - f.rip) * f.op : 0, transform: `translate(${f.x}px,${f.y}px) scale(${1 + f.rip * 1.6})` }); }
+    else { $('#finger').style.opacity = 0; $('#ripple').style.opacity = 0; }
+  }
+  // ---- caption ----
+  if (spec.cap) {
+    const c = $('#cap'), ct = $('#capt'); const big = spec.claim ? 1.25 : 1;
+    if (ct.dataset.k !== b.id) { ct.innerHTML = spec.cap; ct.dataset.k = b.id; }
+    set(ct, { fontSize: L.cap.size * big + 'px', textAlign: L.cap.align });
+    set(c, { left: L.cap.x + 'px', width: L.cap.w + 'px', top: V ? L.cap.y + 'px' : '0', height: V ? 'auto' : SH + 'px', display: 'flex', flexDirection: 'column', justifyContent: 'center' });
+    const voice = VOICES[T.filter((x) => B[x.id] && B[x.id].cap).indexOf(b) % 3];
+    const out = nb && nb.card ? b.dur - 0.45 : nb && nb.id === 'end' ? b.dur : b.dur + 0.3;
+    textIn(c, lt, 0.25, out, voice); if (lt > b.dur - 0.01 && !(nb && nb.card)) c.style.opacity = 0;
+  }
+  // ---- chapter card ----
+  if (b.card) {
+    const c = $('#card'); $('#cardn').textContent = `Chapter ${b.ch}`; $('#cardt').innerHTML = b.card;
+    set($('#cardt'), { fontSize: L.card.size * (b.card.length > 18 ? (V ? 0.62 : 0.72) : 1) + 'px', marginTop: '22px' });
+    set(c, { width: SW + 'px', height: SH + 'px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '0 60px' });
+    const i = eOut(P(lt, 0.15, 0.75)), o = eIn(P(lt, b.dur - 0.45, b.dur));
+    set(c, { opacity: i * (1 - o), transform: `scale(${1.06 - 0.06 * i + 0.02 * lt / b.dur})`, filter: `blur(${(1 - i) * 16 + o * 12}px)` });
+  }
+  // ---- intro: the blue flood collapses, the real cutouts land in a grid, the title, then they fly into the phone ----
+  if (b.id === 'c0') {
+    const fk = eIO(P(lt, 0, 0.7));
+    set($('#flood'), { opacity: 1 - P(lt, 0.6, 0.75), transform: `scale(${1 - 0.45 * fk},${1 - 0.98 * fk})`, borderRadius: fk * 40 + 'px' });
+    const tt = $('#title'); tt.innerHTML = 'Every feature,<br>step by step.';
+    set(tt, { left: '0', width: SW + 'px', top: (V ? SH * 0.40 : SH * 0.5 - L.tsize) + 'px', fontSize: L.tsize + 'px' });
+    textIn(tt, lt, 0.6, b.dur - 2.6, 'build', 50);
+    const cuts = $('#cuts'); cuts.style.opacity = 1;
+    if (!cuts.childElementCount) ITEMS.forEach((n) => { const im = document.createElement('img'); im.src = `items/${n}.png`; im.className = 'cut'; cuts.appendChild(im); });
+    const cols = V ? 4 : 7, cw = V ? 230 : 230, ch = V ? 230 : 200;
+    [...cuts.children].forEach((im, j) => {
+      const col = j % cols, row = Math.floor(j / cols), rowsN = Math.ceil(ITEMS.length / cols);
+      let gx = (SW - cols * cw) / 2 + col * cw + cw / 2, gy;
+      if (V) gy = row < 2 ? 260 + row * ch : SH * 0.40 + 2 * L.tsize + 130 + (row - 2) * ch; else gy = row === 0 ? 150 : SH - 150;
+      const land = 0.7 + j * 0.12, k = eOut(P(lt, land, land + 0.5));
+      const fly = eIO(P(lt, b.dur - 2.4 + j * 0.03, b.dur - 1.7 + j * 0.03));
+      const tx = lerp(gx, L.pc[0], fly), ty = lerp(gy - (1 - k) * 260, L.pc[1], fly);
+      const w = im.naturalWidth ? Math.min(ch * 0.9 * im.naturalWidth / im.naturalHeight, cw * 0.85) : 150;
+      set(im, { width: w + 'px', opacity: k * (1 - P(fly, 0.7, 1)), transform: `translate(${tx - w / 2}px,${ty - ch * 0.4}px) rotate(${(1 - k) * (j % 2 ? 12 : -12)}deg) scale(${1 - 0.8 * fly})` });
+    });
+  }
+  // ---- the end card: the blue bar floods from the centre, the mark and name rise, the fact follows, a slow creep ----
+  if (b.id === 'end') {
+    const fk = eIO(P(lt, 0, 0.5));
+    set($('#flood'), { opacity: 1, transform: `scale(${0.55 + 0.45 * fk},${0.02 + 0.98 * fk})`, borderRadius: (1 - fk) * 40 + 'px' });
+    const lk = $('#lock'); set(lk, { opacity: 1, width: SW + 'px', height: SH + 'px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: V ? '60px' : '44px',
+      transform: `scale(${1 + 0.012 * Math.max(0, lt - 0.4)})` });
+    const sz = V ? 190 : 210; set($('#mark'), { width: sz * 0.78 + 'px', height: sz * 0.78 + 'px' }); set($('#lname'), { fontSize: sz + 'px' }); set($('#lfact'), { fontSize: (V ? 54 : 56) + 'px' });
+    const a = eOut(P(lt, 0.4, 0.9)), c = eOut(P(lt, 0.85, 1.3));
+    set($('#lockrow'), { opacity: a, transform: `translateY(${(1 - a) * 50}px)` }); set($('#lfact'), { opacity: c, transform: `translateY(${(1 - c) * 30}px)` });
+  }
+  // cuts in the previous end-of-cold-open: none
+};
+window.ready = (async () => {
+  await document.fonts.load('800 100px "Bricolage Grotesque"'); await document.fonts.load('600 100px "Bricolage Grotesque"');
+  await document.fonts.load('500 40px "DM Sans"'); await document.fonts.load('600 11px "DM Sans"'); await document.fonts.ready;
+  await Promise.all(preload.map((i) => (i.complete && i.naturalWidth ? 0 : new Promise((r) => { i.onload = i.onerror = r; }))));
+  await Promise.all(preload.map((i) => (i.decode ? i.decode().catch(() => 0) : 0)));
+  return true;
+})();
+</script></body></html>

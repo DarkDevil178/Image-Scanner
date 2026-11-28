@@ -1,0 +1,205 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,800&family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,500&display=block" rel="stylesheet">
+<style>
+:root{--warm:#1c1816;--card:#2a2420;--cream:#F5EDE4;--mute:#A89A8C;--or:#FF8A3D;--orl:#FFB07A;--ord:#D9600F;--ink:#161922}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:var(--warm);color:var(--cream)}
+.abs{position:absolute;left:0;top:0}
+.full{position:absolute;left:0;top:0;width:1080px;height:1920px;overflow:hidden}
+.mono{font-family:'DM Mono',monospace;font-weight:500;letter-spacing:-.02em}
+.scene{position:absolute;left:0;top:0;width:1080px;height:1920px;overflow:hidden;display:none}
+.photo{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;filter:sepia(.28) saturate(1.15) contrast(1.05) brightness(.82)}
+.warmgrade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(40,22,10,.55),rgba(40,22,10,.05) 40%,rgba(20,12,6,.75));mix-blend-mode:multiply}
+.phone{position:absolute;width:470px;height:978px;border-radius:70px;background:#0b0a09;padding:17px;box-shadow:0 0 0 2px #3a332e inset,0 80px 120px -40px rgba(0,0,0,.8)}
+.phone .scr{position:relative;width:436px;height:944px;border-radius:55px;overflow:hidden;background:var(--warm)}
+.phone .scr img{position:absolute;left:0;top:0;width:436px;height:944px}
+.sticker{position:absolute;font-family:'DM Mono';font-weight:500;color:var(--warm);background:var(--cream);border:7px solid var(--warm);border-radius:34px;padding:18px 40px;box-shadow:12px 12px 0 var(--warm);white-space:nowrap}
+#cap{position:absolute;z-index:30;left:70px;right:70px;top:1500px;display:flex;justify-content:center}
+#cap span{font:500 50px/1.25 'DM Mono';letter-spacing:-.02em;color:var(--cream);background:rgba(20,14,10,.78);padding:14px 26px;border-radius:14px;text-align:center;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+#cap span i{font-style:normal;display:inline-block;width:.55em;height:.95em;background:var(--or);vertical-align:-.12em;margin-left:.2em}
+</style></head><body>
+<svg width="0" height="0" style="position:absolute"><defs>
+ <filter id="rgb" x="-5%" y="0" width="110%" height="100%" color-interpolation-filters="sRGB">
+  <feColorMatrix in="SourceGraphic" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="r"/><feOffset id="rdx" in="r" dx="6" result="r2"/>
+  <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="g"/>
+  <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="b"/><feOffset id="bdx" in="b" dx="-6" result="b2"/>
+  <feBlend in="r2" in2="g" mode="screen" result="rg"/><feBlend in="rg" in2="b2" mode="screen"/></filter></defs></svg>
+<div id="stage" class="full">
+ <!-- 1 HOOK: VHS, the result first, then rewind -->
+ <div id="s1" class="scene"><div id="vhs" class="full" style="filter:url(#rgb) sepia(.2) saturate(1.2) contrast(1.08)"><img id="v1" class="abs" style="width:1080px;height:2337px;top:-208px"><img id="v2" class="abs" style="width:1080px;height:2337px;top:-208px"></div>
+  <div class="full" style="background:repeating-linear-gradient(0deg,rgba(0,0,0,.22) 0 2px,rgba(0,0,0,0) 2px 5px)"></div>
+  <div id="vnoise" class="full" style="background:url(../journey/work/grain.png);mix-blend-mode:overlay;opacity:.7"></div>
+  <div id="osd" class="abs mono" style="left:70px;top:150px;font-size:58px;color:#F5EDE4;text-shadow:3px 3px 0 rgba(0,0,0,.5)"></div>
+  <div id="osd2" class="abs mono" style="left:70px;top:1700px;font-size:40px;color:#F5EDE4;opacity:.85;text-shadow:3px 3px 0 rgba(0,0,0,.5)">NOV.30 2026  7:00 PM</div></div>
+ <!-- 2 PROBLEM: comic stickers over the real kitchen, dolly zoom + parallax -->
+ <div id="s2" class="scene"><img id="p2" class="photo" src="../launch-kit-002/build/photos/cooker1.jpg"><div class="warmgrade"></div><div id="steam2" class="full"></div>
+  <div id="stk1" class="sticker" style="font-size:150px">1?</div><div id="stk2" class="sticker" style="font-size:150px">2?</div><div id="stk3" class="sticker" style="font-size:170px;background:#FF8A3D">3??</div></div>
+ <div id="s3" class="scene"><img id="p3" class="photo" src="../launch-kit-002/build/photos/flame2.jpg"><div class="warmgrade"></div>
+  <div id="burst" class="abs" style="left:90px;top:640px;width:900px;height:560px"></div></div>
+ <!-- 4-6 SOLUTION: clean product shots on a warm set -->
+ <div id="s4" class="scene"><div class="full" style="background:radial-gradient(ellipse 900px 1100px at 50% 38%,#4a3426 0%,#2a1e17 45%,#120c09 100%)"></div>
+  <div id="floor4" class="abs" style="left:-200px;top:1330px;width:1480px;height:700px;background:radial-gradient(ellipse 560px 120px at 50% 18%,rgba(0,0,0,.55),rgba(0,0,0,0) 70%)"></div>
+  <div id="kick4" class="abs mono" style="left:0;width:1080px;top:250px;text-align:center;font-size:44px;color:#FFB07A">#002</div>
+  <div id="ttl4" class="abs mono" style="left:0;width:1080px;top:310px;text-align:center;font-size:78px;color:#F5EDE4;line-height:1.05">cooker whistle<br>counter</div>
+  <div id="ph4" class="phone" style="left:305px;top:470px"><div class="scr"><img id="ph4i"></div></div>
+  <div id="flash" class="full" style="background:#fff;opacity:0"></div></div>
+ <div id="s5" class="scene"><div class="full" style="background:radial-gradient(ellipse 900px 1200px at 40% 40%,#4f3727 0%,#2a1e17 50%,#120c09 100%)"></div>
+  <div id="ph5" class="phone" style="left:305px;top:330px"><div class="scr"><img id="ph5i"><div id="tap5" class="abs" style="width:70px;height:70px;border-radius:50%;border:4px solid #fff;background:rgba(255,255,255,.25);opacity:0"></div></div></div></div>
+ <div id="s6" class="scene"><div class="full" style="background:radial-gradient(ellipse 900px 1100px at 50% 42%,#553a28 0%,#2a1e17 48%,#120c09 100%)"></div>
+  <div id="cnt6" class="abs mono" style="left:0;width:1080px;top:200px;text-align:center;font-size:120px;color:#FF8A3D"></div>
+  <div id="ph6" class="phone" style="left:305px;top:420px"><div class="scr"><img id="ph6i"></div></div></div>
+ <!-- 7 FEATURES: infinite zoom into the screen -->
+ <div id="s7" class="scene"><div class="full" style="background:radial-gradient(ellipse 900px 1100px at 50% 45%,#4a3426 0%,#1c1612 60%,#0d0907 100%)"></div>
+  <div id="z7" class="abs" style="transform-origin:0 0"><div id="ph7" class="phone" style="left:305px;top:470px"><div class="scr"><img id="ph7i"></div></div></div>
+  <div id="lz" class="full"></div>
+  <div id="kick7" class="abs mono" style="left:0;width:1080px;top:1160px;text-align:center;font-size:60px;color:#F5EDE4"></div></div>
+ <!-- 8 CTA: the question, then the stamp -->
+ <div id="s8" class="scene"><img id="p8" class="photo" src="../launch-kit-002/build/photos/dal.jpg" style="filter:sepia(.3) saturate(1.1) brightness(.55) blur(6px)"><div class="warmgrade"></div>
+  <div id="q8" class="abs mono" style="left:60px;right:60px;top:430px;text-align:center;font-size:96px;line-height:1.08;color:#F5EDE4">how many whistles<br>for <span style="color:#FF8A3D">your</span> dal?</div>
+  <div id="stamp" class="abs" style="left:0;width:1080px;top:830px;display:flex;flex-direction:column;align-items:center;gap:26px;opacity:0"></div></div>
+ <div id="ink" class="full" style="display:none;pointer-events:none"></div>
+ <div id="leak" class="full" style="z-index:20;pointer-events:none;mix-blend-mode:screen;opacity:0"></div>
+ <div id="grain" class="full" style="z-index:21;background:url(../journey/work/grain.png);mix-blend-mode:overlay;opacity:.28;pointer-events:none"></div>
+ <div id="vig" class="full" style="z-index:22;pointer-events:none;background:radial-gradient(ellipse 820px 1300px at 50% 45%,rgba(0,0,0,0) 55%,rgba(0,0,0,.5) 100%)"></div>
+ <div id="cap"><span></span></div>
+</div>
+<script>
+const RUN = __RUN__, LEARN = __LEARN__;
+const SH = (n) => `../whistle/shots/${n}.png`;
+const $ = (s) => document.querySelector(s);
+const C = (x) => Math.max(0, Math.min(1, x)), P = (t, a, b) => C((t - a) / (b - a)), lerp = (a, b, k) => a + (b - a) * k;
+const eOut = (x) => 1 - Math.pow(1 - x, 3), eIn = (x) => x * x * x, eIO = (x) => (x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2), ex = (x) => (x >= 1 ? 1 : 1 - Math.pow(2, -10 * x));
+const set = (el, o) => { for (const k in o) el.style[k] = o[k]; };
+const hsh = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+const img = (el, src) => { if (el.getAttribute('src') !== src) el.setAttribute('src', src); };
+const runAt = (rt) => { let f = RUN[0].f; for (const r of RUN) { if (r.t <= rt) f = r.f; else break; } return SH(f.replace('.png', '')); };
+const cooker = (s, mono) => { const f = (c) => mono || c; return `<svg width="${s}" height="${s}" viewBox="0 0 512 512"><g fill="none" stroke="${f('#A89A8C')}" stroke-width="16" stroke-linecap="round"><path d="M206 78c-14 14-14 34 0 48"/><path d="M256 78c-14 14-14 34 0 48"/><path d="M306 78c-14 14-14 34 0 48"/></g><rect x="236" y="140" width="40" height="52" rx="12" fill="${f('#F5EDE4')}"/><rect x="62" y="280" width="54" height="30" rx="15" fill="${f('#F5EDE4')}"/><rect x="396" y="280" width="54" height="30" rx="15" fill="${f('#F5EDE4')}"/><rect x="110" y="230" width="292" height="170" rx="46" fill="${f('#FF8A3D')}"/><rect x="96" y="190" width="320" height="52" rx="26" fill="${f('#FFB07A')}"/></svg>`; };
+
+// ---------- timeline (bars of the track: 2.068 s; the phrase lands at 18.2; the track's last hit at 27.0) ----------
+const SC = [['s1', 0, 3.72], ['s2', 3.72, 7.86], ['s3', 7.86, 9.92], ['s4', 9.92, 11.99], ['s5', 11.99, 14.06], ['s6', 14.06, 18.2], ['s7', 18.2, 24.41], ['s8', 24.41, 30.0]];
+// every cut, with its transition: the three picked kinds rotate (ink bleed, light leak, whip pan)
+const CUTS = { 3.72: 'ink', 7.86: 'leak', 9.92: 'whip', 11.99: 'ink', 14.06: 'leak', 18.2: 'whip', 20.27: 'leak', 24.41: 'ink' };
+const CAPS = [[1.75, 3.5, 'wait. let me rewind.'], [3.95, 7.4, 'you put the dal on. one whistle. two. was that three?'], [8.0, 9.75, 'nobody knows.'],
+  [10.15, 11.95, 'so i built cooker whistle counter.'], [12.15, 15.6, 'tap start. it listens, and counts every whistle.'], [16.25, 18.1, 'then it tells you: turn off the gas.'],
+  [18.4, 20.2, 'it learns your own cooker’s whistle.'], [20.4, 24.2, 'and it speaks your language. six of them.'], [24.55, 26.9, 'so. how many whistles for your dal?'], [27.15, 30, 'cooker whistle counter. link in bio.']];
+
+function build() {
+  let st = ''; for (let i = 0; i < 9; i++) { const r = 90 + hsh(i) * 110; st += `<div class="abs puff" style="width:${r * 2}px;height:${r * 2}px;border-radius:50%;background:rgba(255,245,235,.35);filter:blur(30px)"></div>`; }
+  $('#steam2').innerHTML = st;
+  $('#burst').innerHTML = `<svg width="900" height="560" viewBox="0 0 900 560" style="position:absolute;overflow:visible"><polygon points="${Array.from({ length: 28 }, (_, i) => { const a = i / 28 * 6.283, r = i % 2 ? 300 : 230 + hsh(i) * 40; return `${450 + Math.cos(a) * r * 1.45},${280 + Math.sin(a) * r * .9}`; }).join(' ')}" fill="#1c1816" transform="translate(14,14)"/><polygon points="${Array.from({ length: 28 }, (_, i) => { const a = i / 28 * 6.283, r = i % 2 ? 300 : 230 + hsh(i) * 40; return `${450 + Math.cos(a) * r * 1.45},${280 + Math.sin(a) * r * .9}`; }).join(' ')}" fill="#FF8A3D" stroke="#1c1816" stroke-width="10" stroke-linejoin="round"/></svg><div class="abs mono" style="left:0;width:900px;top:200px;text-align:center;font-size:118px;color:#1c1816;line-height:1">nobody<br>knows.</div>`;
+  $('#stamp').innerHTML = `<div id="sm" style="width:230px;height:230px;border-radius:52px;background:#1c1816;display:grid;place-items:center;box-shadow:0 0 0 3px #3a332e inset,0 30px 50px rgba(0,0,0,.6)">${cooker(180)}</div>
+    <div style="font:800 92px/0.95 'Bricolage Grotesque';letter-spacing:-.04em;text-align:center;color:#F5EDE4">Cooker Whistle<br>Counter</div>
+    <div class="mono" style="font-size:36px;color:#FFB07A">no app store · works offline</div>
+    <div class="mono" style="font-size:38px;background:#FF8A3D;color:#1c1816;padding:16px 34px;border-radius:999px">link in bio</div>
+    <div class="mono" style="font-size:32px;color:rgba(245,237,228,.75)">@wierd_stuff_i_make</div>`;
+  let lz = ''; [1, 2, 3, 4, 5, 0].forEach((i) => { lz += `<div class="abs lzs" style="width:1080px;height:2337px;transform-origin:540px 1000px"><img src="${SH('lang' + i + '-alarm')}" style="width:1080px;height:2337px;border-radius:40px"></div>`; });
+  $('#lz').innerHTML = lz;
+}
+
+// ---------- the scenes ----------
+const D = {};
+D.s1 = (t, el) => {   // 0-1.6 PLAY the finished alarm, 1.6-3.72 REWIND to 0/3
+  const rew = P(t, 1.6, 3.55);
+  const rt = t < 1.6 ? 19.0 + t * .4 : lerp(19.6, 0.3, 1 - Math.pow(1 - rew, 1.6));
+  const src = runAt(rt); img($('#v1'), src); img($('#v2'), src);
+  const step = Math.floor(t * 30), rw = t >= 1.6;
+  const dx = (rw ? 12 : 5) + hsh(step) * (rw ? 14 : 4);
+  $('#rdx').setAttribute('dx', dx.toFixed(1)); $('#bdx').setAttribute('dx', (-dx).toFixed(1));
+  // tracking band during the rewind
+  const by = (hsh(step * 3) * 1700) | 0, bh = rw ? 80 + hsh(step + 1) * 160 : 0;
+  set($('#v2'), { clipPath: `inset(${by + 208}px 0 ${Math.max(0, 2337 - by - 208 - bh)}px 0)`, transform: `translateX(${rw ? (hsh(step + 2) - .5) * 90 : 0}px)` });
+  set($('#vhs'), { transform: `translateY(${rw ? (hsh(step + 5) - .5) * 16 : 0}px) scale(${1 + (rw ? .02 : 0)})` });
+  $('#vnoise').style.backgroundPosition = `${(hsh(step) * 512) | 0}px ${(hsh(step + .3) * 512) | 0}px`; $('#vnoise').style.opacity = rw ? .95 : .6;
+  $('#osd').innerHTML = rw ? (step % 10 < 7 ? '◀◀ REW' : '') : (step % 16 < 11 ? 'PLAY ▶' : '');
+};
+D.s2 = (t, el) => {   // dolly zoom: the kitchen pushes in while the stickers hold; parallax steam
+  const lt = t - 3.72, k = eIO(P(lt, 0, 4.14));
+  set($('#p2'), { transform: `scale(${1.0 + .32 * k})`, transformOrigin: '52% 46%' });
+  [...el.querySelectorAll('.puff')].forEach((p, i) => { const y = 1050 - ((lt * (60 + i * 9) + i * 140) % 900), x = 380 + Math.sin(lt * .8 + i) * 120 + (i % 3) * 110; set(p, { transform: `translate(${x}px,${y}px) scale(${1 - .2 * k})`, opacity: .9 }); });
+  const S = [['#stk1', 5.0, 160, 520, -8], ['#stk2', 5.75, 560, 700, 6], ['#stk3', 6.35, 280, 980, -4]];
+  S.forEach(([q, a, x, y, r]) => { const p = P(t, a, a + .22), s = p < 1 ? .4 + .75 * eOut(p) - .15 * Math.sin(p * 3.14) : 1;
+    set($(q), { left: x + 'px', top: y + 'px', opacity: t < a ? 0 : 1, transform: `scale(${s}) rotate(${r}deg) translate(${-k * 30 * (x > 400 ? -1 : 1)}px,${-k * 20}px)` }); });
+};
+D.s3 = (t, el) => {
+  const lt = t - 7.86; set($('#p3'), { transform: `scale(${1.25 - .12 * eOut(P(lt, 0, 2.06))})` });
+  const p = P(t, 7.95, 8.2); set($('#burst'), { transform: `scale(${p < 1 ? .5 + .6 * eOut(p) - .1 * Math.sin(p * 3.14) : 1}) rotate(-4deg)`, opacity: t < 7.95 ? 0 : 1 });
+};
+const phoneTilt = (el, ry, rx, s) => set(el, { transform: `perspective(2200px) rotateY(${ry}deg) rotateX(${rx}deg) scale(${s})` });
+D.s4 = (t) => {   // the hero product shot: a shutter flash, the phone turns into the light
+  const lt = t - 9.92; img($('#ph4i'), SH('idle'));
+  phoneTilt($('#ph4'), lerp(-26, -10, ex(P(lt, 0, 2.0))), 6, lerp(.9, 1, ex(P(lt, 0, 1.6))));
+  $('#flash').style.opacity = Math.max(0, 1 - lt / .18) * .85;
+  const a = eOut(P(lt, .15, .6)); set($('#ttl4'), { opacity: a, transform: `translateY(${(1 - a) * 30}px)` }); set($('#kick4'), { opacity: a });
+};
+D.s5 = (t) => {   // closer, the other side: tap Start, it starts listening
+  const lt = t - 11.99; const started = t >= 12.95;
+  img($('#ph5i'), started ? runAt(lerp(.4, 3.4, P(t, 12.95, 14.06))) : SH('idle'));
+  phoneTilt($('#ph5'), lerp(14, 8, ex(P(lt, 0, 2.0))), 4, lerp(1.32, 1.4, eOut(P(lt, 0, 2.07))));
+  const tp = P(t, 12.75, 13.15); set($('#tap5'), { left: (195 * 436 / 390 - 35) + 'px', top: (801 * 944 / 844 - 35) + 'px', opacity: tp > 0 && tp < 1 ? 1 - tp * .6 : 0, transform: `scale(${1 + tp * .6})` });
+};
+D.s6 = (t) => {   // front on: the real count, 0 -> 3, and the alarm
+  const lt = t - 14.06;
+  const rt = t < 14.4 ? lerp(3.6, 4.35, P(t, 14.06, 14.4)) : t < 15.35 ? lerp(4.35, 11.3, P(t, 14.4, 15.35)) : t < 16.2 ? lerp(11.3, 18.3, P(t, 15.35, 16.2)) : lerp(18.3, 20.5, P(t, 16.2, 18.2));
+  img($('#ph6i'), runAt(rt));
+  phoneTilt($('#ph6'), lerp(-6, 0, ex(P(lt, 0, 1.4))), 0, lerp(1.0, 1.06, eIO(P(lt, 0, 4.1))));
+  const n = rt < 4.28 ? 0 : rt < 11.26 ? 1 : rt < 18.24 ? 2 : 3;
+  const ch = [4.28, 11.26, 18.24].map((x, i) => [14.4, 15.35, 16.2][i]); const last = ch.filter((c) => t >= c).pop() || 0, pop = last ? P(t, last, last + .18) : 1;
+  set($('#cnt6'), { opacity: eOut(P(lt, .1, .4)), transform: `scale(${pop < 1 ? 1.25 - .25 * eOut(pop) : 1})` }); $('#cnt6').textContent = `${n}/3`;
+};
+D.s7 = (t) => {   // infinite zoom: into the screen (learn my whistle), then each language opens out of the last
+  const lt = t - 18.2;
+  const lr = t < 19.6 ? lerp(.2, 6.0, P(t, 18.2, 19.6)) : 99; img($('#ph7i'), t < 19.6 ? SH(LEARN.reduce((f, r) => (r.t <= lr ? r.f : f), LEARN[0].f).replace('.png', '')) : SH('learn-ok'));
+  // camera: into the Learn my whistle button (326,729 of 390x844), log space
+  const z = Math.exp(Math.log(3.4) * eIn(P(t, 18.25, 20.27)));
+  const fx = 305 + 17 + 326 * 436 / 390, fy = 470 + 17 + 729 * 944 / 844;
+  set($('#z7'), { transform: `translate(${540 - fx * z}px,${900 - fy * z}px) scale(${z})`, opacity: t < 20.27 ? 1 : 0 });
+  set($('#kick7'), { opacity: eOut(P(lt, .1, .4)) * (1 - P(t, 19.0, 19.3)) }); $('#kick7').textContent = 'learn my whistle';
+  // languages: each alarm screen grows out of the centre of the one before (an endless zoom)
+  const L = [...document.querySelectorAll('.lzs')], per = .7, t0 = 20.27;
+  $('#lz').style.background = t >= t0 ? '#FC673C' : 'none';
+  L.forEach((e, i) => { const a = t0 + i * per; const u = (t - a) / per;   // u: 0 when it fills the frame
+    const vis = u >= -.7 && (i === L.length - 1 ? true : u < .4);
+    const sc = u < 0 ? Math.exp(Math.log(6) * u) : (i === L.length - 1 ? 1 + .04 * u : Math.exp(Math.log(6) * u));
+    set(e, { display: vis && t >= t0 ? '' : 'none', transform: `translate(0px,${-40}px) scale(${sc})`, zIndex: 10 + i }); });
+};
+D.s8 = (t) => {   // the question, then the stamp on the track's last hit (27.0); it holds and creeps
+  const lt = t - 24.41;
+  set($('#p8'), { transform: `scale(${1.08 + .05 * eIO(P(lt, 0, 5.6))})` });
+  const q = eOut(P(t, 24.5, 24.95)); set($('#q8'), { opacity: q, transform: `translateY(${(1 - q) * 40 - eIO(P(t, 26.9, 27.4)) * 120}px) scale(${1 - .14 * eIO(P(t, 26.9, 27.4))})` });
+  const s = P(t, 27.0, 27.22); set($('#stamp'), { opacity: s > 0 ? 1 : 0, transform: `translateY(${-60}px) scale(${s < 1 ? 1.35 - .35 * eOut(s) : 1 + .015 * (t - 27.22) / 2.8}) rotate(${s < 1 ? -4 * (1 - s) : 0}deg)` });
+};
+
+// ---------- transitions ----------
+function blob(cx, cy, r, seed, n = 46) { const pts = []; for (let i = 0; i < n; i++) { const a = i / n * 6.283; const w = 1 + .16 * Math.sin(a * 3 + seed) + .1 * Math.sin(a * 7 + seed * 2.3) + .06 * Math.sin(a * 13 + seed * 5.1); pts.push(`${(cx + Math.cos(a) * r * w).toFixed(1)}px ${(cy + Math.sin(a) * r * w).toFixed(1)}px`); } return `polygon(${pts.join(',')})`; }
+
+window.render = function (t) {
+  const cur = SC.find(([, a, b]) => t >= a && t < b) || SC[SC.length - 1];
+  SC.forEach(([id]) => { $('#' + id).style.display = 'none'; $('#' + id).style.clipPath = 'none'; $('#' + id).style.transform = 'none'; $('#' + id).style.filter = 'none'; $('#' + id).style.zIndex = 1; });
+  const show = (id) => { const el = $('#' + id); el.style.display = 'block'; D[id](t, el); return el; };
+  const el = show(cur[0]);
+  // the transition around the nearest cut
+  let leak = 0; const ink = $('#ink'); ink.style.display = 'none';
+  for (const [cs, kind] of Object.entries(CUTS)) { const c = +cs, i = SC.findIndex((s) => s[1] === c), prev = i > 0 ? SC[i - 1][0] : null;
+    if (kind === 'ink' && t >= c && t < c + .5) {          // the next scene bleeds in through a growing ink blot, the old one under it
+      const pe = show(prev); pe.style.zIndex = 1; el.style.zIndex = 2; const k = eIO(P(t, c, c + .5)), r = 40 + k * 1500;
+      el.style.clipPath = blob(540, 900, r, c * 3); ink.style.display = 'block'; ink.style.zIndex = 1;
+      set(ink, { background: '#120b07', clipPath: blob(540, 900, r * 1.12 + 30, c * 3 + 1), opacity: 1 - k * .2 }); pe.style.filter = `brightness(${1 - .4 * k})`; }
+    if (kind === 'whip') {
+      if (t >= c - .2 && t < c) { const k = eIn(P(t, c - .2, c)); set(el, { transform: `translateX(${-k * 620}px)`, filter: `blur(${k * 30}px)` }); }
+      if (t >= c && t < c + .24) { const k = 1 - eOut(P(t, c, c + .24)); set(el, { transform: `translateX(${k * 620}px)`, filter: `blur(${k * 30}px)` }); } }
+    if (kind === 'leak') { const d = Math.abs(t - c); if (d < .45) leak = Math.max(leak, 1 - d / .45); }
+  }
+  const lk = $('#leak'); lk.style.opacity = Math.pow(leak, 1.3);
+  if (leak > 0) lk.style.background = `radial-gradient(ellipse 900px 1300px at ${lerp(-10, 110, P(t, 7.4, 8.3)) % 120 || 60}% 35%, rgba(255,200,140,1) 0%, rgba(255,138,61,.85) 30%, rgba(217,96,15,.4) 60%, rgba(0,0,0,0) 80%)`;
+  if (leak > 0 && (Math.abs(t - 14.06) < .5 || Math.abs(t - 20.27) < .5)) lk.style.background = `radial-gradient(ellipse 1000px 1400px at ${lerp(110, -10, P(t, 13.6, 14.5))}% 60%, rgba(255,210,150,1) 0%, rgba(255,138,61,.85) 32%, rgba(217,96,15,.4) 60%, rgba(0,0,0,0) 80%)`;
+  // film grain everywhere, live
+  const step = Math.floor(t * 24); $('#grain').style.backgroundPosition = `${(hsh(step) * 512) | 0}px ${(hsh(step + .7) * 512) | 0}px`;
+  // captions: every line, mono, with a cursor
+  const c = CAPS.find(([a, b]) => t >= a && t < b); const cs = $('#cap span');
+  if (c) { const txt = c[2]; if (cs.dataset.k !== txt) { cs.innerHTML = txt + '<i></i>'; cs.dataset.k = txt; } const a = eOut(P(t, c[0], c[0] + .18)); set($('#cap'), { opacity: a, transform: `translateY(${(1 - a) * 16}px)` }); cs.querySelector('i').style.opacity = Math.floor(t * 2.5) % 2 ? .2 : 1; }
+  else $('#cap').style.opacity = 0;
+};
+build();
+window.ready = (async () => { await document.fonts.load("500 40px 'DM Mono'"); await document.fonts.load("800 90px 'Bricolage Grotesque'"); await document.fonts.ready; return true; })();
+</script></body></html>

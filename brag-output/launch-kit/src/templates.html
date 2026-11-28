@@ -1,0 +1,185 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=block" rel="stylesheet">
+<style>
+:root{--ink:#161922;--paper:#ECEEF2;--white:#FFFFFF;--grey:#7C8494;--line:#DFE2E8;--acc:#3D4FE0;--accl:#A5BBFF;--ink2:#3C4150}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--paper)}
+#c{position:relative;overflow:hidden;font-family:"DM Sans",sans-serif;color:var(--ink);background:var(--paper)}
+.disp{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;letter-spacing:-.035em;line-height:.98}
+.mono{font-family:"DM Mono",monospace;font-weight:500;letter-spacing:-.01em}
+.sub{font-weight:500;color:var(--ink2);line-height:1.25;letter-spacing:-.01em}
+.acc{color:var(--acc)}
+.abs{position:absolute}
+#c.ink{background:var(--ink);color:var(--paper)} #c.ink .sub{color:#c9cdd8}
+#c.accbg{background:var(--acc);color:#fff} #c.accbg .sub{color:#e3e8ff}
+.glow{position:absolute;border-radius:50%;filter:blur(110px);pointer-events:none}
+.phone{position:absolute;border-radius:9.5%/4.6%;background:#0f1116;box-shadow:0 50px 90px -40px rgba(22,25,34,.5),inset 0 0 0 2px #2a2d35;overflow:hidden}
+.phone .scr{position:absolute;overflow:hidden;border-radius:7.9%/3.8%}
+.phone .scr img{position:absolute;left:0;top:0;width:100%}
+.cut{position:absolute;object-fit:contain;filter:drop-shadow(0 18px 22px rgba(22,25,34,.18))}
+.tag{display:inline-flex;align-items:center;gap:12px;border-radius:999px;padding:12px 22px;font:500 24px/1 "DM Mono",monospace}
+.dot{width:14px;height:14px;border-radius:50%;background:var(--acc)}
+.num{font:500 30px/1 "DM Mono",monospace;color:var(--acc)}
+.li{display:flex;gap:28px;align-items:baseline;padding:30px 0;border-top:2px solid var(--line)}
+.ink .li{border-color:#2c303a}
+.mark{display:grid;place-items:center;border-radius:22%;background:var(--ink)}
+</style></head>
+<body><div id="c"></div>
+<script>
+const ROOT = 'file:///home/user/Image-Scanner/brag-output/';
+const SHOT = (n) => `${ROOT}explainer/shots/${n}.png`, CUT = (n) => `${ROOT}explainer/items/${n}.png`;
+const $ = (s) => document.querySelector(s);
+const HANDLE = '@wierd_stuff_i_make';
+// the page mark: "w" with a cursor underscore; the cursor takes the colour of the product being launched
+const pageMark = (size, cursor = 'var(--acc)', bg = 'var(--ink)', fg = 'var(--paper)') => `<div class="mark" style="width:${size}px;height:${size}px;background:${bg}">
+  <div style="position:relative;font:800 ${size * 0.62}px/1 'Bricolage Grotesque';letter-spacing:-.04em;color:${fg};transform:translate(-${size * 0.06}px,-${size * 0.06}px)">w<span style="position:absolute;left:100%;bottom:${size * 0.04}px;margin-left:${size * 0.05}px;width:${size * 0.2}px;height:${size * 0.07}px;border-radius:${size * 0.02}px;background:${cursor}"></span></div></div>`;
+// Wardrobe's own mark: the app's hanger
+const hanger = (size, color = 'var(--acc)', sw = 1.3) => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7.5V6a2 2 0 1 0-2-2"/><path d="M12 7.5 3.5 14a1.5 1.5 0 0 0 .9 2.7h15.2a1.5 1.5 0 0 0 .9-2.7z"/></svg>`;
+const phone = (x, y, w, shot, crop = 0) => { const h = w * 2.08, pad = w * 0.036;
+  return `<div class="phone" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px"><div class="scr" style="left:${pad}px;top:${pad}px;width:${w - 2 * pad}px;height:${h - 2 * pad}px"><img src="${SHOT(shot)}" style="top:${-crop}%"></div></div>`; };
+const glows = (W, H, dark) => dark ? '' : `<div class="glow" style="width:${W * 0.9}px;height:${W * 0.9}px;left:${W * 0.45}px;top:${-W * 0.35}px;background:rgba(61,79,224,.10)"></div><div class="glow" style="width:${W * 0.8}px;height:${W * 0.8}px;left:${-W * 0.35}px;top:${H * 0.55}px;background:rgba(165,187,255,.25)"></div>`;
+// chrome: the handle top-left, the product tag top-right, the slide counter bottom-right
+function chrome(s, W, H, top, bottom, dark) {
+  const g = dark ? '#9aa1b2' : 'var(--grey)';
+  let h = '';
+  if (s.chrome !== false) {
+    h += `<div class="abs mono" style="left:72px;top:${top}px;font-size:26px;color:${g}">${HANDLE}</div>`;
+    if (s.tag !== false) h += `<div class="abs tag" style="right:72px;top:${top - 14}px;background:${dark ? 'rgba(255,255,255,.08)' : '#fff'};color:${dark ? '#fff' : 'var(--ink)'}"><span class="dot" style="${s.bg === 'acc' ? 'background:#fff' : ''}"></span>${s.tag || '#001 wardrobe'}</div>`;
+    if (s.counter) h += `<div class="abs mono" style="right:72px;bottom:${bottom}px;font-size:26px;color:${g}">${s.counter}</div>`;
+    if (s.swipe) h += `<div class="abs mono" style="left:72px;bottom:${bottom}px;font-size:26px;color:${dark ? '#fff' : 'var(--acc)'}">swipe →</div>`;
+  }
+  return h;
+}
+const cutRow = (items, x, y, w, h, gap = 0) => items.map((n, i) => `<img class="cut" src="${CUT(n)}" style="left:${x + i * (w + gap)}px;top:${y}px;width:${w}px;height:${h}px">`).join('');
+
+const T = {};
+// ---------- feed 1080x1350 ----------
+T.hook = (s) => { const dark = s.bg === 'ink' || s.bg === 'acc';
+  let h = glows(1080, 1350, dark);
+  if (s.cutouts) h += cutRow(s.cutouts.slice(0, 4), 60, 150, 220, 220, 20) + cutRow(s.cutouts.slice(4, 8), 60, 980, 220, 220, 20);
+  const top = s.cutouts ? 420 : 0, hgt = s.cutouts ? 520 : 1350;
+  h += `<div class="abs" style="left:72px;right:72px;top:${top}px;height:${hgt}px;display:flex;flex-direction:column;justify-content:center;gap:34px">
+    ${s.kicker ? `<div class="mono" style="font-size:30px;color:${dark ? '#fff' : 'var(--acc)'}">${s.kicker}</div>` : ''}
+    <div class="disp" style="font-size:${s.size || 118}px">${s.title}</div>${s.sub ? `<div class="sub" style="font-size:42px">${s.sub}</div>` : ''}</div>`;
+  return h + chrome(s, 1080, 1350, 64, 60, dark); };
+T.phone = (s) => { let h = glows(1080, 1350);
+  h += `<div class="abs" style="left:72px;top:150px;width:${s.wide ? 936 : 490}px"><div class="disp" style="font-size:${s.size || 76}px">${s.title}</div>${s.sub ? `<div class="sub" style="font-size:36px;margin-top:26px">${s.sub}</div>` : ''}</div>`;
+  h += s.wide ? phone(250, 520, 580, s.screen, s.crop || 0) : phone(600, 200, 430, s.screen, s.crop || 0);
+  if (s.note) h += `<div class="abs mono" style="left:72px;bottom:130px;width:480px;font-size:28px;color:var(--grey);line-height:1.4">${s.note}</div>`;
+  return h + chrome(s, 1080, 1350, 64, 60); };
+T.twophone = (s) => { let h = glows(1080, 1350, s.bg === 'ink');
+  h += `<div class="abs" style="left:72px;right:72px;top:150px"><div class="disp" style="font-size:${s.size || 88}px">${s.title}</div></div>`;
+  h += phone(90, 400, 420, s.screens[0]) + phone(570, 400, 420, s.screens[1]);
+  if (s.labels) h += s.labels.map((l, i) => `<div class="abs mono" style="left:${90 + i * 480}px;top:1290px;width:420px;text-align:center;font-size:26px;color:${s.bg === 'ink' ? '#c9cdd8' : 'var(--grey)'}">${l}</div>`).join('');
+  return h + chrome(s, 1080, 1350, 64, 60, s.bg === 'ink'); };
+T.cutgrid = (s) => { let h = glows(1080, 1350);
+  h += `<div class="abs" style="left:72px;right:72px;top:150px"><div class="disp" style="font-size:${s.size || 92}px">${s.title}</div>${s.sub ? `<div class="sub" style="font-size:36px;margin-top:22px">${s.sub}</div>` : ''}</div>`;
+  const n = s.items.length, cols = n > 6 ? 4 : 3, cw = 936 / cols, rows = Math.ceil(n / cols), ch = Math.min(260, 700 / rows);
+  s.items.forEach((it, i) => { const x = 72 + (i % cols) * cw, y = 520 + Math.floor(i / cols) * (ch + 30);
+    h += `<div class="abs" style="left:${x + 8}px;top:${y}px;width:${cw - 16}px;height:${ch}px;background:#fff;border-radius:26px"></div><img class="cut" src="${CUT(it)}" style="left:${x + 28}px;top:${y + 18}px;width:${cw - 56}px;height:${ch - 36}px">`; });
+  return h + chrome(s, 1080, 1350, 64, 60); };
+T.beforeafter = (s) => { let h = glows(1080, 1350);
+  h += `<div class="abs" style="left:72px;right:72px;top:150px"><div class="disp" style="font-size:${s.size || 92}px">${s.title}</div></div>`;
+  h += `<div class="abs" style="left:72px;top:470px;width:450px;height:600px;border-radius:30px;overflow:hidden"><img src="${ROOT}film/wardrobe/public/assets/tee.jpg" style="width:100%;height:100%;object-fit:cover"></div>
+    <div class="abs" style="left:558px;top:470px;width:450px;height:600px;border-radius:30px;overflow:hidden;background:repeating-conic-gradient(#eef0f3 0% 25%,#fff 0% 50%) 0 0/40px 40px"><img class="cut" src="${CUT('tee')}" style="left:30px;top:120px;width:390px;height:360px"></div>
+    <div class="abs mono" style="left:72px;top:1100px;font-size:28px;color:var(--grey)">your photo</div><div class="abs mono" style="left:558px;top:1100px;font-size:28px;color:var(--acc)">cut out on your phone</div>`;
+  return h + chrome(s, 1080, 1350, 64, 60); };
+T.stat = (s) => { const dark = s.bg === 'ink'; let h = glows(1080, 1350, dark);
+  h += `<div class="abs" style="left:72px;right:72px;top:0;height:1350px;display:flex;flex-direction:column;justify-content:center;gap:24px">
+    ${s.kicker ? `<div class="mono" style="font-size:30px;color:${dark ? 'var(--accl)' : 'var(--acc)'}">${s.kicker}</div>` : ''}
+    <div class="disp" style="font-size:${s.size || 260}px;color:${dark ? '#fff' : 'var(--acc)'}">${s.big}</div><div class="disp" style="font-size:72px">${s.title}</div>
+    ${s.sub ? `<div class="sub" style="font-size:36px">${s.sub}</div>` : ''}</div>`;
+  if (s.cut) h += `<img class="cut" src="${CUT(s.cut)}" style="right:40px;top:160px;width:330px;height:420px">`;
+  return h + chrome(s, 1080, 1350, 64, 60, dark); };
+T.list = (s) => { const dark = s.bg === 'ink'; let h = glows(1080, 1350, dark);
+  h += `<div class="abs" style="left:72px;right:72px;top:150px"><div class="disp" style="font-size:${s.size || 84}px;margin-bottom:46px">${s.title}</div>
+    ${s.items.map((t, i) => `<div class="li"><span class="num" style="${dark ? 'color:var(--accl)' : ''}">${String(i + 1).padStart(2, '0')}</span><span style="font:500 ${s.isize || 40}px/1.25 'DM Sans'">${t}</span></div>`).join('')}</div>`;
+  return h + chrome(s, 1080, 1350, 64, 60, dark); };
+T.log = (s) => { let h = '';
+  h += `<div class="abs" style="left:72px;right:72px;top:160px"><div class="mono" style="font-size:30px;color:var(--accl);margin-bottom:34px">${s.kicker || 'build log · #001'}</div>
+    <div class="disp" style="font-size:${s.size || 86}px;color:#fff;margin-bottom:56px">${s.title}</div>
+    ${(s.lines || []).map((l) => `<div class="mono" style="font-size:34px;line-height:1.5;color:#c9cdd8;margin-bottom:18px"><span style="color:var(--accl)">&gt;</span> ${l}</div>`).join('')}</div>`;
+  return h + chrome({ ...s }, 1080, 1350, 64, 60, true); };
+T.qa = (s) => { let h = glows(1080, 1350);
+  h += `<div class="abs" style="left:72px;right:72px;top:0;height:1350px;display:flex;flex-direction:column;justify-content:center;gap:40px">
+    <div class="mono" style="font-size:30px;color:var(--acc)">${s.kicker || 'q'}</div><div class="disp" style="font-size:${s.size || 96}px">${s.q}</div>
+    <div style="width:120px;height:4px;background:var(--ink)"></div><div class="sub" style="font-size:46px;color:var(--ink)">${s.a}</div></div>`;
+  return h + chrome(s, 1080, 1350, 64, 60); };
+T.cta = (s) => { let h = `<div class="abs" style="left:72px;right:72px;top:0;height:1350px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:40px">
+    ${hanger(170, '#fff', 1.2)}<div class="disp" style="font-size:${s.size || 120}px;color:#fff">${s.title || 'Wardrobe'}</div>
+    <div class="sub" style="font-size:42px">${s.sub || 'one html file. no account. link in bio.'}</div>
+    <div class="tag" style="background:#fff;color:var(--ink);font-size:30px;margin-top:20px">${s.button || 'link in bio'}</div></div>`;
+  return h + chrome({ ...s, bg: 'acc' }, 1080, 1350, 64, 60, true); };
+// ---------- story 1080x1920 (safe: y 250-1640) ----------
+const sChrome = (s, dark) => chrome({ ...s, counter: null }, 1080, 1920, 150, 0, dark);
+T.s_hook = (s) => { const dark = s.bg === 'ink' || s.bg === 'acc'; let h = glows(1080, 1920, dark);
+  if (s.cutouts) h += cutRow(s.cutouts.slice(0, 4), 60, 300, 220, 220, 20);
+  h += `<div class="abs" style="left:80px;right:80px;top:${s.cutouts ? 560 : 300}px;height:${s.sticker ? 760 : 1200}px;display:flex;flex-direction:column;justify-content:center;gap:36px;${s.center ? 'text-align:center;align-items:center' : ''}">
+    ${s.kicker ? `<div class="mono" style="font-size:34px;color:${dark ? 'var(--accl)' : 'var(--acc)'}">${s.kicker}</div>` : ''}
+    <div class="disp" style="font-size:${s.size || 120}px">${s.title}</div>${s.sub ? `<div class="sub" style="font-size:46px">${s.sub}</div>` : ''}</div>`;
+  if (s.sticker) h += `<div class="abs mono" style="left:80px;right:80px;top:1380px;text-align:center;font-size:28px;color:${dark ? 'rgba(255,255,255,.5)' : 'rgba(22,25,34,.35)'}"></div>`;
+  return h + sChrome(s, dark); };
+T.s_phone = (s) => { let h = glows(1080, 1920);
+  h += `<div class="abs" style="left:80px;right:80px;top:280px;text-align:center"><div class="disp" style="font-size:${s.size || 96}px">${s.title}</div>${s.sub ? `<div class="sub" style="font-size:42px;margin-top:22px">${s.sub}</div>` : ''}</div>`;
+  h += phone(230, s.sub ? 720 : 640, 620, s.screen, s.crop || 0);
+  if (s.blur) h = h.replace(`src="${SHOT(s.screen)}"`, `src="${SHOT(s.screen)}" style="filter:blur(14px)"`);
+  return h + sChrome(s); };
+T.s_countdown = (s) => { let h = `<div class="abs" style="left:80px;right:80px;top:250px;height:1250px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:30px">
+    <div class="mono" style="font-size:38px;color:var(--accl)">${s.kicker || 'product #001'}</div>
+    <div class="disp" style="font-size:${s.size || 300}px;color:#fff">${s.big}</div><div class="disp" style="font-size:84px;color:#fff">${s.title}</div>${s.sub ? `<div class="sub" style="font-size:42px">${s.sub}</div>` : ''}</div>
+    <div class="abs mono" style="left:80px;right:80px;top:1460px;text-align:center;font-size:28px;color:rgba(255,255,255,.45)"></div>`;
+  return h + sChrome(s, true); };
+T.s_cut = (s) => { let h = glows(1080, 1920);
+  h += `<div class="abs" style="left:80px;right:80px;top:270px;text-align:center"><div class="disp" style="font-size:${s.size || 96}px">${s.title}</div></div>
+    <div class="abs" style="left:150px;top:560px;width:780px;height:520px;border-radius:34px;overflow:hidden"><img src="${ROOT}film/wardrobe/public/assets/tee.jpg" style="width:100%;height:100%;object-fit:cover"></div>
+    <div class="abs mono" style="left:0;right:0;top:1100px;text-align:center;font-size:44px;color:var(--acc)">↓</div>
+    <div class="abs" style="left:150px;top:1170px;width:780px;height:420px;border-radius:34px;overflow:hidden;background:repeating-conic-gradient(#eef0f3 0% 25%,#fff 0% 50%) 0 0/40px 40px"><img class="cut" src="${CUT('tee')}" style="left:190px;top:40px;width:400px;height:340px"></div>`;
+  if (s.sticker) h += `<div class="abs mono" style="left:80px;right:80px;top:1640px;text-align:center;font-size:28px;color:rgba(22,25,34,.35)"></div>`;
+  return h + sChrome(s); };
+T.s_log = (s) => { let h = `<div class="abs" style="left:80px;right:80px;top:330px"><div class="mono" style="font-size:34px;color:var(--accl);margin-bottom:40px">${s.kicker || 'build log · #001'}</div>
+    <div class="disp" style="font-size:${s.size || 100}px;color:#fff;margin-bottom:60px">${s.title}</div>
+    ${(s.lines || []).map((l) => `<div class="mono" style="font-size:38px;line-height:1.5;color:#c9cdd8;margin-bottom:22px"><span style="color:var(--accl)">&gt;</span> ${l}</div>`).join('')}</div>`;
+  if (s.sticker) h += `<div class="abs mono" style="left:80px;right:80px;top:1480px;text-align:center;font-size:28px;color:rgba(255,255,255,.45)"></div>`;
+  return h + sChrome(s, true); };
+T.s_cuts = (s) => { let h = glows(1080, 1920);
+  h += `<div class="abs" style="left:80px;right:80px;top:290px;text-align:center"><div class="disp" style="font-size:${s.size || 100}px">${s.title}</div>${s.sub ? `<div class="sub" style="font-size:42px;margin-top:22px">${s.sub}</div>` : ''}</div>`;
+  s.items.forEach((it, i) => { const x = 80 + (i % 3) * 307, y = 700 + Math.floor(i / 3) * 330;
+    h += `<div class="abs" style="left:${x}px;top:${y}px;width:287px;height:300px;background:#fff;border-radius:30px"></div><img class="cut" src="${CUT(it)}" style="left:${x + 24}px;top:${y + 24}px;width:239px;height:252px">`; });
+  if (s.sticker) h += `<div class="abs mono" style="left:80px;right:80px;top:1660px;text-align:center;font-size:28px;color:rgba(22,25,34,.35)"></div>`;
+  return h + sChrome(s); };
+T.s_cta = (s) => { let h = `<div class="abs" style="left:80px;right:80px;top:250px;height:1150px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:44px">
+    ${hanger(200, '#fff', 1.2)}<div class="disp" style="font-size:${s.size || 130}px;color:#fff">${s.title || 'Wardrobe'}</div><div class="sub" style="font-size:46px">${s.sub || 'one html file. no account.'}</div></div>
+    <div class="abs mono" style="left:80px;right:80px;top:1420px;text-align:center;font-size:30px;color:rgba(255,255,255,.6)"></div>`;
+  return h + sChrome({ ...s, bg: 'acc' }, true); };
+// ---------- reel cover / end card / highlight / avatar (1080x1920, 1080x1080) ----------
+T.cover = (s) => { let h = glows(1080, 1920, s.bg === 'ink');
+  if (s.screen) h += phone(255, 820, 570, s.screen, s.crop || 0);
+  if (s.cutouts) h += cutRow(s.cutouts, 90, 1080, 280, 300, 25);
+  h += `<div class="abs" style="left:80px;right:80px;top:${s.screen || s.cutouts ? 330 : 285}px;${s.screen || s.cutouts ? '' : 'height:1350px;display:flex;flex-direction:column;justify-content:center;'}text-align:center">
+    <div class="mono" style="font-size:34px;color:${s.bg === 'ink' ? 'var(--accl)' : 'var(--acc)'};margin-bottom:28px">${s.kicker || '#001 wardrobe'}</div>
+    <div class="disp" style="font-size:${s.size || 116}px">${s.title}</div></div>`;
+  return h; };
+T.endcard = () => `<div class="abs" style="left:0;top:0;width:1080px;height:1920px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:46px;text-align:center">
+    ${hanger(200, '#fff', 1.2)}<div class="disp" style="font-size:150px;color:#fff">Wardrobe</div><div class="sub" style="font-size:48px">one html file. no account.</div>
+    <div class="tag" style="background:#fff;color:var(--ink);font-size:34px;margin-top:10px">link in bio</div>
+    <div class="mono" style="font-size:30px;color:rgba(255,255,255,.7);margin-top:30px">${HANDLE}</div></div>`;
+T.teasecard = (s) => `<div class="abs" style="left:0;top:0;width:1080px;height:1920px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:40px;text-align:center">
+    ${pageMark(170)}<div class="mono" style="font-size:40px;color:var(--accl)">product #001</div><div class="disp" style="font-size:${s.size || 130}px;color:#fff">${s.title}</div>
+    <div class="mono" style="font-size:34px;color:rgba(255,255,255,.7)">${HANDLE}</div></div>`;
+T.highlight = (s) => `<div class="abs" style="left:0;top:0;width:1080px;height:1920px;display:grid;place-items:center">
+    <div style="width:760px;height:760px;border-radius:50%;background:${s.bg || 'var(--ink)'};display:grid;place-items:center">${s.icon}</div></div>`;
+T.avatar = (s) => `<div class="abs" style="left:0;top:0;width:1080px;height:1080px;display:grid;place-items:center;background:var(--paper)">${pageMark(760, s.cursor || 'var(--acc)')}</div>`;
+// ---------- brand-guide plates ----------
+T.plate = (s) => `<div class="abs" style="left:0;top:0;width:100%;height:100%;display:grid;place-items:center;background:${s.bg || 'var(--paper)'}">${s.html}</div>`;
+
+window.go = (s) => {
+  const c = $('#c'); c.style.width = s.W + 'px'; c.style.height = s.H + 'px';
+  c.className = s.bg === 'ink' || ['log', 's_log', 's_countdown', 'teasecard'].includes(s.t) ? 'ink' : s.bg === 'acc' || ['cta', 's_cta', 'endcard'].includes(s.t) ? 'accbg' : '';
+  if (s.t === 'highlight' || s.t === 'avatar') c.className = '';
+  c.innerHTML = T[s.t](s);
+  return Promise.all([...document.images].map((i) => i.complete ? 0 : new Promise((r) => { i.onload = i.onerror = r; })));
+};
+window.ready = (async () => { await document.fonts.load('800 100px "Bricolage Grotesque"'); await document.fonts.load('500 40px "DM Sans"'); await document.fonts.load('500 30px "DM Mono"'); await document.fonts.ready; return true; })();
+window.parts = { pageMark, hanger };
+</script></body></html>

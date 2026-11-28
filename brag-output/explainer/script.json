@@ -1,0 +1,200 @@
+[
+ {
+  "id": "c0",
+  "ch": 0,
+  "vo": "That was Wardrobe in twenty-four seconds. Now let's slow down, and walk through every feature: from the first photo to next week's plan.",
+  "dur": 7.872
+ },
+ {
+  "id": "c1t",
+  "ch": 1,
+  "card": "Add clothes",
+  "vo": ""
+ },
+ {
+  "id": "c1a",
+  "ch": 1,
+  "vo": "It starts with the plus button. Add clothes opens with a short guide to a good photo: lay the piece flat, in daylight, on a plain surface.",
+  "dur": 8.597
+ },
+ {
+  "id": "c1b",
+  "ch": 1,
+  "vo": "Take a photo, or pick several at once. Smart AI cuts the background away. It runs right on your phone, so your photos never leave it.",
+  "dur": 8.533
+ },
+ {
+  "id": "c1c",
+  "ch": 1,
+  "vo": "If the cut needs a touch-up, the eraser and restore brushes fix it, and you can pinch to zoom for the fine detail.",
+  "dur": 6.741
+ },
+ {
+  "id": "c1d",
+  "ch": 1,
+  "vo": "Then add the details. Wardrobe picks out the colour for you. Choose the category and type, add a brand, a size and a price, and tag the occasions and seasons it suits.",
+  "dur": 10.411
+ },
+ {
+  "id": "c1e",
+  "ch": 1,
+  "vo": "It even asks for the real length, so every piece stays to scale when you try outfits on. Tap Save to wardrobe, and it's in.",
+  "dur": 7.531
+ },
+ {
+  "id": "c2t",
+  "ch": 2,
+  "card": "Your wardrobe",
+  "vo": ""
+ },
+ {
+  "id": "c2a",
+  "ch": 2,
+  "vo": "Everything you own lives here, sorted into tops, bottoms, shoes, jackets and accessories, with today's outfit waiting at the top.",
+  "dur": 8.0
+ },
+ {
+  "id": "c2b",
+  "ch": 2,
+  "vo": "Search by name, brand or colour, or jump straight to a category.",
+  "dur": 3.605
+ },
+ {
+  "id": "c2c",
+  "ch": 2,
+  "vo": "Tap any piece to see its details: how often you've worn it, and what it costs per wear. Mark it as worn today, send it to the laundry, or archive what you no longer wear.",
+  "dur": 10.069
+ },
+ {
+  "id": "c3t",
+  "ch": 3,
+  "card": "Try on",
+  "vo": ""
+ },
+ {
+  "id": "c3a",
+  "ch": 3,
+  "vo": "Try on is where outfits come together. Tops, bottoms and shoes sit in rows, at their real size. Swipe each row to mix and match.",
+  "dur": 8.384
+ },
+ {
+  "id": "c3b",
+  "ch": 3,
+  "vo": "Lock a piece you love, and shuffle everything around it. Bring in jackets and accessories for another layer.",
+  "dur": 6.08
+ },
+ {
+  "id": "c3c",
+  "ch": 3,
+  "vo": "Stuck? Tap Style me. It picks a combination whose colours work together, suited to the season, and even the weather. Not for you? Tap the thumbs-down, and it steers away from that pairing.",
+  "dur": 10.944
+ },
+ {
+  "id": "c4t",
+  "ch": 4,
+  "card": "Outfits",
+  "vo": ""
+ },
+ {
+  "id": "c4a",
+  "ch": 4,
+  "vo": "Like what you see? Tap Create outfit. On the board, move and resize every piece, change the background, and undo any step.",
+  "dur": 7.296
+ },
+ {
+  "id": "c4b",
+  "ch": 4,
+  "vo": "Saved outfits collect in Outfits. Favourite them, tag them, duplicate one to make a variation, or share it as an image.",
+  "dur": 7.659
+ },
+ {
+  "id": "c5t",
+  "ch": 5,
+  "card": "Plan",
+  "vo": ""
+ },
+ {
+  "id": "c5a",
+  "ch": 5,
+  "vo": "Plan puts outfits on your calendar. Pick an outfit for any day in the agenda, or switch to the month view.",
+  "dur": 6.101
+ },
+ {
+  "id": "c5b",
+  "ch": 5,
+  "vo": "Add your city, and each day shows its forecast. On an empty day, tap Style me, and Wardrobe plans one for you.",
+  "dur": 6.635
+ },
+ {
+  "id": "c5c",
+  "ch": 5,
+  "vo": "When the day comes, tap Mark as worn. Every wear is logged.",
+  "dur": 3.435
+ },
+ {
+  "id": "c6t",
+  "ch": 6,
+  "card": "Capsules, trips and wishes",
+  "vo": ""
+ },
+ {
+  "id": "c6a",
+  "ch": 6,
+  "vo": "Lists keep sets of clothes together. A capsule is a small set that all works together, and Wardrobe counts how many combinations it makes.",
+  "dur": 8.064
+ },
+ {
+  "id": "c6b",
+  "ch": 6,
+  "vo": "A trip is a packing list with dates and a forecast. Tick items off as you pack, then share the list.",
+  "dur": 5.845
+ },
+ {
+  "id": "c6c",
+  "ch": 6,
+  "vo": "And the wish list notes what you want to buy next, with its price, so you shop with a plan.",
+  "dur": 4.949
+ },
+ {
+  "id": "c7t",
+  "ch": 7,
+  "card": "Insights",
+  "vo": ""
+ },
+ {
+  "id": "c7a",
+  "ch": 7,
+  "vo": "Insights turns your logged wears into numbers: your items, your outfits, your wardrobe's value, and your colours.",
+  "dur": 6.571
+ },
+ {
+  "id": "c7b",
+  "ch": 7,
+  "vo": "It shows what you wear most, the best cost per wear, what's still waiting for a first wear, and what you might consider letting go.",
+  "dur": 6.933
+ },
+ {
+  "id": "c8t",
+  "ch": 8,
+  "card": "Make it yours",
+  "vo": ""
+ },
+ {
+  "id": "c8a",
+  "ch": 8,
+  "vo": "Make it yours in Settings: light or dark mode, five accent colours, and your own currency.",
+  "dur": 5.547
+ },
+ {
+  "id": "c8b",
+  "ch": 8,
+  "vo": "Everything is stored on your device. Back it up to a single file, and restore it on any phone.",
+  "dur": 5.461
+ },
+ {
+  "id": "c8c",
+  "ch": 8,
+  "vo": "And the whole app is one HTML file. No app store, no account. Open it, and your wardrobe is ready.",
+  "dur": 6.763
+ }
+]

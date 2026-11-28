@@ -1,0 +1,307 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,800&family=DM+Mono:wght@500&display=block" rel="stylesheet">
+<style>
+:root{--ink:#E9ECF3;--paper:#101217;--grey:#7C8494;--line:#2B303B;--ind:#3D4FE0;--indl:#A5BBFF;--or:#FF8A3D;--orl:#FFB07A;--cream:#F5EDE4}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:var(--paper)}
+#stage{position:absolute;inset:0;overflow:hidden;background:var(--paper)}
+.abs{position:absolute;left:0;top:0}
+.grain{position:absolute;inset:0;background:url(work/grain.png);mix-blend-mode:overlay;opacity:.5;pointer-events:none}
+.pp{filter:drop-shadow(0 -1.5px 0 rgba(255,255,255,.10)) drop-shadow(0 3px 0 rgba(0,0,0,.45)) drop-shadow(0 16px 18px rgba(0,0,0,.55))}
+.pp2{filter:drop-shadow(0 -2px 0 rgba(255,255,255,.12)) drop-shadow(0 4px 0 rgba(0,0,0,.5)) drop-shadow(0 30px 30px rgba(0,0,0,.6))}
+svg{overflow:visible;display:block} body{color:#E9ECF3}
+.disp{font-family:'Bricolage Grotesque';font-weight:800;letter-spacing:-.04em;line-height:.95;color:var(--ink)}
+.mono{font-family:'DM Mono';font-weight:500;letter-spacing:-.01em}
+.line{position:absolute;left:0;width:1080px;text-align:center}
+</style></head><body><div id="stage">
+<div class="grain" style="z-index:0"></div>
+<div id="scenes"></div>
+<div id="tags" class="abs" style="width:1080px;height:1920px"></div>
+<div id="tag" class="abs"></div>
+<div id="lines"></div>
+<div id="flood" class="abs" style="width:1080px;height:1920px;background:#07080A;opacity:0"></div>
+<div id="end" class="abs" style="width:1080px;height:1920px;opacity:0"></div>
+<div id="dof" class="abs" style="width:1080px;height:1920px;pointer-events:none"></div>
+<div id="key" class="abs" style="width:1080px;height:1920px;pointer-events:none;mix-blend-mode:soft-light"></div>
+<div id="glow" class="abs" style="width:1080px;height:1920px;pointer-events:none;mix-blend-mode:screen"></div>
+<div id="dust" class="abs" style="width:1080px;height:1920px;pointer-events:none"></div>
+<div id="vig" class="abs" style="width:1080px;height:1920px;pointer-events:none;background:radial-gradient(ellipse 810px 1440px at 50% 44%,rgba(0,0,0,0) 45%,rgba(0,0,0,.55) 100%)"></div>
+<div id="fgrain" class="abs" style="width:1080px;height:1920px;pointer-events:none;background:url(work/grain.png);mix-blend-mode:overlay;opacity:.35"></div>
+</div>
+<script>
+// ---------- helpers: everything is a pure function of t ----------
+const $ = (s) => document.querySelector(s);
+const C = (x) => Math.max(0, Math.min(1, x)), P = (t, a, b) => C((t - a) / (b - a));
+const eOut = (x) => 1 - Math.pow(1 - x, 3), eIn = (x) => x * x * x, eIO = (x) => (x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const ex = (x) => (x >= 1 ? 1 : 1 - Math.pow(2, -10 * x));          // exponential landing
+const lerp = (a, b, k) => a + (b - a) * k;
+const set = (el, o) => { for (const k in o) el.style[k] = o[k]; };
+let seed = 11; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+const GR = (id) => `<pattern id="${id}" width="512" height="512" patternUnits="userSpaceOnUse"><image href="work/grain.png" width="512" height="512"/></pattern>`;
+// a hand-cut edge: a polyline with small jitter between points
+function jag(pts, amp = 3, step = 26) { let d = ''; for (let i = 0; i < pts.length - 1; i++) { const [x0, y0] = pts[i], [x1, y1] = pts[i + 1], L = Math.hypot(x1 - x0, y1 - y0), n = Math.max(1, Math.round(L / step));
+  for (let k = 0; k < n; k++) { const u = k / n, nx = -(y1 - y0) / L, ny = (x1 - x0) / L, j = (k === 0 ? 0 : (rnd() - .5) * 2 * amp); d += `${d ? 'L' : 'M'}${(x0 + (x1 - x0) * u + nx * j).toFixed(1)},${(y0 + (y1 - y0) * u + ny * j).toFixed(1)}`; } }
+  return d + 'Z'; }
+const paper = (d, fill, extra = '') => `<path d="${d}" fill="${fill}" ${extra}/><path d="${d}" fill="url(#g)" opacity=".35" style="mix-blend-mode:overlay"/>`;
+const svg = (w, h, inner, cls = 'pp', style = '') => `<svg class="${cls}" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" style="${style}"><defs>${GR('g')}</defs>${inner}</svg>`;
+// the luggage tag (the carried element): 900x330, notched left end, eyelet
+const TW = 900, TH = 330;
+const tagPath = jag([[90, 0], [TW, 0], [TW, TH], [90, TH], [0, TH - 90], [0, 90], [90, 0]], 2.2, 30);
+function tagSVG(fill, ring = '#08090C') { return svg(TW, TH, paper(tagPath, fill) + `<circle cx="70" cy="${TH / 2}" r="24" fill="${ring}" opacity=".9"/><circle cx="70" cy="${TH / 2}" r="14" fill="#ECEEF2"/>`, 'pp2'); }
+
+// ---------- scene 1: the sheet the tag is cut from ----------
+const S = {};
+function build() {
+  const sc = $('#scenes');
+  // ground strips (torn paper) that frame scene 1 and 2
+  const strips = [['#2B303B', 840], ['#3A404D', 900], ['#08090C', 975]];
+  sc.innerHTML += `<div id="s1" class="abs" style="width:1920px;height:1080px">${strips.map(([c, y], i) => `<div class="abs st" style="top:${y}px">${svg(2000, 900, paper(jag([[-40, 30], [500, 6], [1000, 34], [1500, 0], [2040, 28], [2040, 900], [-40, 900]], 9, 40), c))}</div>`).join('')}
+    <div id="sheet" class="abs" style="left:380px;top:200px">${svg(1160, 680, paper(jag([[0, 0], [1160, 0], [1160, 680], [0, 680]], 2, 34), '#2E333F') +
+      `<path id="hole" d="${tagPath}" transform="translate(130,175)" fill="#0C0D11" opacity="0"/>` +
+      `<path id="cut" d="${tagPath}" transform="translate(130,175)" fill="none" stroke="#E9ECF3" stroke-width="4" stroke-dasharray="18 14" pathLength="1000"/>`)}
+      <div id="s1t" class="disp line" style="left:0;width:1160px;top:290px;font-size:118px"></div></div></div>`;
+  // ---------- scene 2: the closet ----------
+  const cl = [['tee', '#3D4FE0'], ['shirt', '#2E333F'], ['jeans', '#2B3A9E'], ['dress', '#A5BBFF'], ['jacket', '#08090C']];
+  const G = {
+    tee: jag([[40, 0], [110, 0], [150, 40], [190, 80], [160, 120], [140, 100], [140, 300], [10, 300], [10, 100], [-10, 120], [-40, 80], [0, 40]], 2, 22),
+    shirt: jag([[45, 0], [105, 0], [150, 30], [175, 220], [140, 225], [135, 110], [135, 320], [15, 320], [15, 110], [10, 225], [-25, 220], [0, 30]], 2, 22),
+    jeans: jag([[0, 0], [150, 0], [160, 330], [95, 330], [75, 90], [55, 330], [-10, 330]], 2, 22),
+    dress: jag([[50, 0], [100, 0], [110, 70], [190, 340], [-40, 340], [40, 70]], 2, 22),
+    jacket: jag([[35, 0], [115, 0], [160, 40], [185, 250], [148, 255], [140, 120], [142, 310], [8, 310], [10, 120], [2, 255], [-35, 250], [-10, 40]], 2, 22),
+  };
+  let h = `<div id="phone" class="abs" style="left:355px;top:1940px">${svg(370, 720, paper(jag([[40, 0], [330, 0], [370, 40], [370, 680], [330, 720], [40, 720], [0, 680], [0, 40]], 1.5, 30), '#08090C') + paper(jag([[22, 60], [348, 60], [348, 660], [22, 660]], 1.2, 30), '#2E333F') + `<rect x="150" y="24" width="70" height="12" rx="6" fill="#14161C"/>`, 'pp2')}</div>`;
+  h += `<div id="rail" class="abs" style="left:40px;top:200px">${svg(1000, 40, paper(jag([[0, 10], [1000, 10], [1000, 28], [0, 28]], 1.5, 40), '#08090C'))}</div>`;
+  cl.forEach(([k, c], i) => {
+    const hang = `<path d="M75 -70 C75 -96 100 -96 100 -78" fill="none" stroke="#7C8494" stroke-width="6" stroke-linecap="round"/><path d="M75 -70 L-5 -10 L155 -10 Z" fill="none" stroke="#7C8494" stroke-width="6" stroke-linejoin="round"/>`;
+    const detail = k === 'jeans' ? `<path d="M10 20 L140 20" stroke="#A5BBFF" stroke-width="5" stroke-dasharray="8 7"/>` : k === 'shirt' ? `<path d="M75 0 L75 320" stroke="#2B303B" stroke-width="4"/><circle cx="75" cy="70" r="5" fill="#3A404D"/><circle cx="75" cy="130" r="5" fill="#3A404D"/><circle cx="75" cy="190" r="5" fill="#3A404D"/>` : k === 'jacket' ? `<path d="M75 0 L75 310" stroke="#14161C" stroke-width="5"/><path d="M45 0 L75 70 L105 0" fill="none" stroke="#14161C" stroke-width="5"/>` : '';
+    h += `<div class="abs cloth" id="cl${i}" style="left:${70 + i * 190}px;top:300px;transform-origin:75px -78px">${svg(190, 360, `<g transform="translate(20,10)">${hang}${paper(G[k], c)}${detail}</g>`, 'pp', 'margin-left:-20px;margin-top:-10px')}</div>`;
+  });
+  sc.innerHTML += `<div id="s2" class="abs" style="width:1920px;height:1080px">${h}</div>`;
+  // ---------- scene 3: the stove and the cooker ----------
+  const fl = (c, s) => jag([[0, 120], [20 * s, 30], [40 * s, 80], [60 * s, 0], [80 * s, 70], [100 * s, 20], [120 * s, 120]], 1.2, 16);
+  let k3 = `<div class="abs" style="top:900px">${svg(2000, 900, paper(jag([[-40, 20], [2040, 10], [2040, 900], [-40, 900]], 4, 50), '#08090C'))}</div>`;
+  k3 += `<div class="abs" style="left:610px;top:860px">${svg(700, 60, paper(jag([[0, 10], [700, 10], [700, 50], [0, 50]], 2, 40), '#14161C'))}</div>`;
+  k3 += `<div id="flames" class="abs" style="left:780px;top:770px">${[['#2F6FD6', 1], ['#6FA8F5', .8], ['#BFDBFF', .55]].map(([c, s], i) => `<div class="abs fl" style="left:${(1 - s) * 180}px;top:${(1 - s) * 70}px">${svg(360, 140, paper(fl(c, 3 * s), c))}</div>`).join('')}</div>`;
+  k3 += `<div id="cooker" class="abs" style="left:700px;top:560px">${svg(520, 330,
+    paper(jag([[90, 110], [430, 110], [460, 140], [460, 300], [430, 320], [90, 320], [60, 300], [60, 140]], 1.6, 26), '#FF8A3D') +
+    paper(jag([[40, 70], [480, 70], [490, 112], [30, 112]], 1.4, 30), '#FFB07A') +
+    paper(jag([[-30, 160], [62, 160], [62, 196], [-30, 196]], 1.2, 20), '#F5EDE4') + paper(jag([[458, 160], [560, 160], [560, 196], [458, 196]], 1.2, 20), '#F5EDE4') +
+    `<g id="weight">${paper(jag([[236, 18], [284, 18], [290, 72], [230, 72]], 1, 14), '#08090C')}</g>` + `<path d="M120 210 L400 210" stroke="#D9600F" stroke-width="5" stroke-dasharray="10 9"/>`)}</div>`;
+  k3 += `<div id="steam" class="abs"></div><div id="digits" class="abs"></div>`;
+  sc.innerHTML += `<div id="s3" class="abs" style="width:1920px;height:1080px">${k3}</div>`;
+  // steam puffs and paper digits
+  let st = ''; for (let i = 0; i < 18; i++) { const r = 40 + rnd() * 50; st += `<div class="abs puff" style="width:${r * 2}px;height:${r * 2}px">${svg(r * 2, r * 2, paper(jag(Array.from({ length: 13 }, (_, k) => [r + r * Math.cos(k / 12 * 6.283), r + r * Math.sin(k / 12 * 6.283)]), 3, 14), '#C9CFDB'), 'pp')}</div>`; }
+  $('#steam').innerHTML = st;
+  $('#digits').innerHTML = [1, 2, 3].map((n) => `<div class="abs dg disp" style="font-size:300px;color:#FF8A3D;filter:drop-shadow(0 3px 0 rgba(22,25,34,.15)) drop-shadow(0 18px 18px rgba(22,25,34,.25))">${n}</div>`).join('');
+  // ---------- scene 4: many tags ----------
+  const pal = ['#2E333F', '#2E333F', '#2B303B', '#08090C', '#3D4FE0', '#FF8A3D', '#2E333F', '#3A404D', '#A5BBFF', '#FFB07A'];
+  let tg = ''; S.tags = [];
+  const cols = 7, rows = 15;
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+    const x = (c + .5) / cols * 1180 - 50 + (rnd() - .5) * 60, y = (r + .5) / rows * 2000 - 40 + (rnd() - .5) * 50;
+    if (Math.abs(x - 540) < 500 && Math.abs(y - 960) < 230) continue;           // leave the centre for the counter
+    const n = 3 + S.tags.length * 7, col = pal[Math.floor(rnd() * pal.length)], dark = !['#A5BBFF', '#FFB07A', '#FF8A3D'].includes(col);
+    S.tags.push({ x, y, rot: (rnd() - .5) * 40, s: .16 + rnd() * .08, d: rnd(), a: rnd() * 6.283 });
+    tg += `<div class="abs tg" style="width:${TW}px;height:${TH}px;transform-origin:0 0">${tagSVG(col, dark ? '#ECEEF2' : '#08090C')}<div class="mono" style="position:absolute;left:150px;top:0;height:${TH}px;display:flex;align-items:center;font-size:150px;color:${dark ? '#E9ECF3' : '#08090C'}">#${String(Math.min(n, 998)).padStart(3, '0')}</div></div>`;
+  }
+  $('#tags').innerHTML = tg;
+  // ---------- scene 5: the paper landscape and the path ----------
+  const hills = [['#2B303B', 470, 50, .35], ['#0C0D11', 560, 60, .55], ['#1F232B', 650, 70, .75], ['#14161C', 770, 80, .9], ['#08090C', 880, 60, 1]];
+  let k5 = `<div id="sun" class="abs" style="left:110px;top:430px">${svg(220, 220, paper(jag(Array.from({ length: 17 }, (_, k) => [110 + 110 * Math.cos(k / 16 * 6.283), 110 + 110 * Math.sin(k / 16 * 6.283)]), 2, 18), '#D9DEE8'), 'pp', 'filter:drop-shadow(0 0 30px rgba(220,228,255,.55)) drop-shadow(0 0 90px rgba(200,212,255,.3))')}</div>`;
+  hills.forEach(([c, y, a, z], i) => { const pts = [[-200, 140]]; for (let k = 0; k <= 8; k++) pts.push([k * 290 - 200, 140 - a * (.5 + .5 * Math.sin(k * 1.7 + i * 2.1)) - 30]); pts.push([2200, 140], [2200, 700], [-200, 700]);
+    k5 += `<div class="abs hill" data-z="${z}" style="top:${y - 140 + 700}px;left:-600px">${svg(2400, 900, paper(jag(pts.map(([a, b]) => [a, b === 700 ? 900 : b]), 5, 40), c), 'pp', 'margin-left:0')}</div>`;
+  });
+  k5 += `<div class="abs hill" data-z="0.9" style="top:0">${svg(1080, 1920, paper('M300 1920 C420 1790 760 1760 700 1650 C640 1550 500 1510 620 1445 C680 1405 705 1370 698 1336 L714 1338 C728 1372 712 1415 650 1458 C548 1522 680 1560 742 1650 C830 1790 560 1810 520 1920 Z', '#BFC6D4'), 'pp')}</div>`;
+  k5 += `<div id="flag" class="abs" style="transform-origin:0 0"><div class="abs" style="left:-5px;top:-230px;width:10px;height:240px;background:#08090C;border-radius:5px"></div><div class="abs" style="left:5px;top:-232px;width:${TW}px;height:${TH}px;transform:scale(.3);transform-origin:0 0">${tagSVG('#2E333F')}<div class="mono" style="position:absolute;left:150px;top:0;height:${TH}px;display:flex;align-items:center;font-size:170px;color:#E9ECF3">#1000</div></div></div>`;
+  sc.innerHTML += `<div id="s5" class="abs" style="width:1920px;height:1080px">${k5}</div>`;
+  // the carried tag
+  $('#tag').innerHTML = `<div id="tagIn" style="position:relative;width:${TW}px;height:${TH}px">${tagSVG('#2E333F')}<div id="tagFace" style="position:absolute;inset:0"></div></div>`;
+  set($('#tag'), { width: TW + 'px', height: TH + 'px', transformOrigin: `${TW / 2}px ${TH / 2}px` });
+  // lines
+  $('#lines').innerHTML = `<div id="L" class="disp line" style="font-size:132px"></div>`;
+  // end card
+  $('#end').innerHTML = `<div id="em" class="abs" style="left:390px;top:680px;width:300px;height:300px;border-radius:66px;background:#ECEEF2;display:grid;place-items:center;filter:drop-shadow(0 26px 30px rgba(0,0,0,.4))">
+      <div style="position:relative;font:800 186px/1 'Bricolage Grotesque';letter-spacing:-.04em;color:#08090C;transform:translate(-18px,-18px)">w<span id="cur" style="position:absolute;left:100%;bottom:12px;margin-left:15px;width:60px;height:21px;border-radius:6px;background:#FF8A3D"></span></div></div>
+    <div id="ew" class="mono line" style="top:1040px;font-size:64px;color:#E9ECF3">wierd_stuff_i_make</div>
+    <div id="ef" class="mono line" style="top:1142px;font-size:34px;color:#FFB07A">#001 → #999 · follow along</div>`;
+}
+// ---------- the tag's text faces ----------
+function face(k) {
+  const f = $('#tagFace'); if (f.dataset.k === k) return; f.dataset.k = k;
+  const box = (inner, l = 150) => `<div style="position:absolute;left:${l}px;right:40px;top:0;bottom:0;display:flex;flex-direction:column;justify-content:center;gap:14px">${inner}</div>`;
+  f.innerHTML = {
+    cut: box(`<div class="disp" style="font-size:104px">from scratch.</div>`),
+    w1: box(`<div class="mono" style="font-size:44px;color:#A5BBFF">#001</div><div class="disp" style="font-size:118px">Wardrobe</div>`),
+    w2: box(`<div class="mono" style="font-size:44px;color:#A5BBFF">#001 Wardrobe</div><div class="disp" style="font-size:78px">your closet,<br>on your phone.</div>`),
+    c1: box(`<div class="mono" style="font-size:44px;color:#FFB07A">#002</div><div class="disp" style="font-size:84px">Cooker Whistle<br>Counter</div>`),
+    n: box(`<div id="num" class="mono" style="font-size:190px;letter-spacing:-.04em">#003</div>`, 160),
+    p: box(`<div class="disp" style="font-size:150px;line-height:.9">999<br><span style="font-size:96px">projects.</span></div>`, 170),
+  }[k];
+}
+// ---------- statement lines (one face, rotating voices) ----------
+const LINES = [
+  // [in, out, text, y, size, voice]
+  [9e9, 0, '', 0, 0, ''],
+  [20.6, 23.35, 'be a part of<br>the journey.', 700, 132, 'build'],
+  [23.6, 25.2, 'what happens<br>after that?', 700, 132, 'blur'],
+  [25.3, 27.0, 'let’s find out<br>together.', 700, 132, 'ink'],
+];
+function lines(t) {
+  const el = $('#L'); const L = LINES.find((l) => t >= l[0] - .01 && t < l[1]);
+  if (!L) { el.style.opacity = 0; return; }
+  const [a, z, txt, y, size, v] = L; if (el.dataset.k !== txt) { el.innerHTML = txt; el.dataset.k = txt; }
+  const i = eOut(P(t, a, a + .5)), o = eIn(P(t, z - .22, z));
+  set(el, { top: y + 'px', fontSize: size + 'px', opacity: Math.min(1, i * 1.4) * (1 - o) });
+  if (v === 'build') set(el, { filter: 'none', clipPath: 'none', transform: `translateY(${(1 - i) * 60 - o * 30}px) scale(${.96 + .04 * i})` });
+  else if (v === 'blur') set(el, { filter: `blur(${(1 - i) * 18 + o * 14}px)`, clipPath: 'none', transform: `scale(${1.04 - .04 * i})` });
+  else set(el, { filter: o ? `blur(${o * 14}px)` : 'none', clipPath: `inset(0 ${(1 - i) * 100}% 0 0)`, transform: 'none' });
+}
+// ---------- the tag's path through the film ----------
+// keys: [t, x(centre), y(centre), scale, rot]
+const TK = [[3.3, 540, 960, .85, -1.5], [3.95, 540, 900, .9, 2], [4.7, 540, 900, .95, -2], [9.0, 540, 900, .95, -2], [9.5, 540, 700, .95, 1.5], [14.5, 540, 700, .95, 1.5], [15.2, 540, 960, .94, 0], [18.1, 540, 960, .94, 0], [18.45, 540, 960, 1.02, 0], [19.92, 540, 960, 1.02, 0]];
+function tagAt(t) { for (let i = 0; i < TK.length - 1; i++) { const [a, ...A] = TK[i], [b, ...B] = TK[i + 1]; if (t <= b) { const k = eIO(P(t, a, b)); return A.map((v, j) => lerp(v, B[j], k)); } } return TK[TK.length - 1].slice(1); }
+
+window.render = function (t) {
+  const s1 = $('#s1'), s2 = $('#s2'), s3 = $('#s3'), s5 = $('#s5'), tag = $('#tag');
+  // camera micro-push on each act (front-loaded, landing): log-space scale
+  const push = (a, d, z) => Math.exp(Math.log(z) * ex(P(t, a, a + d) * 1.0));
+  // ===== scene 1 (0.37 - 4.5) =====
+  if (t < 4.6) {
+    s1.style.display = '';
+    [...s1.querySelectorAll('.st')].forEach((e, i) => { const k = ex(P(t, .2 + i * .12, 1.1 + i * .12)); e.style.transform = `translateY(${(1 - k) * 320 + eIn(P(t, 3.9, 4.5)) * 300}px)`; });
+    const sk = ex(P(t, .37, 1.2)), sx = eIn(P(t, 3.9, 4.5));
+    set($('#sheet'), { transform: `translateY(${(1 - sk) * 900 + sx * 1000}px) rotate(${-1.5 + (1 - sk) * 6}deg)` });
+    const t1 = $('#s1t'); const first = t < 2.15;
+    if (t1.dataset.k !== String(first)) { t1.innerHTML = first ? 'i make<br>useful things.' : ''; t1.dataset.k = String(first); }
+    const ink = eOut(P(t, .65, 1.25)), out1 = P(t, 1.95, 2.15);
+    set(t1, { clipPath: `inset(0 ${(1 - ink) * 100}% 0 0)`, opacity: 1 - out1, filter: out1 ? `blur(${out1 * 16}px)` : 'none' });
+    $('#cut').style.strokeDashoffset = 1000 - 1000 * eIO(P(t, 2.35, 3.2)); $('#cut').style.opacity = t < 2.3 || t > 3.4 ? 0 : 1;
+    $('#hole').style.opacity = t >= 3.3 ? 1 : 0;
+    s1.style.transform = `translate(-420px,420px) scale(${.85 * push(.37, 3.5, 1.03)})`; s1.style.transformOrigin = '960px 540px';
+  } else s1.style.display = 'none';
+  // ===== the tag =====
+  if (t >= 2.15 && t < 19.92 + .9) {
+    tag.style.display = '';
+    let [x, y, s, r] = tagAt(t);
+    if (t < 3.3) { // printed on the sheet, rides with it: the words "from scratch." are inside the cut line
+      const sk = ex(P(t, .37, 1.2)); x = 540; y = 960 + (1 - sk) * 900 * .85; s = .85; r = -1.5;
+    }
+    const lift = eOut(P(t, 3.3, 3.8));
+    tag.querySelector('svg').style.visibility = t < 3.3 ? 'hidden' : 'visible';
+    // faces
+    const fk = t < 3.9 ? 'cut' : t < 6.6 ? 'w1' : t < 9.26 ? 'w2' : t < 14.59 ? 'c1' : t < 18.15 ? 'n' : 'p';
+    face(fk);
+    // face swaps hide inside a short blur
+    const sw = [3.9, 6.6, 9.26, 14.59, 18.15].reduce((m, a) => Math.min(m, Math.abs(t - a)), 9);
+    const fb = sw < .14 ? (1 - sw / .14) : 0; $('#tagFace').style.filter = fb ? `blur(${fb * 14}px)` : 'none'; $('#tagFace').style.opacity = 1 - fb * .8;
+    if (fk === 'n') { const k = P(t, 14.75, 18.1), n = Math.round(Math.exp(Math.log(3) + (Math.log(999) - Math.log(3)) * eIO(k))); $('#num').textContent = '#' + String(n).padStart(3, '0'); }
+    // the flip on the whip (anchor held, the card turns)
+    const fl = P(t, 9.06, 9.46), ry = fl > 0 && fl < 1 ? Math.sin(fl * Math.PI) * 70 : 0;
+    // scene 5: the tag shrinks into the distance and becomes the flag
+    let op = 1;
+    if (t > 19.92) { const k = eIO(P(t, 19.92, 20.8)); x = lerp(540, 840, k); y = lerp(960, 1148, k); s = lerp(1.02, .3, k); op = 1 - P(t, 20.1, 20.45); }
+    set(tag, { opacity: op, transform: `translate(${x - TW / 2}px,${y - TH / 2 - lift * 14}px) scale(${s * (1 + lift * .03)}) rotate(${r}deg) perspective(1400px) rotateY(${ry}deg)` });
+    tag.style.filter = lift < 1 && t >= 3.3 ? `drop-shadow(0 ${lift * 30}px ${lift * 30}px rgba(22,25,34,${.15 * lift}))` : 'none';
+  } else tag.style.display = 'none';
+  // ===== scene 2: the closet (3.92 - 9.26) =====
+  if (t > 3.9 && t < 9.5) {
+    s2.style.display = '';
+    const wx = t > 9.06 ? -eIn(P(t, 9.06, 9.26)) * 520 : 0, wb = t > 9.06 ? P(t, 9.06, 9.26) * 26 : 0;
+    set(s2, { transform: `translateX(${wx}px)`, filter: wb ? `blur(${wb}px)` : 'none', opacity: t > 9.26 ? 0 : 1 });
+    $('#rail').style.transform = `translateY(${(1 - ex(P(t, 3.95, 4.5))) * -260}px)`;
+    const into = eIO(P(t, 6.7, 7.6));
+    [...s2.querySelectorAll('.cloth')].forEach((e, i) => { const a = 4.25 + i * .45, lt = t - a, k = ex(P(t, a, a + .55));
+      const sw = lt > 0 ? 16 * Math.exp(-lt * 2.6) * Math.cos(lt * 7) : 0;
+      // into the phone: each piece lands in a 2-column grid on the white screen
+      const tx = i === 4 ? 540 : 460 + (i % 2) * 160, ty = 1270 + Math.floor(i / 2) * 185, gx = tx - (145 + 190 * i), gy = ty - 222;
+      const ph = into; const x = gx * ph, y = (1 - k) * -700 + gy * ph, sc = 1 - .55 * ph;
+      set(e, { transform: `translate(${x}px,${y}px) scale(${sc}) rotate(${sw * (1 - ph)}deg)`, opacity: t < a ? 0 : 1 }); });
+    $('#phone').style.transform = `translateY(${-ex(P(t, 6.6, 7.3)) * 760}px)`;
+    set(s2, { transformOrigin: '960px 540px' });
+  } else s2.style.display = 'none';
+  // ===== scene 3: the cooker (9.26 - 15.2) =====
+  if (t > 9.26 && t < 15.4) {
+    s3.style.display = '';
+    const ex3 = (1 - eOut(P(t, 9.26, 9.55))) * 520, eb = (1 - P(t, 9.26, 9.5)) * 24;
+    const sink = eIn(P(t, 14.59, 15.2));
+    set(s3, { transformOrigin: '960px 1000px', transform: `translate(${ex3 - 420}px,${560 + sink * 900}px) scale(1.32)`, filter: eb > .5 || sink > 0 ? `blur(${Math.max(eb, sink * 14)}px)` : 'none' });
+    // flames: cut paper "on twos" (12 fps steps), never smooth
+    const st = Math.floor(t * 12);
+    [...s3.querySelectorAll('.fl')].forEach((e, i) => { const j = Math.sin(st * 1.7 + i * 2) * .06 + Math.sin(st * 0.9 + i) * .04; e.style.transform = `scaleY(${1 + j}) translateX(${Math.sin(st * 1.3 + i) * 4}px)`; e.style.transformOrigin = '50% 100%'; });
+    const ig = ex(P(t, 9.4, 9.9)); $('#flames').style.transform = `scale(${.3 + .7 * ig})`; $('#flames').style.transformOrigin = '180px 130px'; $('#flames').style.opacity = P(t, 9.35, 9.5);
+    // whistles at the beats: weight jumps, steam bursts, a paper digit pops
+    const W = [11.03, 11.92, 12.81];
+    const lastW = W.filter((w) => t >= w).pop();
+    const jump = lastW ? Math.max(0, Math.sin(P(t, lastW, lastW + .3) * Math.PI)) * -16 : 0;
+    $('#weight').setAttribute('transform', `translate(0,${jump})`);
+    [...s3.querySelectorAll('.puff')].forEach((e, i) => { const w = W[i % 3], lt = t - w - (Math.floor(i / 3) * .07); const k = C(lt / 2.4);
+      const x = 960 + (i % 2 ? 1 : -1) * (20 + k * (60 + (i * 13) % 90)) - 50, y = 560 - k * (420 + (i * 37) % 160);
+      set(e, { transform: `translate(${x}px,${y}px) scale(${lt > 0 ? .4 + k * 1.2 : 0.001})`, opacity: lt > 0 ? 1 - eIn(k) : 0 }); });
+    [...s3.querySelectorAll('.dg')].forEach((e, i) => { const a = W[i], b = W[i + 1] || 14.59; const k = eOut(P(t, a, a + .35)), o = P(t, b - .05, b + .1);
+      set(e, { transform: `translate(${1100 + i * 0}px,${560 - k * 60}px) scale(${.6 + .4 * k}) rotate(${(i - 1) * 6}deg)`, opacity: t < a ? 0 : (i === 2 ? 1 : 1 - o) }); });
+  } else s3.style.display = 'none';
+  // ===== scene 4: the wall of tags (14.59 - 20.6) =====
+  const tags = $('#tags');
+  if (t > 14.7 && t < 20.7) {
+    tags.style.display = '';
+    const burst = eIn(P(t, 19.92, 20.55));
+    [...tags.children].forEach((e, i) => { const g = S.tags[i]; const a = 14.8 + g.d * 3.1, k = ex(P(t, a, a + .55));
+      const fx = g.x + Math.cos(g.a) * 900 * (1 - k), fy = g.y + Math.sin(g.a) * 700 * (1 - k);
+      const bx = (g.x - 540) * burst * 1.8, by = (g.y - 960) * burst * 1.8;
+      set(e, { transform: `translate(${fx + bx - TW * g.s / 2}px,${fy + by - TH * g.s / 2}px) scale(${g.s}) rotate(${g.rot * (1 - burst) + (1 - k) * 40}deg)`, opacity: t < a ? 0 : 1 }); });
+    tags.style.filter = burst > .05 ? `blur(${burst * 10}px)` : 'none';
+  } else tags.style.display = 'none';
+  // ===== scene 5: the landscape and the path (19.92 - 27.6) =====
+  if (t > 19.8 && t < 28.2) {
+    s5.style.display = '';
+    const rise = ex(P(t, 19.9, 20.9));
+    const cam = Math.exp(Math.log(1.12) * eIO(P(t, 20.3, 27.0)));          // one dolly along the path, log space
+    [...s5.querySelectorAll('.hill')].forEach((e, i) => { const z = +e.dataset.z; const r = (1 - ex(P(t, 19.9 + i * .07, 20.8 + i * .07))) * (500 * z + 120);
+      e.style.transform = `translateY(${r}px) scale(${1 + (cam - 1) * z * 1.6})`; e.style.transformOrigin = `${706 + (e.style.left ? 600 : 0)}px ${1335 - (parseFloat(e.style.top) || 0)}px`; });
+    const sunk = ex(P(t, 20.4, 21.4)); $('#sun').style.transform = `translateY(${(1 - sunk) * 240}px)`; $('#sun').style.opacity = sunk;
+    // the flag stands where the tag landed
+    const fz = 1 + (cam - 1) * .9 * 1.6; const fu = eOut(P(t, 20.35, 20.85));
+    set($('#flag'), { transform: `translate(700px,${1335 + (1 - fu) * 30}px) scale(${fz * (.9 + .1 * fu)})`, opacity: fu });
+    s5.style.filter = 'none';
+  } else s5.style.display = 'none';
+  lines(t);
+  // ===== the end: the flag floods to ink, the mark lands and keeps creeping =====
+  const fd = P(t, 27.0, 27.45), endT = t - 27.0;
+  if (t > 26.95) {
+    const k = eIO(fd);
+    $('#flood').style.opacity = 1; $('#flood').style.clipPath = `circle(${k * 2300}px at ${lerp(840, 540, k)}px ${lerp(1148, 960, k)}px)`;
+    $('#end').style.opacity = 1;
+    const a = eOut(P(t, 27.25, 27.85)), b = eOut(P(t, 27.65, 28.25)), cr = 1 + .022 * Math.max(0, endT - .3) / 4.7;
+    set($('#end'), { transform: `scale(${cr})`, transformOrigin: '540px 960px' });
+    set($('#em'), { opacity: a, transform: `translateY(${(1 - a) * 40}px) scale(${.92 + .08 * a})` });
+    ['#ew', '#ef'].forEach((s, i) => set($(s), { opacity: i ? b : a, transform: `translateY(${(1 - (i ? b : a)) * 26}px)` }));
+    $('#cur').style.opacity = (Math.floor(endT * 1.6) % 2 === 0 || endT < 1) ? 1 : .25;   // the cursor blinks, slowly
+  } else { $('#flood').style.opacity = 0; $('#end').style.opacity = 0; }
+};
+build();
+
+// ---------- the handmade, cinematic layer ----------
+const _render = window.render, FW = 1080, FH = 1920;
+const hsh = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+(function () { let d = ''; for (let i = 0; i < 46; i++) { const r = 1.2 + hsh(i) * 2.6; d += `<div class="abs mote" style="width:${r * 2}px;height:${r * 2}px;border-radius:50%;background:rgba(235,240,255,${.25 + hsh(i + 50) * .45});filter:blur(${hsh(i + 9) > .7 ? 2 : .6}px)"></div>`; } $('#dust').innerHTML = d; })();
+window.render = function (t) {
+  const step = Math.floor(t * 12), tq = step / 12;                     // stop-motion: the picture moves on twos
+  _render(tq);
+  const j = (k, a) => ((hsh(step * 7.31 + k) - .5) * 2 * a);               // the paper boils a little every step
+  [['#scenes', 1.4, .12], ['#tag', 1.6, .18], ['#tags', 1.2, .1], ['#lines', 1.1, .1], ['#end', .8, .06]].forEach(([q, a, r], k) => {
+    const el = $(q); if (!el) return; el.style.translate = `${j(k * 3 + 1, a).toFixed(2)}px ${j(k * 3 + 2, a).toFixed(2)}px`; el.style.rotate = `${j(k * 3 + 3, r).toFixed(3)}deg`; });
+  // the key light: a pool from above that drifts slowly (continuous, like a real lamp), breathing a touch
+  const lx = .5 + .08 * Math.sin(t * .23 + .6), ly = 0.28 + .03 * Math.sin(t * .17), br = .9 + .1 * Math.sin(t * 1.3) * Math.sin(t * .37);
+  $('#key').style.background = `radial-gradient(ellipse ${FW * .62}px ${FH * .55}px at ${lx * 100}% ${ly * 100}%, rgba(225,232,255,${.85 * br}) 0%, rgba(225,232,255,.25) 40%, rgba(0,0,0,.4) 100%)`;
+  $('#glow').style.background = `radial-gradient(ellipse ${FW * .5}px ${FH * .4}px at ${lx * 100}% ${ly * 100}%, rgba(200,212,255,${.10 * br}), rgba(0,0,0,0) 70%)`;
+  // dust drifting through the light (real time, not stepped: it is the air, not the paper)
+  [...document.querySelectorAll('.mote')].forEach((m, i) => { const sp = 10 + hsh(i + 3) * 22, x = (hsh(i + 1) * FW + Math.sin(t * .4 + i) * 40 + t * sp * .6) % FW, y = (hsh(i + 2) * FH - t * sp + FH * 4) % FH;
+    const near = Math.max(0, 1 - Math.hypot(x / FW - lx, y / FH - ly) * 1.6); m.style.transform = `translate(${x}px,${y}px)`; m.style.opacity = (.15 + .85 * near).toFixed(2); });
+  // live film grain
+  $('#fgrain').style.backgroundPosition = `${Math.floor(hsh(step) * 512)}px ${Math.floor(hsh(step + .5) * 512)}px`;
+  // depth: the far hills sit out of focus
+  document.querySelectorAll('.hill').forEach((h, i) => { if (i < 2) h.style.filter = `blur(${2.4 - i}px)`; });
+};
+window.ready = (async () => { await document.fonts.load("800 100px 'Bricolage Grotesque'"); await document.fonts.load("500 40px 'DM Mono'"); await document.fonts.ready; return true; })();
+</script></body></html>
